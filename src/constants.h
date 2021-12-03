@@ -22,7 +22,7 @@
 #define APP_NAME "smng"
 #define APP_MAJOR 1
 #define APP_MINOR 0
-#define APP_PATCH 0
+#define APP_PATCH 1
 
 #define CMD_HELP "h"
 #define CMD_HELP_LONG "help"

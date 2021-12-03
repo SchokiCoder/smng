@@ -26,7 +26,7 @@
 
 int32_t database_connect(sqlite3** p_db);
 
-uint8_t check_last_work_record(sqlite3* p_db, uint32_t* p_work_record_id, uint8_t* p_work_record_state);
+uint8_t is_prev_record_done(sqlite3* p_db, uint32_t* p_work_record_id, bool* p_work_record_done);
 
 uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end);
 

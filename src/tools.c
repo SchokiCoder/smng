@@ -83,7 +83,7 @@ int32_t database_connect(sqlite3** p_db)
     return 0;
 }
 
-uint8_t check_last_work_record(sqlite3* p_db, uint32_t* p_work_record_id, uint8_t* p_work_record_state)
+uint8_t is_prev_record_done(sqlite3* p_db, uint32_t* p_work_record_id, bool* p_work_record_done)
 {
     sqlite3_stmt* stmt;
     int32_t rc_prepare;
@@ -100,7 +100,15 @@ uint8_t check_last_work_record(sqlite3* p_db, uint32_t* p_work_record_id, uint8_
 
     rc_step = sqlite3_step(stmt);
 
-    if (rc_step != SQLITE_ROW)
+    //if there are no previous records, just skip
+    if (rc_step == SQLITE_DONE)
+    {
+        *p_work_record_id = 0;
+        *p_work_record_done = true;
+        sqlite3_finalize(stmt);
+        return 0;
+    }
+    else if (rc_step != SQLITE_ROW)
     {
         printf("ERROR: Statement to check validity of previous record could not be executed. (%i)\n", rc_step);
         sqlite3_finalize(stmt);
@@ -109,7 +117,7 @@ uint8_t check_last_work_record(sqlite3* p_db, uint32_t* p_work_record_id, uint8_
 
     //save values to output pointers
     *p_work_record_id = sqlite3_column_int(stmt, 0);
-    *p_work_record_state = (uint8_t) (sqlite3_column_int(stmt, 1));
+    *p_work_record_done = (bool) (sqlite3_column_int(stmt, 1));
     
     sqlite3_finalize(stmt);
     return 0;

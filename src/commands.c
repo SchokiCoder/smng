@@ -189,8 +189,8 @@ void cmd_record(int32_t p_project_id)
     sqlite3* db;
     sqlite3_stmt* stmt;
     int32_t id;
-    uint32_t last_record_id;
-    uint8_t last_record_state;
+    uint32_t prev_record_id;
+    bool prev_record_done;
     int32_t rc_prepare;
     int32_t rc_bind[2];
     int32_t rc_step;
@@ -201,16 +201,16 @@ void cmd_record(int32_t p_project_id)
         return;
     
     //check validity of last work record
-    if (check_last_work_record(db, &last_record_id, &last_record_state) != 0)
+    if (is_prev_record_done(db, &prev_record_id, &prev_record_done) != 0)
     {
         sqlite3_close(db);
         return;
     }
 
-    if (last_record_state == 0)
+    if (prev_record_done == false)
     {
         //invalid record found, print
-        printf("ERROR: Before starting a new work-record close the last one.\nlast work_record_id: %i\n", sqlite3_column_int(stmt, 0));
+        printf("ERROR: Before starting a new work-record finish the last one.\nlast work_record_id: %i\n", prev_record_id);
         sqlite3_close(db);
         return;
     }
@@ -258,8 +258,8 @@ void cmd_stop(char* p_description)
     int32_t rc_prepare;
     int32_t rc_bind[2];
     int32_t rc_step;
-    uint8_t last_record_state;
-    uint32_t last_record_id;
+    bool prev_record_done;
+    uint32_t prev_record_id;
     time_t record_end;
 
     //try connect to db
@@ -267,16 +267,16 @@ void cmd_stop(char* p_description)
         return;
 
     //check validity of last work record
-    if (check_last_work_record(db, &last_record_id, &last_record_state) != 0)
+    if (is_prev_record_done(db, &prev_record_id, &prev_record_done) != 0)
     {
         sqlite3_close(db);
         return;
     }
 
     //if last work record is closed, print and stop
-    if (last_record_state == 1)
+    if (prev_record_done == true)
     {
-        printf("ERROR: Before stopping a work-record, there should be an unfinished record.\nlast work_record_id: %i\n", last_record_id);
+        printf("ERROR: Your previous record is already finished.\nlast work_record_id: %i\n", prev_record_id);
         sqlite3_close(db);
         return;
     }
