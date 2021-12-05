@@ -28,7 +28,7 @@
 "work_record_id INTEGER PRIMARY KEY, " \
 "project_id INTEGER NOT NULL REFERENCES tbl_projects(project_id), " \
 "begin INTEGER NOT NULL, " \
-"end INTEGER, " \
+"end INTEGER CHECK(end > begin), " \
 "description VARCHAR(" WORK_DESCRIPTION_MAXLENGTH ")" \
 ");"
 
@@ -37,7 +37,7 @@
 "project_name VARCHAR(" PROJECT_NAME_MAXLENGTH ") NOT NULL UNIQUE" \
 ");"
 
-#define SQL_CREATE_INDEXES "CREATE INDEX idx_work_record_id ON tbl_work_records(work_record_id);" \
+#define SQL_CREATE_INDICES "CREATE INDEX idx_work_record_id ON tbl_work_records(work_record_id);" \
 "CREATE INDEX idx_project_id ON tbl_projects(project_id);" \
 "CREATE INDEX idx_begin ON tbl_work_records(begin);" \
 "CREATE INDEX idx_end ON tbl_work_records(end);"

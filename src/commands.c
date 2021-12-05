@@ -434,7 +434,9 @@ void cmd_edit_record_time(
     //exec sql
     rc_step = sqlite3_step(stmt);
 
-    if (rc_step != SQLITE_DONE)
+    if (rc_step == SQLITE_CONSTRAINT)
+        printf("Statement failed on a constraint. (%i)\nMake sure the record's begin is before the end.\n", rc_step);
+    else if (rc_step != SQLITE_DONE)
         printf("Statement to edit work-record could not be executed. (%i)\n", rc_step);
     else
         printf("Record %i project %s set to %i-%i-%i %i:%i.\n",

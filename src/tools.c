@@ -28,7 +28,7 @@ int32_t database_connect(sqlite3** p_db)
     int32_t rc_activate_fkeys;
     int32_t rc_create_work_records;
     int32_t rc_create_projects;
-    int32_t rc_create_indexes;
+    int32_t rc_create_indices;
 
     //try connecting to db
     rc_connect = sqlite3_open(DATABASE_PATH, p_db);
@@ -49,7 +49,7 @@ int32_t database_connect(sqlite3** p_db)
         rc_activate_fkeys = sqlite3_exec(*p_db, SQL_ACTIVATE_FKEYS, NULL, NULL, NULL);
         rc_create_work_records = sqlite3_exec(*p_db, SQL_CREATE_WORKRECORDS, NULL, NULL, NULL);
         rc_create_projects = sqlite3_exec(*p_db, SQL_CREATE_PROJECTS, NULL, NULL, NULL);
-        rc_create_indexes = sqlite3_exec(*p_db, SQL_CREATE_INDEXES, NULL, NULL, NULL);
+        rc_create_indices = sqlite3_exec(*p_db, SQL_CREATE_INDICES, NULL, NULL, NULL);
     }
 
     //else activate fkeys and end
@@ -70,7 +70,7 @@ int32_t database_connect(sqlite3** p_db)
     if ((rc_activate_fkeys != SQLITE_OK) |
         (rc_create_work_records != SQLITE_OK) |
         (rc_create_projects != SQLITE_OK) |
-        (rc_create_indexes != SQLITE_OK))
+        (rc_create_indices != SQLITE_OK))
     {
         printf("ERROR: The database was missing and an attempt to create it failed.\n");
         sqlite3_close(*p_db);
@@ -130,6 +130,7 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
     int32_t rc_bind[2];
     int32_t rc_step;
     char timespan[2][14];
+    char worked_time[6];
     struct tm* temp;
     uint32_t hours, minutes, seconds;
     uint32_t sum_seconds = 0;
@@ -161,7 +162,7 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
         temp = localtime(&p_end);
         strftime(timespan[1], sizeof(timespan[1]), "%Y-%m-%d", temp);
 
-        printf("Summarize from %s to %s:\n\nrecord_id, begin, end, time, project_id, description\n", 
+        printf("Summarize from %s to %s:\n\nrec_id\tbegin    end      time  prj_id\tdesc\n", 
             timespan[0],
             timespan[1]);
 
@@ -174,12 +175,15 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
             hours = minutes / 60;
             minutes = minutes % 60;
 
+            //generate worked_time string as "hours(2):minutes(2)"
+            sprintf(worked_time, "%s%i:%s%i", (hours < 10 ? "0" : ""), hours, (minutes < 10 ? "0" : ""), minutes);
+
             //print results
-            printf("%i, %s, %s, %i:%i, %i, %s\n",
+            printf("%i\t%s %s %s %i\t%s\n",
                 sqlite3_column_int(stmt, 0),
                 sqlite3_column_text(stmt, 1),
                 sqlite3_column_text(stmt, 2),
-                hours, minutes,
+                worked_time,
                 sqlite3_column_int(stmt, 4),
                 sqlite3_column_text(stmt, 5));
         }
