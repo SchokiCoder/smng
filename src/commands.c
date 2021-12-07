@@ -430,7 +430,7 @@ void cmd_edit_record_time(
         sqlite3_close(db);
         return;
     }
-
+printf("ts_now: %li; rec_time: %li\n", ts_now, record_time);
     //exec sql
     rc_step = sqlite3_step(stmt);
 

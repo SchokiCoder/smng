@@ -130,7 +130,7 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
     int32_t rc_bind[2];
     int32_t rc_step;
     char timespan[2][14];
-    char worked_time[6];
+    char worked_time[16];
     struct tm* temp;
     uint32_t hours, minutes, seconds;
     uint32_t sum_seconds = 0;
@@ -193,7 +193,7 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
         sum_minutes = sum_seconds / 60;
         sum_hours = sum_minutes / 60;
         sum_minutes = sum_minutes % 60;
-        printf("\nSummarized work time: %i:%i\n", sum_hours, sum_minutes);
+        printf("\nSummarized work time: %s%i:%s%i\n", (sum_hours < 10 ? "0" : ""), sum_hours, (sum_minutes < 10 ? "0" : ""), sum_minutes);
     }
     else if (rc_step == SQLITE_DONE)
         printf("No records available.\n");
