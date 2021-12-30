@@ -20,9 +20,13 @@
 #define CONSTANTS_H
 
 #define APP_NAME "smng"
+#define APP_LICENSE "GPLv3"
+#define APP_LICENSE_NOTICE "You should have received a copy of the GNU General Public License\n" \
+"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n"
+#define APP_SOURCE "https://github.com/SchokiCoder/smng"
 #define APP_MAJOR 1
 #define APP_MINOR 0
-#define APP_PATCH 3
+#define APP_PATCH 4
 
 #define CMD_HELP "h"
 #define CMD_HELP_LONG "help"
@@ -73,10 +77,10 @@
 "  " CMD_EDIT_RECORD_PROJECT ",\t" CMD_EDIT_RECORD_PROJECT_LONG "\tENTRY_ID PROJECT_ID\n" \
 "\n" \
 "  edit work record's begin:\n" \
-"  " CMD_EDIT_RECORD_BEGIN ",\t" CMD_EDIT_RECORD_BEGIN_LONG "\tENTRY_ID HOUR MINUTE [DAY] [MONTH] [YEAR]\n" \
+"  " CMD_EDIT_RECORD_BEGIN ",\t" CMD_EDIT_RECORD_BEGIN_LONG "\tENTRY_ID YEAR MONTH DAY HOUR MINUTE\n" \
 "\n" \
 "  edit work record's end:\n" \
-"  " CMD_EDIT_RECORD_END ",\t" CMD_EDIT_RECORD_END_LONG "\t\tENTRY_ID HOUR MINUTE [DAY] [MONTH] [YEAR]\n" \
+"  " CMD_EDIT_RECORD_END ",\t" CMD_EDIT_RECORD_END_LONG "\t\tENTRY_ID YEAR MONTH DAY HOUR MINUTE\n" \
 "\n" \
 "  edit work record's description:\n" \
 "  " CMD_EDIT_RECORD_DESC ",\t" CMD_EDIT_RECORD_DESC_LONG "\tENTRY_ID DESCRIPTION\n" \
@@ -88,17 +92,13 @@
 "  " CMD_SHOW_MONTH ",\t" CMD_SHOW_MONTH_LONG "\t\t[MONTH] [YEAR]\n" \
 "\n" \
 "Id's:\n" \
-"If you use negative numbers as id's then the newest targets are used.\n" \
+"If you use negative numbers as id's then the most recent tuple is used.\n" \
 "For example -1 is the newest and -2 the one that was created before.\n" \
 "But don't use 0. That would do nothing.\n" \
 "\n" \
-"Time:\n" \
-"If time arguments receive a -1 then the current time is used.\n" \
-"The current time is also used for optional arguments that have been left out.\n" \
-"\n" \
-"By the way, if you issue commands and get errors or warnings as responds,\n" \
-"which contain parantheses with numbers, then you are given sqlite3 error codes.\n" \
-"Even if it doesn't help you, you can check what they mean here:\n" \
-"https://sqlite.org/rescode.html\n"
+APP_NAME " is licensed under the " APP_LICENSE ".\n" \
+APP_LICENSE_NOTICE \
+"The source code of this program is available at\n" \
+APP_SOURCE "\n"
 
 #endif

@@ -36,7 +36,7 @@ int32_t database_connect(sqlite3** p_db)
     //if no connection possible, end
     if (rc_connect != SQLITE_OK)
     {
-        printf("ERROR: The database is missing or access is not given. (%i)\n"
+        printf("Sqlite-ERROR (%i): The database is missing or access is not given.\n"
             "Check the path in the config and make sure permissions are not missing.\n", rc_connect);
         return 1;
     }
@@ -59,7 +59,7 @@ int32_t database_connect(sqlite3** p_db)
 
         if (rc_activate_fkeys != SQLITE_OK)
         {
-            printf("ERROR: The activation of foreign keys in this database did not work. (%i)\n", rc_activate_fkeys);
+            printf("Sqlite-ERROR (%i): The activation of foreign keys in this database did not work.\n", rc_activate_fkeys);
             return 3;
         }
 
@@ -94,7 +94,7 @@ uint8_t is_prev_record_done(sqlite3* p_db, uint32_t* p_work_record_id, bool* p_w
 
     if (rc_prepare != SQLITE_OK)
     {
-        printf("ERROR: Statement to check validity of previous record could not prepared. (%i)\n", rc_prepare);
+        printf("Sqlite-ERROR (%i): Statement to check validity of previous record could not prepared.\n", rc_prepare);
         return 1;
     }
 
@@ -110,7 +110,7 @@ uint8_t is_prev_record_done(sqlite3* p_db, uint32_t* p_work_record_id, bool* p_w
     }
     else if (rc_step != SQLITE_ROW)
     {
-        printf("ERROR: Statement to check validity of previous record could not be executed. (%i)\n", rc_step);
+        printf("Sqlite-ERROR (%i): Statement to check validity of previous record could not be executed.\n", rc_step);
         sqlite3_finalize(stmt);
         return 2;
     }
@@ -145,7 +145,7 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
         (rc_bind[0] != SQLITE_OK) |
         (rc_bind[1] != SQLITE_OK))
     {
-        printf("Statement to show records could not be prepared. (%i)\n", rc_prepare);
+        printf("Sqlite-ERROR (%i): Statement to show records could not be prepared.\n", rc_prepare);
         sqlite3_finalize(stmt);
         return 1;
     }
@@ -199,7 +199,7 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
         printf("No records available.\n");
     else
     {
-        printf("Statement to show work-records could not be executed. (%i)\n", rc_step);
+        printf("Sqlite-Error (%i): Statement to show work-records could not be executed.\n", rc_step);
         sqlite3_finalize(stmt);
         return 2;
     }
@@ -226,7 +226,7 @@ int32_t parse_id(sqlite3* p_db, int32_t p_raw, bool p_is_project, int32_t *p_res
 
         if (rc_prep != SQLITE_OK)
         {
-            printf("Statement to find real id could not be prepared. (%i)\n", rc_prep);
+            printf("Sqlite-ERROR (%i): Statement to find real id could not be prepared.\n", rc_prep);
             sqlite3_finalize(stmt);
             return 1;
         }
@@ -235,7 +235,7 @@ int32_t parse_id(sqlite3* p_db, int32_t p_raw, bool p_is_project, int32_t *p_res
 
         if (rc_step != SQLITE_ROW)
         {
-            printf("Statement to find real id could not be executed. (%i)\n", rc_step);
+            printf("Sqlite-ERROR (%i): Statement to find real id could not be executed.\n", rc_step);
             sqlite3_finalize(stmt);
             return 2;
         }

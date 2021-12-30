@@ -38,8 +38,8 @@ void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id);
 
 void cmd_edit_record_time(
     bool p_work_record_begin, int32_t p_work_record_id,
-    int8_t p_hour, int8_t p_minute,
-    int16_t p_year, int8_t p_month, int8_t p_day);
+    uint16_t p_year, uint8_t p_month, uint8_t p_day,
+    uint8_t p_hour, uint8_t p_minute);
 
 void cmd_edit_record_description(int32_t p_work_record_id, char* p_desc);
 

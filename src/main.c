@@ -171,60 +171,17 @@ int main(int argc, char *argv[])
         cmd_edit_record_project(id[0],id[1]);
     }
     else if((strcmp(argv[1], CMD_EDIT_RECORD_BEGIN) == 0) |
-        (strcmp(argv[1], CMD_EDIT_RECORD_BEGIN_LONG) == 0))
-    {
-        int32_t id;
-        int16_t year;
-        int8_t month;
-        int8_t day;
-        int8_t hour;
-        int8_t minute;
-
-        //check max arg count
-        if (argc > 8)
-        {
-            printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
-        }
-
-        //check min arg count
-        else if (argc < 5)
-        {
-            printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
-            return 0;
-        }
-
-        //parse args
-        id = strtol(argv[2], NULL, 10);
-        hour = strtol(argv[3], NULL, 10);
-        minute = strtol(argv[4], NULL, 10);
-
-        if (argc > 5)
-            year = strtol(argv[5], NULL, 10);
-        else
-            year = -1;
-
-        if (argc > 6)
-            month = strtol(argv[6], NULL, 10);
-        else
-            month = -1;
-
-        if (argc > 7)
-            day = strtol(argv[7], NULL, 10);
-        else
-            day = -1;
-        
-        //exec
-        cmd_edit_record_time(true, id, hour, minute, day, month, year);
-    }
-    else if((strcmp(argv[1], CMD_EDIT_RECORD_END) == 0) |
+        (strcmp(argv[1], CMD_EDIT_RECORD_BEGIN_LONG) == 0) |
+        (strcmp(argv[1], CMD_EDIT_RECORD_END) == 0) |
         (strcmp(argv[1], CMD_EDIT_RECORD_END_LONG) == 0))
     {
         int32_t id;
-        int16_t year;
-        int8_t month;
-        int8_t day;
-        int8_t hour;
-        int8_t minute;
+        bool edit_begin = true;
+        uint16_t year;
+        uint8_t month;
+        uint8_t day;
+        uint8_t hour;
+        uint8_t minute;
 
         //check max arg count
         if (argc > 8)
@@ -233,34 +190,29 @@ int main(int argc, char *argv[])
         }
 
         //check min arg count
-        else if (argc < 5)
+        else if (argc < 8)
         {
             printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
             return 0;
         }
 
         //parse args
-        id = strtol(argv[2], NULL, 10);
-        hour = strtol(argv[3], NULL, 10);
-        minute = strtol(argv[4], NULL, 10);
-        
-        if (argc > 5)
-            year = strtol(argv[5], NULL, 10);
-        else
-            year = -1;
+        id = strtoul(argv[2], NULL, 10);
+        year = strtoul(argv[3], NULL, 10);
+        month = strtoul(argv[4], NULL, 10);
+        day = strtoul(argv[5], NULL, 10);
+        hour = strtoul(argv[6], NULL, 10);
+        minute = strtoul(argv[7], NULL, 10);
 
-        if (argc > 6)
-            month = strtol(argv[6], NULL, 10);
-        else
-            month = -1;
-
-        if (argc > 7)
-            day = strtol(argv[7], NULL, 10);
-        else
-            day = -1;
         
+        if ((strcmp(argv[1], CMD_EDIT_RECORD_END) == 0) |
+            (strcmp(argv[1], CMD_EDIT_RECORD_END_LONG) == 0))
+        {
+            edit_begin = false;
+        }
+
         //exec
-        cmd_edit_record_time(false, id, hour, minute, day, month, year);
+        cmd_edit_record_time(edit_begin, id, year, month, day, hour, minute);
     }
     else if((strcmp(argv[1], CMD_EDIT_RECORD_DESC) == 0) |
         (strcmp(argv[1], CMD_EDIT_RECORD_DESC_LONG) == 0))
