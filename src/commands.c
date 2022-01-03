@@ -433,7 +433,12 @@ void cmd_edit_record_time(
         return;
     }
 
-    rc_prepare = sqlite3_prepare_v2(db, (p_work_record_begin == true ? SQL_EDIT_RECORD_BEGIN : SQL_EDIT_RECORD_END), -1, &stmt, 0);
+    rc_prepare = sqlite3_prepare_v2(
+        db,
+        (p_work_record_begin == true ? SQL_EDIT_RECORD_BEGIN : SQL_EDIT_RECORD_END),
+        -1,
+        &stmt,
+        0);
     rc_bind[0] = sqlite3_bind_int(stmt, 1, record_time);
     rc_bind[1] = sqlite3_bind_int(stmt, 2, id);
 
@@ -460,7 +465,7 @@ void cmd_edit_record_time(
         printf("Sqlite-ERROR (%i): Statement to edit work-record could not be executed.\n", rc_step);
     else
         printf(
-            "Record %i project %s set to %i-%i-%i %i:%i.\n",
+            "Record %i project %s set to %i-%02i-%02i %02i:%02i.\n",
             id, (p_work_record_begin == true ? "begin" : "end"),
             (1900 + dt.tm_year), (1 + dt.tm_mon), dt.tm_mday, p_hour, p_minute);
 

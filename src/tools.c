@@ -59,7 +59,9 @@ int32_t database_connect(sqlite3** p_db)
 
         if (rc_activate_fkeys != SQLITE_OK)
         {
-            printf("Sqlite-ERROR (%i): The activation of foreign keys in this database did not work.\n", rc_activate_fkeys);
+            printf(
+                "Sqlite-ERROR (%i): The activation of foreign keys in this database did not work.\n",
+                rc_activate_fkeys);
             return 3;
         }
 
@@ -94,7 +96,9 @@ uint8_t is_prev_record_done(sqlite3* p_db, uint32_t* p_work_record_id, bool* p_w
 
     if (rc_prepare != SQLITE_OK)
     {
-        printf("Sqlite-ERROR (%i): Statement to check validity of previous record could not prepared.\n", rc_prepare);
+        printf(
+            "Sqlite-ERROR (%i): Statement to check validity of previous record could not prepared.\n",
+            rc_prepare);
         return 1;
     }
 
@@ -110,7 +114,9 @@ uint8_t is_prev_record_done(sqlite3* p_db, uint32_t* p_work_record_id, bool* p_w
     }
     else if (rc_step != SQLITE_ROW)
     {
-        printf("Sqlite-ERROR (%i): Statement to check validity of previous record could not be executed.\n", rc_step);
+        printf(
+            "Sqlite-ERROR (%i): Statement to check validity of previous record could not be executed.\n",
+            rc_step);
         sqlite3_finalize(stmt);
         return 2;
     }
@@ -176,7 +182,7 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
             minutes = minutes % 60;
 
             //generate worked_time string as "hours(2):minutes(2)"
-            sprintf(worked_time, "%s%i:%s%i", (hours < 10 ? "0" : ""), hours, (minutes < 10 ? "0" : ""), minutes);
+            sprintf(worked_time, "%02i:%02i", hours, minutes);
 
             //print results
             printf("%i\t%s %s %s %i\t%s\n",
@@ -193,7 +199,7 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
         sum_minutes = sum_seconds / 60;
         sum_hours = sum_minutes / 60;
         sum_minutes = sum_minutes % 60;
-        printf("\nSummarized work time: %s%i:%s%i\n", (sum_hours < 10 ? "0" : ""), sum_hours, (sum_minutes < 10 ? "0" : ""), sum_minutes);
+        printf("\nSummarized work time: %02i:%02i\n", sum_hours, sum_minutes);
     }
     else if (rc_step == SQLITE_DONE)
         printf("No records available.\n");

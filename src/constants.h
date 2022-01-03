@@ -24,9 +24,9 @@
 #define APP_LICENSE_NOTICE "You should have received a copy of the GNU General Public License\n" \
 "along with this program.  If not, see <https://www.gnu.org/licenses/>.\n"
 #define APP_SOURCE "https://github.com/SchokiCoder/smng"
-#define APP_MAJOR 1
-#define APP_MINOR 0
-#define APP_PATCH 4
+#define APP_MAJOR "1"
+#define APP_MINOR "0"
+#define APP_PATCH "5"
 
 #define CMD_HELP "h"
 #define CMD_HELP_LONG "help"
@@ -96,7 +96,7 @@
 "For example -1 is the newest and -2 the one that was created before.\n" \
 "But don't use 0. That would do nothing.\n" \
 "\n" \
-APP_NAME " is licensed under the " APP_LICENSE ".\n" \
+APP_NAME " " APP_MAJOR "." APP_MINOR "." APP_PATCH " is licensed under the " APP_LICENSE ".\n" \
 APP_LICENSE_NOTICE \
 "The source code of this program is available at\n" \
 APP_SOURCE "\n"

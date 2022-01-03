@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
         (strcmp(argv[1], CMD_SHOW_MONTH_LONG) == 0))
     {
         int8_t month;
-        int8_t year;
+        int16_t year;
 
         //check max arg count
         if (argc > 4)
