@@ -1,19 +1,19 @@
 /*
-    SchokiManager
-    Copyright (C) 2021  Andy Frank Schoknecht
+	SchokiManager
+	Copyright (C) 2021	Andy Frank Schoknecht
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef SQL_H
@@ -52,7 +52,14 @@
 "SET project_name = ?\n" \
 "WHERE project_id = ?;"
 
-#define SQL_CHECK_PREVIOUS_RECORD "SELECT work_record_id, (CASE WHEN end IS NULL THEN 0 ELSE 1 END) as record_valid\n" \
+#define SQL_DELETE_PROJECT "DELETE FROM tbl_projects\n" \
+"WHERE project_id = ?;"
+
+#define SQL_DELETE_PROJECT_RECORDS "DELETE FROM tbl_work_records\n" \
+"WHERE project_id = ?;"
+
+#define SQL_CHECK_PREVIOUS_RECORD "SELECT work_record_id, " \
+"(CASE WHEN end IS NULL THEN 0 ELSE 1 END) as record_valid\n" \
 "FROM tbl_work_records\n" \
 "ORDER BY work_record_id DESC LIMIT 1;"
 
@@ -77,6 +84,9 @@
 
 #define SQL_EDIT_RECORD_DESC "UPDATE tbl_work_records\n" \
 "SET description = ?\n" \
+"WHERE work_record_id = ?;"
+
+#define SQL_DELETE_RECORD "DELETE FROM tbl_work_records\n" \
 "WHERE work_record_id = ?;"
 
 #define SQL_SHOW_RECORDS "SELECT work_record_id, " \
