@@ -16,10 +16,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "tools.h"
+#include <sys/stat.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 #include "config.h"
 #include "sql.h"
-#include <stdio.h>
+#include "tools.h"
 
 int32_t database_connect(sqlite3** p_db)
 {
@@ -29,9 +33,44 @@ int32_t database_connect(sqlite3** p_db)
     int32_t rc_create_work_records;
     int32_t rc_create_projects;
     int32_t rc_create_indices;
+#ifndef STATIC_DATABASE_PATH
+    int32_t rc_dir;
+    char path[PATH_MAX_LEN] = "";
+#endif
 
-    //try connecting to db
-    rc_connect = sqlite3_open(DATABASE_PATH, p_db);
+#ifndef STATIC_DATABASE_PATH
+    //get path
+    sprintf(path, PATH_BASE, getenv("HOME"));
+
+    //try create dir
+    errno = 0;
+
+#ifdef _WIN32
+    rc_dir = mkdir(path);
+#else
+    rc_dir = mkdir(path, S_IRWXU);
+#endif
+
+    //if failure, stop
+    if (rc_dir == -1)
+    {
+        if (errno != EEXIST)
+        {
+            printf("ERROR: Path to database does not exist and could not be created.\n");
+            return 1;
+        }
+    }
+
+    //get the rest of the path
+    strcat(path, SLASH);
+    strcat(path, FILE_DATABASE);
+
+    //try connecting to db (with dynamic path)
+    rc_connect = sqlite3_open(path, p_db);
+#else
+    //try connecting to db (with static path)
+    rc_connect = sqlite3_open(PATH_DATABASE, p_db);
+#endif
 
     //if no connection possible, end
     if (rc_connect != SQLITE_OK)

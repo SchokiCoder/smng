@@ -126,6 +126,17 @@ int main(int argc, char *argv[])
         //exec
         cmd_record(id);
     }
+    else if (strcmp(argv[1], CMD_STATUS_LONG) == 0)
+    {
+        //check max arg count
+        if (argc > 2)
+        {
+            printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
+        }
+
+        //exec
+        cmd_status();
+    }
     else if((strcmp(argv[1], CMD_STOP) == 0) |
         (strcmp(argv[1], CMD_STOP_LONG) == 0))
     {

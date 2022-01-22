@@ -19,19 +19,22 @@ APP_NAME = smng
 CFLAGS = -std=c99 -Wall -pedantic -O3
 LIBS = -lsqlite3
 
+INSTALL_BIN_DIR = /usr/bin
+
 options:
 	@echo smng build options:
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "CC       = ${CC}"
+	@echo "LIBS     = ${LIBS}"
 
 clean:
 	rm -f ${APP_NAME} *.o
 
 install:
-	${CC} *.c ${CFLAGS} ${LIBS} -o ${APP_NAME}
-	mkdir -p ${DESTDIR}${PREFIX}/bin
-	mv -f ${APP_NAME} ${DESTDIR}${PREFIX}/bin
-	chmod 755 ${DESTDIR}${PREFIX}/bin/${APP_NAME}
+	${CC} src/*.c ${CFLAGS} ${LIBS} -o ${APP_NAME}
+	mkdir -p ${INSTALL_BIN_DIR}
+	mv -f ${APP_NAME} ${INSTALL_BIN_DIR}
+	chmod 755 ${INSTALL_BIN_DIR}/${APP_NAME}
 
 uninstall:
-	rm -f ${DESTDIR}${PREFIX}/bin/${APP_NAME}
+	rm -f ${INSTALL_BIN_DIR}/${APP_NAME}

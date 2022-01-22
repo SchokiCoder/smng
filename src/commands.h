@@ -32,6 +32,8 @@ void cmd_edit_project(int32_t p_project_id, char* p_project_name);
 
 void cmd_record(int32_t p_project_id);
 
+void cmd_status();
+
 void cmd_stop(char* p_description);
 
 void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id);

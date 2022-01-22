@@ -19,6 +19,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+/* application defintions */
 #define APP_NAME "smng"
 #define APP_LICENSE "GPLv3"
 #define APP_LICENSE_NOTICE "You should have received a copy of the GNU General Public License\n" \
@@ -28,6 +29,22 @@
 #define APP_MINOR "0"
 #define APP_PATCH "5"
 
+/* path definitions */
+#ifdef _WIN32
+    #define SLASH "\\"
+#else
+    #define SLASH "/"
+#endif
+
+#define PATH_MAX_LEN 256
+
+/* if static database path is not enabled, define dynamic path */
+#ifndef STATIC_DATABASE_PATH
+    #define PATH_BASE "%s/." APP_NAME
+    #define FILE_DATABASE "worktimes.db"
+#endif
+
+/* commands */
 #define CMD_HELP "h"
 #define CMD_HELP_LONG "help"
 #define CMD_ADD_PROJECT "ap"
@@ -38,6 +55,7 @@
 #define CMD_EDIT_PROJECT_LONG "edit-project"
 #define CMD_RECORD "r"
 #define CMD_RECORD_LONG "record"
+#define CMD_STATUS_LONG "status"
 #define CMD_STOP "s"
 #define CMD_STOP_LONG "stop"
 #define CMD_EDIT_RECORD_PROJECT "erp"
@@ -53,6 +71,7 @@
 #define CMD_SHOW_MONTH "sm"
 #define CMD_SHOW_MONTH_LONG "show-month"
 
+/* help */
 #define HELP_TEXT "Usage " APP_NAME " COMMAND ARGS\n" \
 "\n" \
 "  show this message:\n" \
@@ -69,6 +88,9 @@
 "\n" \
 "  record work time:\n" \
 "  " CMD_RECORD ",\t" CMD_RECORD_LONG "\t\t\tPROJECT_ID\n" \
+"\n" \
+"  show current work status:\n" \
+"  " CMD_STATUS_LONG "\n" \
 "\n" \
 "  stop recording work time:\n" \
 "  " CMD_STOP ",\t" CMD_STOP_LONG "\t\t\tDESCRIPTION\n" \

@@ -64,18 +64,19 @@ void cmd_add_project(char* p_project_name)
     switch (rc_step)
     {
         case SQLITE_CONSTRAINT:
-        printf(
-            "Sqlite-ERROR (%i): Statement failed on a constraint.\n"
-            "Make sure \"%s\" is not already used as a project name.\n",
-            rc_step, p_project_name);
-        break;
+            printf(
+                "Sqlite-ERROR (%i): Statement failed on a constraint.\n"
+                "Make sure \"%s\" is not already used as a project name.\n",
+                rc_step, p_project_name);
+            break;
 
         case SQLITE_DONE:
-        printf("Project \"%s\" added.\n", p_project_name);
-        break;
+            printf("Project \"%s\" added.\n", p_project_name);
+            break;
 
         default:
-        printf("Sqlite-ERROR (%i): Unknown error. Code RED, burn the evidence and run!\n", rc_step);
+            printf("Sqlite-ERROR (%i): Unknown error. Code RED, burn the evidence and run!\n", rc_step);
+            break;
     }
 
     //clean
@@ -173,18 +174,19 @@ void cmd_edit_project(int32_t p_project_id, char* p_project_name)
     switch (rc_step)
     {
         case SQLITE_CONSTRAINT:
-        printf(
-            "Sqlite-ERROR (%i): Statement failed on a constraint.\n"
-            "Make sure \"%s\" is not already used as a project name.\n",
-            rc_step, p_project_name);
-        break;
+            printf(
+                "Sqlite-ERROR (%i): Statement failed on a constraint.\n"
+                "Make sure \"%s\" is not already used as a project name.\n",
+                rc_step, p_project_name);
+            break;
 
         case SQLITE_DONE:
-        printf("Project %i name set to \"%s\".\n", id, p_project_name);
-        break;
+            printf("Project %i name set to \"%s\".\n", id, p_project_name);
+            break;
 
         default:
-        printf("Sqlite-ERROR (%i): Statement to edit project could not be executed.\n", rc_step);
+            printf("Sqlite-ERROR (%i): Statement to edit project could not be executed.\n", rc_step);
+            break;
     }
 
     //clean
@@ -261,6 +263,30 @@ void cmd_record(int32_t p_project_id)
 
     sqlite3_finalize(stmt);
     sqlite3_close(db);
+}
+
+void cmd_status()
+{
+    sqlite3* db;
+    bool prev_record_done;
+    uint32_t prev_record_id;
+
+    //try connect to db
+    if (database_connect(&db) != 0)
+        return;
+
+    //check validity of last work record
+    if (is_prev_record_done(db, &prev_record_id, &prev_record_done) != 0)
+    {
+        sqlite3_close(db);
+        return;
+    }
+
+    //print result
+    printf(
+        "Previous work record (%u) is " "%s" "done.\n",
+        prev_record_id,
+        (prev_record_done == false ? "NOT " : ""));
 }
 
 void cmd_stop(char* p_description)
@@ -364,17 +390,18 @@ void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id)
     switch (rc_step)
     {
         case SQLITE_DONE:
-        printf("Record %i project set to %i.\n", rec_id, pro_id);
-        break;
+            printf("Record %i project set to %i.\n", rec_id, pro_id);
+            break;
 
         case SQLITE_CONSTRAINT:
-        printf(
-            "Sqlite-ERROR (%i): Statement failed on a constraint.\n"
-            "Make sure project %i exists.\n", rc_step, p_project_id);
-        break;
+            printf(
+                "Sqlite-ERROR (%i): Statement failed on a constraint.\n"
+                "Make sure project %i exists.\n", rc_step, p_project_id);
+            break;
 
         default:
-        printf("Sqlite-ERROR (%i): Statement to edit the work-record could not be executed.\n", rc_step);
+            printf("Sqlite-ERROR (%i): Statement to edit the work-record could not be executed.\n", rc_step);
+            break;
     }
 
     sqlite3_finalize(stmt);
@@ -400,6 +427,44 @@ void cmd_edit_record_time(
     //connect
     if (database_connect(&db) != 0)
         return;
+
+    //if enabled, make sure given datetime makes sense
+#ifdef DISALLOW_WEIRD_DATETIME
+    if (p_year < DT_YEAR_MIN ||
+        p_year > DT_YEAR_MAX)
+    {
+        printf("Given year %u is not allowed.\n", p_year);
+        return;
+    }
+
+    if (p_month < DT_MONTH_MIN ||
+        p_month > DT_MONTH_MAX)
+    {
+        printf("Given month %u is not allowed.\n", p_month);
+        return;
+    }
+
+    if (p_day < DT_DAY_MIN ||
+        p_day > DT_DAY_MAX)
+    {
+        printf("Given day %u is not allowed.\n", p_day);
+        return;
+    }
+
+    if (p_hour < DT_HOUR_MIN ||
+        p_hour > DT_HOUR_MAX)
+    {
+        printf("Given hour %u is not allowed.\n", p_hour);
+        return;
+    }
+
+    if (p_minute < DT_MINUTE_MIN ||
+        p_minute > DT_MINUTE_MAX)
+    {
+        printf("Given minute %u is not allowed.\n", p_minute);
+        return;
+    }
+#endif
     
     //parse datetime arguments and convert to unixepoch
     time(&ts_now);
