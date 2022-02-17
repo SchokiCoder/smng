@@ -16,7 +16,7 @@
 
 CC = cc
 APP_NAME = smng
-CFLAGS = -std=c99 -Wall -pedantic -O3
+CFLAGS = -std=c99 -Wall -Wextra -pedantic -O3
 LIBS = -lsqlite3
 
 INSTALL_BIN_DIR = /usr/bin

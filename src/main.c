@@ -45,26 +45,35 @@ int main(int argc, char *argv[])
 		{
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
-		
+
 		//exec
 		cmd_help();
 	}
 	else if ((strcmp(argv[1], CMD_ADD_PROJECT) == 0) ||
 		(strcmp(argv[1], CMD_ADD_PROJECT_LONG) == 0))
-	{		 
+	{
 		//check max arg count
 		if (argc > 3)
 		{
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
 
-		//check min arg count
+		//check if no args
+		else if (argc == 2)
+		{
+			//print help, stop
+			printf(MSG_HELP_ADD_PROJECT, CMD_ADD_PROJECT, CMD_ADD_PROJECT_LONG);
+			printf("\n");
+			return 0;
+		}
+
+		/*check min arg count
 		else if (argc < 3)
 		{
 			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
 			return 0;
-		}
-		
+		}*/
+
 		//exec
 		cmd_add_project(argv[2]);
 	}
@@ -76,7 +85,7 @@ int main(int argc, char *argv[])
 		{
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
-		
+
 		//exec
 		cmd_show_projects();
 	}
@@ -91,13 +100,22 @@ int main(int argc, char *argv[])
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
 
+		//check if no args
+		else if (argc == 2)
+		{
+			//print help, stop
+			printf(MSG_HELP_EDIT_PROJECT, CMD_EDIT_PROJECT, CMD_EDIT_PROJECT_LONG);
+			printf("\n");
+			return 0;
+		}
+
 		//check min arg count
 		else if (argc < 4)
 		{
 			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
 			return 0;
 		}
-		
+
 		//parse args
 		id = strtol(argv[2], NULL, 10);
 
@@ -115,19 +133,28 @@ int main(int argc, char *argv[])
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
 
-		//check min arg count
+		//check if no args
+		else if (argc == 2)
+		{
+			//print help, stop
+			printf(MSG_HELP_DELETE_PROJECT, CMD_DELETE_PROJECT_LONG);
+			printf("\n");
+			return 0;
+		}
+
+		/*check min arg count
 		else if (argc < 3)
 		{
 			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
 			return 0;
-		}
-		
+		}*/
+
 		//parse args
 		id = strtol(argv[2], NULL, 10);
 
 		if (argc > 3)
 			force = strtoul(argv[3], NULL, 10);
-		
+
 		//exec
 		cmd_delete_project(id, force);
 	}
@@ -142,16 +169,25 @@ int main(int argc, char *argv[])
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
 
-		//check min arg count
+		//check if no args
+		else if (argc == 2)
+		{
+			//print help, stop
+			printf(MSG_HELP_RECORD, CMD_RECORD, CMD_RECORD_LONG);
+			printf("\n");
+			return 0;
+		}
+
+		/*check min arg count
 		else if (argc < 3)
 		{
 			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
 			return 0;
-		}
-		
+		}*/
+
 		//parse args
 		id = strtol(argv[2], NULL, 10);
-		
+
 		//exec
 		cmd_record(id);
 	}
@@ -175,13 +211,22 @@ int main(int argc, char *argv[])
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
 
-		//check min arg count
+		//check if no args
+		else if (argc == 2)
+		{
+			//print help, stop
+			printf(MSG_HELP_STOP, CMD_STOP, CMD_STOP_LONG);
+			printf("\n");
+			return 0;
+		}
+
+		/*check min arg count
 		else if (argc < 3)
 		{
 			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
 			return 0;
-		}
-		
+		}*/
+
 		//exec
 		cmd_stop(argv[2]);
 	}
@@ -196,13 +241,22 @@ int main(int argc, char *argv[])
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
 
+		//check if no args
+		else if (argc == 2)
+		{
+			//print help, stop
+			printf(MSG_HELP_EDIT_RECORD_PROJECT, CMD_EDIT_RECORD_PROJECT, CMD_EDIT_RECORD_PROJECT_LONG);
+			printf("\n");
+			return 0;
+		}
+
 		//check min arg count
 		else if (argc < 4)
 		{
 			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
 			return 0;
 		}
-		
+
 		//parse args
 		id[0] = strtol(argv[2], NULL, 10);
 		id[1] = strtol(argv[3], NULL, 10);
@@ -223,10 +277,30 @@ int main(int argc, char *argv[])
 		uint8_t hour;
 		uint8_t minute;
 
+		//check if user edits begin or end
+		if ((strcmp(argv[1], CMD_EDIT_RECORD_END) == 0) ||
+			(strcmp(argv[1], CMD_EDIT_RECORD_END_LONG) == 0))
+		{
+			edit_begin = false;
+		}
+
 		//check max arg count
 		if (argc > 8)
 		{
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
+		}
+
+		//check if no args
+		else if (argc == 2)
+		{
+			//print help, stop
+			if (edit_begin == true)
+				printf(MSG_HELP_EDIT_RECORD_BEGIN, CMD_EDIT_RECORD_BEGIN, CMD_EDIT_RECORD_BEGIN_LONG);
+			else
+				printf(MSG_HELP_EDIT_RECORD_END, CMD_EDIT_RECORD_END, CMD_EDIT_RECORD_END_LONG);
+
+			printf("\n");
+			return 0;
 		}
 
 		//check min arg count
@@ -244,13 +318,6 @@ int main(int argc, char *argv[])
 		hour = strtoul(argv[6], NULL, 10);
 		minute = strtoul(argv[7], NULL, 10);
 
-		
-		if ((strcmp(argv[1], CMD_EDIT_RECORD_END) == 0) ||
-			(strcmp(argv[1], CMD_EDIT_RECORD_END_LONG) == 0))
-		{
-			edit_begin = false;
-		}
-
 		//exec
 		cmd_edit_record_time(edit_begin, id, year, month, day, hour, minute);
 	}
@@ -258,11 +325,20 @@ int main(int argc, char *argv[])
 		(strcmp(argv[1], CMD_EDIT_RECORD_DESC_LONG) == 0))
 	{
 		int32_t id;
-		
+
 		//check max arg count
 		if (argc > 4)
 		{
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
+		}
+
+		//check if no args
+		else if (argc == 2)
+		{
+			//print help, stop
+			printf(MSG_HELP_EDIT_RECORD_DESC, CMD_EDIT_RECORD_DESC, CMD_EDIT_RECORD_DESC_LONG);
+			printf("\n");
+			return 0;
 		}
 
 		//check min arg count
@@ -288,16 +364,25 @@ int main(int argc, char *argv[])
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
 
-		//check min arg count
+		//check if no args
+		else if (argc == 2)
+		{
+			//print help, stop
+			printf(MSG_HELP_DELETE_RECORD, CMD_DELETE_RECORD_LONG);
+			printf("\n");
+			return 0;
+		}
+
+		/*check min arg count
 		else if (argc < 3)
 		{
 			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
 			return 0;
-		}
-		
+		}*/
+
 		//parse args
 		id = strtol(argv[2], NULL, 10);
-		
+
 		//exec
 		cmd_delete_record(id);
 	}
@@ -328,7 +413,7 @@ int main(int argc, char *argv[])
 			month = strtol(argv[3], NULL, 10);
 			day = strtol(argv[4], NULL, 10);
 		}
-		
+
 		//exec
 		cmd_show_records_week(year, month, day);
 	}
@@ -343,7 +428,7 @@ int main(int argc, char *argv[])
 		{
 			printf("WARNING: Too many arguments were passed.\nAdditional arguments will be ignored.\n");
 		}
-		
+
 		//parse args
 		if (argc > 2)
 			month = strtol(argv[2], NULL, 10);
@@ -354,7 +439,7 @@ int main(int argc, char *argv[])
 			year = strtol(argv[3], NULL, 10);
 		else
 			year = -1;
-		
+
 		//exec
 		cmd_show_records_month(month, year);
 	}

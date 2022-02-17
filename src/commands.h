@@ -24,11 +24,11 @@
 
 void cmd_help();
 
-void cmd_add_project(char* p_project_name);
+void cmd_add_project(char *p_project_name);
 
 void cmd_show_projects();
 
-void cmd_edit_project(int32_t p_project_id, char* p_project_name);
+void cmd_edit_project(int32_t p_project_id, char *p_project_name);
 
 void cmd_delete_project(int32_t p_project_id, bool p_force);
 
@@ -36,16 +36,16 @@ void cmd_record(int32_t p_project_id);
 
 void cmd_status();
 
-void cmd_stop(char* p_description);
+void cmd_stop(char *p_description);
 
 void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id);
 
 void cmd_edit_record_time(
 	bool p_work_record_begin, int32_t p_work_record_id,
-	uint16_t p_year, uint8_t p_month, uint8_t p_day,
-	uint8_t p_hour, uint8_t p_minute);
+	int16_t p_year, int8_t p_month, int8_t p_day,
+	int8_t p_hour, int8_t p_minute);
 
-void cmd_edit_record_description(int32_t p_work_record_id, char* p_desc);
+void cmd_edit_record_description(int32_t p_work_record_id, char *p_desc);
 
 void cmd_delete_record(int32_t p_record_id);
 
@@ -53,4 +53,4 @@ void cmd_show_records_month(int8_t p_month, int16_t p_year);
 
 void cmd_show_records_week(int16_t p_year, int8_t p_month, int8_t p_day);
 
-#endif
+#endif /* COMMANDS_H */

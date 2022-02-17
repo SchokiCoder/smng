@@ -25,14 +25,70 @@
 
 void cmd_help()
 {
-	//print help text
-	printf("%s", HELP_TEXT);
+	//print every help message
+	printf(MSG_HELP_APP, APP_NAME);
+	printf("\n");
+
+	printf(MSG_HELP_HELP, CMD_HELP, CMD_HELP_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_ADD_PROJECT, CMD_ADD_PROJECT, CMD_ADD_PROJECT_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_SHOW_PROJECTS, CMD_SHOW_PROJECTS, CMD_SHOW_PROJECTS_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_EDIT_PROJECT, CMD_EDIT_PROJECT, CMD_EDIT_PROJECT_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_DELETE_PROJECT, CMD_DELETE_PROJECT_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_RECORD, CMD_RECORD, CMD_RECORD_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_STATUS, CMD_STATUS_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_STOP, CMD_STOP, CMD_STOP_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_EDIT_RECORD_PROJECT, CMD_EDIT_RECORD_PROJECT, CMD_EDIT_RECORD_PROJECT_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_EDIT_RECORD_BEGIN, CMD_EDIT_RECORD_BEGIN, CMD_EDIT_RECORD_BEGIN_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_EDIT_RECORD_END, CMD_EDIT_RECORD_END, CMD_EDIT_RECORD_END_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_EDIT_RECORD_DESC, CMD_EDIT_RECORD_DESC, CMD_EDIT_RECORD_DESC_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_DELETE_RECORD, CMD_DELETE_RECORD_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_SHOW_WEEK, CMD_SHOW_WEEK, CMD_SHOW_WEEK_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_SHOW_MONTH, CMD_SHOW_MONTH, CMD_SHOW_MONTH_LONG);
+	printf("\n");
+
+	printf(MSG_HELP_EXTRA);
+	printf("\n");
+
+	printf(
+		MSG_HELP_APP_INFO,
+		APP_NAME, APP_MAJOR, APP_MINOR, APP_PATCH, APP_LICENSE,
+		APP_LICENSE_NOTICE,
+		APP_SOURCE);
+	printf("\n");
 }
 
-void cmd_add_project(char* p_project_name)
+void cmd_add_project(char *p_project_name)
 {
-	sqlite3* db;
-	sqlite3_stmt* stmt;
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
 	int32_t rc_prepare;
 	int32_t rc_step;
 	int32_t rc_bind;
@@ -86,8 +142,8 @@ void cmd_add_project(char* p_project_name)
 
 void cmd_show_projects()
 {
-	sqlite3* db;
-	sqlite3_stmt* stmt;
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
 	int32_t rc_prepare;
 	int32_t rc_step;
 
@@ -127,10 +183,10 @@ void cmd_show_projects()
 	sqlite3_close(db);
 }
 
-void cmd_edit_project(int32_t p_project_id, char* p_project_name)
+void cmd_edit_project(int32_t p_project_id, char *p_project_name)
 {
-	sqlite3* db;
-	sqlite3_stmt* stmt;
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
 	int32_t id;
 	int32_t rc_prepare;
 	int32_t rc_bind[2];
@@ -292,8 +348,8 @@ void cmd_delete_project(int32_t p_project_id, bool p_force)
 
 void cmd_record(int32_t p_project_id)
 {
-	sqlite3* db;
-	sqlite3_stmt* stmt;
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
 	int32_t id;
 	uint32_t prev_record_id;
 	bool prev_record_done;
@@ -305,7 +361,7 @@ void cmd_record(int32_t p_project_id)
 	//connect
 	if (database_connect(&db) != 0)
 		return;
-	
+
 	//check validity of last work record
 	if (is_prev_record_done(db, &prev_record_id, &prev_record_done) != 0)
 	{
@@ -322,7 +378,7 @@ void cmd_record(int32_t p_project_id)
 		sqlite3_close(db);
 		return;
 	}
-	
+
 	//add new work record
 	time(&record_begin);
 
@@ -337,7 +393,7 @@ void cmd_record(int32_t p_project_id)
 
 	rc_bind[0] = sqlite3_bind_int(stmt, 1, id);
 	rc_bind[1] = sqlite3_bind_int(stmt, 2, record_begin);
-	
+
 	if ((rc_prepare != SQLITE_OK) ||
 		(rc_bind[0] != SQLITE_OK) ||
 		(rc_bind[1] != SQLITE_OK))
@@ -363,7 +419,7 @@ void cmd_record(int32_t p_project_id)
 
 void cmd_status()
 {
-	sqlite3* db;
+	sqlite3 *db;
 	bool prev_record_done;
 	uint32_t prev_record_id;
 
@@ -385,10 +441,10 @@ void cmd_status()
 		(prev_record_done == false ? "NOT " : ""));
 }
 
-void cmd_stop(char* p_description)
+void cmd_stop(char *p_description)
 {
-	sqlite3* db;
-	sqlite3_stmt* stmt;
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
 	int32_t rc_prepare;
 	int32_t rc_bind[2];
 	int32_t rc_step;
@@ -420,7 +476,7 @@ void cmd_stop(char* p_description)
 
 	rc_prepare = sqlite3_prepare_v2(db, SQL_FINISH_WORK_RECORD, -1, &stmt, 0);
 	rc_bind[0] = sqlite3_bind_int(stmt, 1, record_end);
-	rc_bind[1] = sqlite3_bind_text(stmt, 2, p_description, -1, NULL); 
+	rc_bind[1] = sqlite3_bind_text(stmt, 2, p_description, -1, NULL);
 
 	if ((rc_prepare != SQLITE_OK) ||
 		(rc_bind[0] != SQLITE_OK) ||
@@ -444,8 +500,8 @@ void cmd_stop(char* p_description)
 
 void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id)
 {
-	sqlite3* db;
-	sqlite3_stmt* stmt;
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
 	int32_t rec_id;
 	int32_t pro_id;
 	int32_t rc_prepare;
@@ -506,20 +562,20 @@ void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id)
 
 void cmd_edit_record_time(
 	bool p_work_record_begin, int32_t p_work_record_id,
-	uint16_t p_year, uint8_t p_month, uint8_t p_day,
-	uint8_t p_hour, uint8_t p_minute)
+	int16_t p_year, int8_t p_month, int8_t p_day,
+	int8_t p_hour, int8_t p_minute)
 {
-	sqlite3* db;
-	sqlite3_stmt* stmt;
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
 	time_t ts_now;
-	struct tm* now;
+	struct tm *now;
 	time_t record_time;
 	struct tm dt;
 	int32_t id;
 	int32_t rc_prepare;
 	int32_t rc_bind[2];
 	int32_t rc_step;
-	
+
 	//connect
 	if (database_connect(&db) != 0)
 		return;
@@ -529,7 +585,7 @@ void cmd_edit_record_time(
 	if (sanitize_datetime(p_year, p_month, p_day, p_hour, p_minute) != 0)
 		return;
 #endif
-	
+
 	//parse datetime arguments and convert to unixepoch
 	time(&ts_now);
 	now = localtime(&ts_now);
@@ -548,7 +604,7 @@ void cmd_edit_record_time(
 		dt.tm_mday = now->tm_mday;
 	else
 		dt.tm_mday = p_day;
-	
+
 	dt.tm_hour = p_hour;
 	dt.tm_min = p_minute;
 	dt.tm_sec = 0;
@@ -602,10 +658,10 @@ void cmd_edit_record_time(
 	sqlite3_close(db);
 }
 
-void cmd_edit_record_description(int32_t p_work_record_id, char* p_desc)
+void cmd_edit_record_description(int32_t p_work_record_id, char *p_desc)
 {
-	sqlite3* db;
-	sqlite3_stmt* stmt;
+	sqlite3 *db;
+	sqlite3_stmt *stmt;
 	int32_t id;
 	int32_t rc_prep, rc_step, rc_bind[2];
 
@@ -694,10 +750,10 @@ void cmd_delete_record(int32_t p_record_id)
 
 void cmd_show_records_month(int8_t p_month, int16_t p_year)
 {
-	sqlite3* db;
+	sqlite3 *db;
 	time_t begin, end;
 	struct tm temp_begin, temp_end;
-	struct tm* now;
+	struct tm *now;
 	time_t ts_now;
 
 	//connect to db
@@ -735,7 +791,7 @@ void cmd_show_records_month(int8_t p_month, int16_t p_year)
 	temp_begin.tm_min = 0;
 	temp_begin.tm_sec = 0;
 	temp_begin.tm_isdst = -1;
-	
+
 	temp_end.tm_mday = 0;
 	temp_end.tm_hour = 23;
 	temp_end.tm_min = 59;
@@ -747,17 +803,17 @@ void cmd_show_records_month(int8_t p_month, int16_t p_year)
 
 	//show
 	show_records(db, begin, end);
-	
+
 	//clean
 	sqlite3_close(db);
 }
 
 void cmd_show_records_week(int16_t p_year, int8_t p_month, int8_t p_day)
 {
-	sqlite3* db;
+	sqlite3 *db;
 	time_t begin, end;
-	struct tm* date;
-	
+	struct tm *date;
+
 	//connect
 	if (database_connect(&db) != 0)
 		return;
@@ -766,7 +822,7 @@ void cmd_show_records_week(int16_t p_year, int8_t p_month, int8_t p_day)
 	time(&begin);
 	date = localtime(&begin);
 	date->tm_isdst = -1;
-		
+
 	if (p_year == -1 || p_month == -1 || p_day == -1)
 	{
 		date->tm_hour = 0;

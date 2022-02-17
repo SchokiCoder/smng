@@ -19,117 +19,138 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include <stdint.h>
+
 /* application defintions */
-#define APP_NAME "smng"
-#define APP_LICENSE "GPLv3"
-#define APP_LICENSE_NOTICE "You should have received a copy of the GNU General Public License\n" \
-"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n"
-#define APP_SOURCE "https://github.com/SchokiCoder/smng"
-#define APP_MAJOR "1"
-#define APP_MINOR "1"
-#define APP_PATCH "0"
+static const char APP_NAME[] = "smng";
+static const char APP_LICENSE[] = "GPLv3";
+static const char APP_LICENSE_NOTICE[] =
+"You should have received a copy of the GNU General Public License\n" \
+"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
+static const char APP_SOURCE[] = "https://github.com/SchokiCoder/smng";
+static const uint32_t APP_MAJOR = 1;
+static const uint32_t APP_MINOR = 1;
+static const uint32_t APP_PATCH = 0;
 
 /* path definitions */
 #ifdef _WIN32
-	#define SLASH "\\"
+	static const char SLASH = '\\';
 #else
-	#define SLASH "/"
+	static const char SLASH = '/';
 #endif
 
 #define PATH_MAX_LEN 256
 
 /* if static database path is not enabled, define dynamic path */
 #ifndef STATIC_DATABASE_PATH
-	#define PATH_BASE "%s/." APP_NAME
-	#define FILE_DATABASE "worktimes.db"
+	static const char PATH_BASE[] = "%s/.%s";
+	static const char FILE_DATABASE[] = "worktimes.db";
 #endif
 
 /* commands */
-#define CMD_HELP "h"
-#define CMD_HELP_LONG "help"
-#define CMD_ADD_PROJECT "ap"
-#define CMD_ADD_PROJECT_LONG "add-project"
-#define CMD_SHOW_PROJECTS "sp"
-#define CMD_SHOW_PROJECTS_LONG "show-projects"
-#define CMD_EDIT_PROJECT "ep"
-#define CMD_EDIT_PROJECT_LONG "edit-project"
-#define CMD_DELETE_PROJECT_LONG "delete-project"
-#define CMD_RECORD "r"
-#define CMD_RECORD_LONG "record"
-#define CMD_STATUS_LONG "status"
-#define CMD_STOP "s"
-#define CMD_STOP_LONG "stop"
-#define CMD_EDIT_RECORD_PROJECT "erp"
-#define CMD_EDIT_RECORD_PROJECT_LONG "edit-record-project"
-#define CMD_EDIT_RECORD_BEGIN "erb"
-#define CMD_EDIT_RECORD_BEGIN_LONG "edit-record-begin"
-#define CMD_EDIT_RECORD_END "ere"
-#define CMD_EDIT_RECORD_END_LONG "edit-record-end"
-#define CMD_EDIT_RECORD_DESC "erd"
-#define CMD_EDIT_RECORD_DESC_LONG "edit-record-description"
-#define CMD_DELETE_RECORD_LONG "delete-record"
-#define CMD_SHOW_WEEK "sw"
-#define CMD_SHOW_WEEK_LONG "show-week"
-#define CMD_SHOW_MONTH "sm"
-#define CMD_SHOW_MONTH_LONG "show-month"
+static const char CMD_HELP[] = "h";
+static const char CMD_HELP_LONG[] = "help";
+static const char CMD_ADD_PROJECT[] = "ap";
+static const char CMD_ADD_PROJECT_LONG[] = "add-project";
+static const char CMD_SHOW_PROJECTS[] = "sp";
+static const char CMD_SHOW_PROJECTS_LONG[] = "show-projects";
+static const char CMD_EDIT_PROJECT[] = "ep";
+static const char CMD_EDIT_PROJECT_LONG[] = "edit-project";
+static const char CMD_DELETE_PROJECT_LONG[] = "delete-project";
+static const char CMD_RECORD[] = "r";
+static const char CMD_RECORD_LONG[] = "record";
+static const char CMD_STATUS_LONG[] = "status";
+static const char CMD_STOP[] = "s";
+static const char CMD_STOP_LONG[] = "stop";
+static const char CMD_EDIT_RECORD_PROJECT[] = "erp";
+static const char CMD_EDIT_RECORD_PROJECT_LONG[] = "edit-record-project";
+static const char CMD_EDIT_RECORD_BEGIN[] = "erb";
+static const char CMD_EDIT_RECORD_BEGIN_LONG[] = "edit-record-begin";
+static const char CMD_EDIT_RECORD_END[] = "ere";
+static const char CMD_EDIT_RECORD_END_LONG[] = "edit-record-end";
+static const char CMD_EDIT_RECORD_DESC[] = "erd";
+static const char CMD_EDIT_RECORD_DESC_LONG[] = "edit-record-description";
+static const char CMD_DELETE_RECORD_LONG[] = "delete-record";
+static const char CMD_SHOW_WEEK[] = "sw";
+static const char CMD_SHOW_WEEK_LONG[] = "show-week";
+static const char CMD_SHOW_MONTH[] = "sm";
+static const char CMD_SHOW_MONTH_LONG[] = "show-month";
 
 /* help */
-#define HELP_TEXT "Usage:\n" \
-"  " APP_NAME " [COMMAND] [ARGS]\n" \
-"\n" \
+static const char MSG_HELP_APP[] =
+"Usage:\n"
+"  %s [COMMAND] [ARGS]\n";
+
+static const char MSG_HELP_HELP[] =
 "  show this message:\n" \
-"  " CMD_HELP ",\t" CMD_HELP_LONG "\t\n" \
-"\n" \
+"  %s,\t%s\t\n";
+
+static const char MSG_HELP_ADD_PROJECT[] =
 "  add a project:\n" \
-"  " CMD_ADD_PROJECT ",\t" CMD_ADD_PROJECT_LONG "\t\tPROJECT_NAME\n" \
-"\n" \
+"  %s,\t%s\t\tPROJECT_NAME\n";
+
+static const char MSG_HELP_SHOW_PROJECTS[] =
 "  show projects:\n" \
-"  " CMD_SHOW_PROJECTS ",\t" CMD_SHOW_PROJECTS_LONG "\n" \
-"\n" \
+"  %s,\t%s\n";
+
+static const char MSG_HELP_EDIT_PROJECT[] =
 "  edit project:\n" \
-"  " CMD_EDIT_PROJECT ",\t" CMD_EDIT_PROJECT_LONG "\t\tPROJECT_ID PROJECT_NAME\n" \
-"\n" \
+"  %s,\t%s\t\tPROJECT_ID PROJECT_NAME\n";
+
+static const char MSG_HELP_DELETE_PROJECT[] =
 "  delete project:\n" \
-"  " CMD_DELETE_PROJECT_LONG "\t\tPROJECT_ID [FORCE]\n" \
-"\n" \
+"  %s\t\tPROJECT_ID [FORCE]\n";
+
+static const char MSG_HELP_RECORD[] =
 "  record work time:\n" \
-"  " CMD_RECORD ",\t" CMD_RECORD_LONG "\t\t\tPROJECT_ID\n" \
-"\n" \
+"  %s,\t%s\t\t\tPROJECT_ID\n";
+
+static const char MSG_HELP_STATUS[] =
 "  show current work status:\n" \
-"  " CMD_STATUS_LONG "\n" \
-"\n" \
+"  %s\n";
+
+static const char MSG_HELP_STOP[] =
 "  stop recording work time:\n" \
-"  " CMD_STOP ",\t" CMD_STOP_LONG "\t\t\tDESCRIPTION\n" \
-"\n" \
+"  %s,\t%s\t\t\tDESCRIPTION\n";
+
+static const char MSG_HELP_EDIT_RECORD_PROJECT[] =
 "  edit work record's project:\n" \
-"  " CMD_EDIT_RECORD_PROJECT ",\t" CMD_EDIT_RECORD_PROJECT_LONG "\tRECORD_ID PROJECT_ID\n" \
-"\n" \
+"  %s,\t%s\tRECORD_ID PROJECT_ID\n";
+
+static const char MSG_HELP_EDIT_RECORD_BEGIN[] =
 "  edit work record's begin:\n" \
-"  " CMD_EDIT_RECORD_BEGIN ",\t" CMD_EDIT_RECORD_BEGIN_LONG "\tRECORD_ID YEAR MONTH DAY HOUR MINUTE\n" \
-"\n" \
+"  %s,\t%s\tRECORD_ID YEAR MONTH DAY HOUR MINUTE\n";
+
+static const char MSG_HELP_EDIT_RECORD_END[] =
 "  edit work record's end:\n" \
-"  " CMD_EDIT_RECORD_END ",\t" CMD_EDIT_RECORD_END_LONG "\t\tRECORD_ID YEAR MONTH DAY HOUR MINUTE\n" \
-"\n" \
+"  %s,\t%s\t\tRECORD_ID YEAR MONTH DAY HOUR MINUTE\n";
+
+static const char MSG_HELP_EDIT_RECORD_DESC[] =
 "  edit work record's description:\n" \
-"  " CMD_EDIT_RECORD_DESC ",\t" CMD_EDIT_RECORD_DESC_LONG "\tRECORD_ID DESCRIPTION\n" \
-"\n" \
+"  %s,\t%s\tRECORD_ID DESCRIPTION\n";
+
+static const char MSG_HELP_DELETE_RECORD[] =
 "  delete a work record:\n" \
-"  " CMD_DELETE_RECORD_LONG "\t\t\tRECORD_ID\n" \
-"\n" \
+"  %s\t\t\tRECORD_ID\n";
+
+static const char MSG_HELP_SHOW_WEEK[] =
 "  show work records of the week:\n" \
-"  " CMD_SHOW_WEEK ",\t" CMD_SHOW_WEEK_LONG "\t\t[YEAR MONTH DAY]\n" \
-"\n" \
+"  %s,\t%s\t\t[YEAR MONTH DAY]\n";
+
+static const char MSG_HELP_SHOW_MONTH[] =
 "  show work records of a certain month:\n" \
-"  " CMD_SHOW_MONTH ",\t" CMD_SHOW_MONTH_LONG "\t\t[MONTH] [YEAR]\n" \
-"\n" \
+"  %s,\t%s\t\t[MONTH] [YEAR]\n";
+
+static const char MSG_HELP_EXTRA[] =
 "Id's:\n" \
 "If you use negative numbers as id's then the most recent tuple is used.\n" \
 "For example -1 is the newest and -2 the one that was created before.\n" \
-"But don't use 0. That would do nothing.\n" \
-"\n" \
-APP_NAME " " APP_MAJOR "." APP_MINOR "." APP_PATCH " is licensed under the " APP_LICENSE ".\n" \
-APP_LICENSE_NOTICE \
-"The source code of this program is available at\n" \
-APP_SOURCE "\n"
+"But don't use 0. That would do nothing.\n";
 
-#endif
+static const char MSG_HELP_APP_INFO[] =
+"%s %u.%u.%u is licensed under the %s.\n" \
+"%s" \
+"The source code of this program is available at\n" \
+"%s\n";
+
+#endif /* CONSTANTS_H */

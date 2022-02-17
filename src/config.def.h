@@ -24,7 +24,7 @@
 */
 #define DISALLOW_WEIRD_DATETIME
 
-/* 
+/*
 	If weird datetime is disallowed.
 	Defines what range of datetime values are accepted.
 */
@@ -45,7 +45,7 @@
 #define WORK_DESCRIPTION_MAXLENGTH "50"
 #define PROJECT_NAME_MAXLENGTH "32"
 
-/* 
+/*
 	Uncomment the following definition to use a static path to the database.
 	Otherwise path will be "/home/" + user_name + "/.smng/worktimes.db",
 	which is constructed at runtime.
@@ -57,4 +57,4 @@
 	#define PATH_DATABASE ""
 #endif
 
-#endif
+#endif /* CONFIG_H */

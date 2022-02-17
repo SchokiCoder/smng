@@ -25,7 +25,7 @@
 #include "sql.h"
 #include "tools.h"
 
-int32_t database_connect(sqlite3** p_db)
+int32_t database_connect(sqlite3 **p_db)
 {
 	int32_t rc_connect;
 	int32_t rc_empty;
@@ -40,7 +40,7 @@ int32_t database_connect(sqlite3** p_db)
 
 #ifndef STATIC_DATABASE_PATH
 	//get path
-	sprintf(path, PATH_BASE, getenv("HOME"));
+	sprintf(path, PATH_BASE, getenv("HOME"), APP_NAME);
 
 	//try create dir
 	errno = 0;
@@ -125,12 +125,12 @@ int32_t database_connect(sqlite3** p_db)
 	return 0;
 }
 
-uint8_t is_prev_record_done(sqlite3* p_db, uint32_t* p_work_record_id, bool* p_work_record_done)
+uint8_t is_prev_record_done(sqlite3 *p_db, uint32_t *p_work_record_id, bool *p_work_record_done)
 {
-	sqlite3_stmt* stmt;
+	sqlite3_stmt *stmt;
 	int32_t rc_prepare;
 	int32_t rc_step;
-	
+
 	//check if there is an open record left
 	rc_prepare = sqlite3_prepare_v2(p_db, SQL_CHECK_PREVIOUS_RECORD, -1, &stmt, 0);
 
@@ -164,24 +164,24 @@ uint8_t is_prev_record_done(sqlite3* p_db, uint32_t* p_work_record_id, bool* p_w
 	//save values to output pointers
 	*p_work_record_id = sqlite3_column_int(stmt, 0);
 	*p_work_record_done = (bool) (sqlite3_column_int(stmt, 1));
-	
+
 	sqlite3_finalize(stmt);
 	return 0;
 }
 
-uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
+uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
 {
-	sqlite3_stmt* stmt;
+	sqlite3_stmt *stmt;
 	int32_t rc_prepare;
 	int32_t rc_bind[2];
 	int32_t rc_step;
 	char timespan[2][14];
 	char worked_time[16];
-	struct tm* temp;
+	struct tm *temp;
 	uint32_t hours, minutes, seconds;
 	uint32_t sum_seconds = 0;
 	uint32_t sum_hours, sum_minutes;
-	
+
 	//prepare sql
 	rc_prepare = sqlite3_prepare_v2(p_db, SQL_SHOW_RECORDS, -1, &stmt, 0);
 	rc_bind[0] = sqlite3_bind_int(stmt, 1, p_begin);
@@ -208,7 +208,7 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
 		temp = localtime(&p_end);
 		strftime(timespan[1], sizeof(timespan[1]), "%Y-%m-%d", temp);
 
-		printf("Summarize from %s to %s:\n\nrec_id\tbegin	 end	  time	prj_id\tdesc\n", 
+		printf("Summarize from %s to %s:\n\nrec_id\tbegin	 end	  time	prj_id\tdesc\n",
 			timespan[0],
 			timespan[1]);
 
@@ -255,9 +255,9 @@ uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end)
 	return 0;
 }
 
-int32_t parse_id(sqlite3* p_db, int32_t p_raw, bool p_is_project, int32_t *p_result)
+int32_t parse_id(sqlite3 *p_db, int32_t p_raw, bool p_is_project, int32_t *p_result)
 {
-	sqlite3_stmt* stmt;
+	sqlite3_stmt *stmt;
 	int32_t rc_prep;
 	int32_t rc_step;
 
@@ -293,12 +293,12 @@ int32_t parse_id(sqlite3* p_db, int32_t p_raw, bool p_is_project, int32_t *p_res
 	{
 		*p_result = p_raw;
 	}
-	
+
 	return	0;
 }
 
 #ifdef DISALLOW_WEIRD_DATETIME
-int32_t sanitize_datetime(uint16_t p_year, uint8_t p_month, uint8_t p_day, uint8_t p_hour, uint8_t p_minute)
+int32_t sanitize_datetime(int16_t p_year, int8_t p_month, int8_t p_day, int8_t p_hour, int8_t p_minute)
 {
 	if (p_year < DT_YEAR_MIN ||
 		p_year > DT_YEAR_MAX)

@@ -24,14 +24,14 @@
 #include <time.h>
 #include <sqlite3.h>
 
-int32_t database_connect(sqlite3** p_db);
+int32_t database_connect(sqlite3 **p_db);
 
-uint8_t is_prev_record_done(sqlite3* p_db, uint32_t* p_work_record_id, bool* p_work_record_done);
+uint8_t is_prev_record_done(sqlite3 *p_db, uint32_t *p_work_record_id, bool *p_work_record_done);
 
-uint8_t show_records(sqlite3* p_db, time_t p_begin, time_t p_end);
+uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end);
 
-int32_t parse_id(sqlite3* p_db, int32_t p_raw, bool p_is_project, int32_t *p_result);
+int32_t parse_id(sqlite3 *p_db, int32_t p_raw, bool p_is_project, int32_t *p_result);
 
-int32_t sanitize_datetime(uint16_t p_year, uint8_t p_month, uint8_t p_day, uint8_t p_hour, uint8_t p_minute);
+int32_t sanitize_datetime(int16_t p_year, int8_t p_month, int8_t p_day, int8_t p_hour, int8_t p_minute);
 
-#endif
+#endif /* TOOLS_H */
