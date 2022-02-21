@@ -22,21 +22,21 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-void cmd_help();
+void cmd_help(void);
 
-void cmd_add_project(char *p_project_name);
+void cmd_add_project(const char *p_project_name);
 
-void cmd_show_projects();
+void cmd_show_projects(void);
 
-void cmd_edit_project(int32_t p_project_id, char *p_project_name);
+void cmd_edit_project(int32_t p_project_id, const char *p_project_name);
 
-void cmd_delete_project(int32_t p_project_id, bool p_force);
+void cmd_delete_project(int32_t p_project_id, bool p_purge);
 
 void cmd_record(int32_t p_project_id);
 
-void cmd_status();
+void cmd_status(void);
 
-void cmd_stop(char *p_description);
+void cmd_stop(const char *p_description);
 
 void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id);
 
@@ -45,11 +45,13 @@ void cmd_edit_record_time(
 	int16_t p_year, int8_t p_month, int8_t p_day,
 	int8_t p_hour, int8_t p_minute);
 
-void cmd_edit_record_description(int32_t p_work_record_id, char *p_desc);
+void cmd_edit_record_description(int32_t p_work_record_id, const char *p_desc);
 
 void cmd_delete_record(int32_t p_record_id);
 
-void cmd_show_records_month(int8_t p_month, int16_t p_year);
+void cmd_transfer_project_records(int32_t p_old_project_id, int32_t p_new_project_id);
+
+void cmd_show_records_month(int16_t p_year, int8_t p_month);
 
 void cmd_show_records_week(int16_t p_year, int8_t p_month, int8_t p_day);
 

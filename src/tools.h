@@ -34,4 +34,6 @@ int32_t parse_id(sqlite3 *p_db, int32_t p_raw, bool p_is_project, int32_t *p_res
 
 int32_t sanitize_datetime(int16_t p_year, int8_t p_month, int8_t p_day, int8_t p_hour, int8_t p_minute);
 
+uint32_t djb2_hash(const char *p_str);
+
 #endif /* TOOLS_H */

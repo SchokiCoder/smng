@@ -36,22 +36,22 @@ int32_t database_connect(sqlite3 **p_db)
 #ifndef STATIC_DATABASE_PATH
 	int32_t rc_dir;
 	char path[PATH_MAX_LEN] = "";
-#endif
+#endif /* STATIC_DATABASE_PATH */
 
 #ifndef STATIC_DATABASE_PATH
-	//get path
+	// get path
 	sprintf(path, PATH_BASE, getenv("HOME"), APP_NAME);
 
-	//try create dir
+	// try create dir
 	errno = 0;
 
 #ifdef _WIN32
 	rc_dir = mkdir(path);
 #else
 	rc_dir = mkdir(path, S_IRWXU);
-#endif
+#endif /* _WIN32 */
 
-	//if failure, stop
+	// if failure, stop
 	if (rc_dir == -1)
 	{
 		if (errno != EEXIST)
@@ -61,18 +61,18 @@ int32_t database_connect(sqlite3 **p_db)
 		}
 	}
 
-	//get the rest of the path
+	// get the rest of the path
 	strcat(path, SLASH);
 	strcat(path, FILE_DATABASE);
 
-	//try connecting to db (with dynamic path)
+	// try connecting to db (with dynamic path)
 	rc_connect = sqlite3_open(path, p_db);
 #else
-	//try connecting to db (with static path)
+	// try connecting to db (with static path)
 	rc_connect = sqlite3_open(PATH_DATABASE, p_db);
-#endif
+#endif /* STATIC_DATABASE_PATH */
 
-	//if no connection possible, end
+	// if no connection possible, end
 	if (rc_connect != SQLITE_OK)
 	{
 		printf("Sqlite-ERROR (%i): The database is missing or access is not given.\n"
@@ -80,7 +80,7 @@ int32_t database_connect(sqlite3 **p_db)
 		return 1;
 	}
 
-	//if db is empty, create tables etc.
+	// if db is empty, create tables etc.
 	rc_empty = sqlite3_table_column_metadata(
 		*p_db, NULL, "tbl_work_records", "work_record_id", NULL, NULL, NULL, NULL, NULL);
 
@@ -92,7 +92,7 @@ int32_t database_connect(sqlite3 **p_db)
 		rc_create_indices = sqlite3_exec(*p_db, SQL_CREATE_INDICES, NULL, NULL, NULL);
 	}
 
-	//else activate fkeys and end
+	// else activate fkeys and end
 	else
 	{
 		rc_activate_fkeys = sqlite3_exec(*p_db, SQL_ACTIVATE_FKEYS, NULL, NULL, NULL);
@@ -108,7 +108,7 @@ int32_t database_connect(sqlite3 **p_db)
 		return 0;
 	}
 
-	//if db creation fails, print error, end
+	// if db creation fails, print error, end
 	if ((rc_activate_fkeys != SQLITE_OK) ||
 		(rc_create_work_records != SQLITE_OK) ||
 		(rc_create_projects != SQLITE_OK) ||
@@ -120,7 +120,7 @@ int32_t database_connect(sqlite3 **p_db)
 		return 2;
 	}
 
-	//on success, print warning
+	// on success, print warning
 	printf("WARNING: The database was missing and a new one was created.\n");
 	return 0;
 }
@@ -131,7 +131,7 @@ uint8_t is_prev_record_done(sqlite3 *p_db, uint32_t *p_work_record_id, bool *p_w
 	int32_t rc_prepare;
 	int32_t rc_step;
 
-	//check if there is an open record left
+	// check if there is an open record left
 	rc_prepare = sqlite3_prepare_v2(p_db, SQL_CHECK_PREVIOUS_RECORD, -1, &stmt, 0);
 
 	if (rc_prepare != SQLITE_OK)
@@ -144,7 +144,7 @@ uint8_t is_prev_record_done(sqlite3 *p_db, uint32_t *p_work_record_id, bool *p_w
 
 	rc_step = sqlite3_step(stmt);
 
-	//if there are no previous records, just skip
+	// if there are no previous records, just skip
 	if (rc_step == SQLITE_DONE)
 	{
 		*p_work_record_id = 0;
@@ -161,7 +161,7 @@ uint8_t is_prev_record_done(sqlite3 *p_db, uint32_t *p_work_record_id, bool *p_w
 		return 2;
 	}
 
-	//save values to output pointers
+	// save values to output pointers
 	*p_work_record_id = sqlite3_column_int(stmt, 0);
 	*p_work_record_done = (bool) (sqlite3_column_int(stmt, 1));
 
@@ -182,7 +182,7 @@ uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
 	uint32_t sum_seconds = 0;
 	uint32_t sum_hours, sum_minutes;
 
-	//prepare sql
+	// prepare sql
 	rc_prepare = sqlite3_prepare_v2(p_db, SQL_SHOW_RECORDS, -1, &stmt, 0);
 	rc_bind[0] = sqlite3_bind_int(stmt, 1, p_begin);
 	rc_bind[1] = sqlite3_bind_int(stmt, 2, p_end);
@@ -196,12 +196,12 @@ uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
 		return 1;
 	}
 
-	//if results are incoming
+	// if results are incoming
 	rc_step = sqlite3_step(stmt);
 
 	if (rc_step == SQLITE_ROW)
 	{
-		//print header
+		// print header
 		temp = localtime(&p_begin);
 		strftime(timespan[0], sizeof(timespan[0]), "%Y-%m-%d", temp);
 
@@ -214,17 +214,17 @@ uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
 
 		do
 		{
-			//convert seconds to hours and minutes
+			// convert seconds to hours and minutes
 			seconds = sqlite3_column_int(stmt, 3);
 			sum_seconds += seconds;
 			minutes = seconds / 60;
 			hours = minutes / 60;
 			minutes = minutes % 60;
 
-			//generate worked_time string as "hours(2):minutes(2)"
+			// generate worked_time string as "hours(2):minutes(2)"
 			sprintf(worked_time, "%02i:%02i", hours, minutes);
 
-			//print results
+			// print results
 			printf("%i\t%s %s %s %i\t%s\n",
 				sqlite3_column_int(stmt, 0),
 				sqlite3_column_text(stmt, 1),
@@ -235,7 +235,7 @@ uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
 		}
 		while ((rc_step = sqlite3_step(stmt)) == SQLITE_ROW);
 
-		//print sum time
+		// print sum time
 		sum_minutes = sum_seconds / 60;
 		sum_hours = sum_minutes / 60;
 		sum_minutes = sum_minutes % 60;
@@ -250,7 +250,7 @@ uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
 		return 2;
 	}
 
-	//clean
+	// clean
 	sqlite3_finalize(stmt);
 	return 0;
 }
@@ -261,10 +261,10 @@ int32_t parse_id(sqlite3 *p_db, int32_t p_raw, bool p_is_project, int32_t *p_res
 	int32_t rc_prep;
 	int32_t rc_step;
 
-	//if number is negative
+	// if number is negative
 	if (p_raw < 0)
 	{
-		//find real id
+		// find real id
 		if (p_is_project == true)
 			rc_prep = sqlite3_prepare_v2(p_db, SQL_MAX_PROJECT_ID, -1, &stmt, 0);
 		else
@@ -297,7 +297,7 @@ int32_t parse_id(sqlite3 *p_db, int32_t p_raw, bool p_is_project, int32_t *p_res
 	return	0;
 }
 
-#ifdef DISALLOW_WEIRD_DATETIME
+#ifdef SANITIZE_DATETIME
 int32_t sanitize_datetime(int16_t p_year, int8_t p_month, int8_t p_day, int8_t p_hour, int8_t p_minute)
 {
 	if (p_year < DT_YEAR_MIN ||
@@ -338,3 +338,15 @@ int32_t sanitize_datetime(int16_t p_year, int8_t p_month, int8_t p_day, int8_t p
 	return 0;
 }
 #endif
+
+uint32_t djb2_hash(const char *p_str)
+{
+	// credits to Daniel J. Bernstein for the upcoming algorithm
+	uint32_t result = 5381;
+	char temp;
+
+	while ((temp = *(p_str++)))
+		result += ((result << 5) + result) + temp;
+
+	return result;
+}

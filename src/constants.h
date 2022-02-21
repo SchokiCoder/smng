@@ -20,6 +20,7 @@
 #define CONSTANTS_H
 
 #include <stdint.h>
+#include "config.h"
 
 /* application defintions */
 static const char APP_NAME[] = "smng";
@@ -29,22 +30,22 @@ static const char APP_LICENSE_NOTICE[] =
 "along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
 static const char APP_SOURCE[] = "https://github.com/SchokiCoder/smng";
 static const uint32_t APP_MAJOR = 1;
-static const uint32_t APP_MINOR = 1;
+static const uint32_t APP_MINOR = 2;
 static const uint32_t APP_PATCH = 0;
 
 /* path definitions */
 #ifdef _WIN32
-	static const char SLASH = '\\';
+static const char SLASH = '\\';
 #else
-	static const char SLASH = '/';
+static const char SLASH = '/';
 #endif
 
 #define PATH_MAX_LEN 256
 
 /* if static database path is not enabled, define dynamic path */
 #ifndef STATIC_DATABASE_PATH
-	static const char PATH_BASE[] = "%s/.%s";
-	static const char FILE_DATABASE[] = "worktimes.db";
+static const char PATH_BASE[] = "%s/.%s";
+static const char FILE_DATABASE[] = "worktimes.db";
 #endif
 
 /* commands */
@@ -71,6 +72,7 @@ static const char CMD_EDIT_RECORD_END_LONG[] = "edit-record-end";
 static const char CMD_EDIT_RECORD_DESC[] = "erd";
 static const char CMD_EDIT_RECORD_DESC_LONG[] = "edit-record-description";
 static const char CMD_DELETE_RECORD_LONG[] = "delete-record";
+static const char CMD_TRANSFER_PROJECT_RECORDS_LONG[] = "transfer-project-records";
 static const char CMD_SHOW_WEEK[] = "sw";
 static const char CMD_SHOW_WEEK_LONG[] = "show-week";
 static const char CMD_SHOW_MONTH[] = "sm";
@@ -99,7 +101,7 @@ static const char MSG_HELP_EDIT_PROJECT[] =
 
 static const char MSG_HELP_DELETE_PROJECT[] =
 "  delete project:\n" \
-"  %s\t\tPROJECT_ID [FORCE]\n";
+"  %s\t\tPROJECT_ID [PURGE]\n";
 
 static const char MSG_HELP_RECORD[] =
 "  record work time:\n" \
@@ -119,11 +121,21 @@ static const char MSG_HELP_EDIT_RECORD_PROJECT[] =
 
 static const char MSG_HELP_EDIT_RECORD_BEGIN[] =
 "  edit work record's begin:\n" \
+
+#ifdef MAJOR_DATEFORMAT
+"  %s,\t%s\tRECORD_ID HOUR MINUTE DAY MONTH YEAR\n";
+#else
 "  %s,\t%s\tRECORD_ID YEAR MONTH DAY HOUR MINUTE\n";
+#endif
 
 static const char MSG_HELP_EDIT_RECORD_END[] =
 "  edit work record's end:\n" \
+
+#ifdef MAJOR_DATEFORMAT
+"  %s,\t%s\t\tRECORD_ID HOUR MINUTE DAY MONTH YEAR\n";
+#else
 "  %s,\t%s\t\tRECORD_ID YEAR MONTH DAY HOUR MINUTE\n";
+#endif
 
 static const char MSG_HELP_EDIT_RECORD_DESC[] =
 "  edit work record's description:\n" \
@@ -133,13 +145,27 @@ static const char MSG_HELP_DELETE_RECORD[] =
 "  delete a work record:\n" \
 "  %s\t\t\tRECORD_ID\n";
 
+static const char MSG_HELP_TRANSFER_PROJECT_RECORDS[] =
+"  transfer all records from one project to another:\n" \
+"  %s\tOLD_PROJECT_ID NEW_PORJECT_ID\n";
+
 static const char MSG_HELP_SHOW_WEEK[] =
 "  show work records of the week:\n" \
+
+#ifdef MAJOR_DATEFORMAT
+"  %s,\t%s\t\t[DAY MONTH YEAR]\n";
+#else
 "  %s,\t%s\t\t[YEAR MONTH DAY]\n";
+#endif
 
 static const char MSG_HELP_SHOW_MONTH[] =
 "  show work records of a certain month:\n" \
-"  %s,\t%s\t\t[MONTH] [YEAR]\n";
+
+#ifdef MAJOR_DATEFORMAT
+"  %s,\t%s\t\t[MONTH YEAR]\n";
+#else
+"  %s,\t%s\t\t[YEAR MONTH]\n";
+#endif
 
 static const char MSG_HELP_EXTRA[] =
 "Id's:\n" \

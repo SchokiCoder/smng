@@ -20,15 +20,23 @@
 #define CONFIG_H
 
 /*
-	Disallows datetime values that may are incorrect.
+	Changes parameters of commands to fit dateformat used in most countries.
+
+	major dateformat: HH:MM DD-MM-YYYY
+	otherwise		: YYYY-MM-DD HH:MM
 */
-#define DISALLOW_WEIRD_DATETIME
+// #define MAJOR_DATEFORMAT
+
+/*
+	Allows only datetime values defined below.
+*/
+#define SANITIZE_DATETIME
 
 /*
 	If weird datetime is disallowed.
 	Defines what range of datetime values are accepted.
 */
-#ifdef DISALLOW_WEIRD_DATETIME
+#ifdef SANITIZE_DATETIME
 	#define DT_YEAR_MAX		2100
 	#define DT_YEAR_MIN		2000
 	#define DT_MONTH_MAX	12
