@@ -35,9 +35,9 @@ static const uint32_t APP_PATCH = 0;
 
 /* path definitions */
 #ifdef _WIN32
-static const char SLASH = '\\';
+static const char SLASH[] = "\\";
 #else
-static const char SLASH = '/';
+static const char SLASH[] = "/";
 #endif
 
 #define PATH_MAX_LEN 256
