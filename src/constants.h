@@ -31,7 +31,7 @@ static const char APP_LICENSE_NOTICE[] =
 static const char APP_SOURCE[] = "https://github.com/SchokiCoder/smng";
 static const uint32_t APP_MAJOR = 1;
 static const uint32_t APP_MINOR = 2;
-static const uint32_t APP_PATCH = 0;
+static const uint32_t APP_PATCH = 1;
 
 /* path definitions */
 #ifdef _WIN32

@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_DELETE_RECORD, CMD_DELETE_RECORD_LONG);
+			printf(MSG_HELP_TRANSFER_PROJECT_RECORDS, CMD_TRANSFER_PROJECT_RECORDS_LONG);
 			printf("\n");
 			return 0;
 		}
