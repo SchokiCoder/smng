@@ -21,30 +21,72 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "constants.h"
+#include <SM_crypto.h>
+#include "app.h"
 #include "tools.h"
 #include "commands.h"
+
+void print_cmd_djb2( void )
+{
+	FILE *file = fopen("djb2_hash.txt", "w");
+
+	fprintf(file, "%-32s| %-10s | %-10s\n", "cmd", "name", "abbr");
+
+	for (uint32_t i = 0; i <= CMD_LAST; i++)
+	{
+		if (DATA_COMMANDS[i].has_abbr)
+		{
+			fprintf(file,
+				"%-32s| %-10u | %-10u\n",
+				DATA_COMMANDS[i].name,
+				SM_djb2_encode(DATA_COMMANDS[i].name),
+				SM_djb2_encode(DATA_COMMANDS[i].abbr));
+		}
+		else
+		{
+			fprintf(file,
+				"%-32s| %-10u |\n",
+				DATA_COMMANDS[i].name,
+				SM_djb2_encode(DATA_COMMANDS[i].name));
+
+		}
+	}
+
+	fclose(file);
+}
 
 int main(int argc, char *argv[])
 {
 	uint32_t cmd_hash;
+	bool edit_begin = false;
+	bool force = false;
+	int32_t record_id;
+	int32_t project_id;
+	int32_t dest_project_id;
+	int32_t src_project_id;
+	uint16_t year = -1;
+	uint8_t month = -1;
+	uint8_t day = -1;
+	uint8_t hour = -1;
+	uint8_t minute = -1;
 
 	// if no command given, print help and end
 	if (argc < 2)
 	{
 		printf(
 			"Usage: %s COMMAND [OPTIONS]\nTry '%s %s' for more information.\n",
-			APP_NAME, APP_NAME, CMD_HELP_LONG);
+			APP_NAME, APP_NAME, DATA_COMMANDS[CMD_HELP].name);
 		return 0;
 	}
 
 	// hash given command
-	cmd_hash = djb2_hash(argv[1]);
+	cmd_hash = SM_djb2_encode(argv[1]);
 
 	// execute command
-	if ((djb2_hash(CMD_HELP) == cmd_hash) ||
-		(djb2_hash(CMD_HELP_LONG) == cmd_hash))
+	switch (cmd_hash)
 	{
+	case DJB2_HELP:
+	case DJB2_HELP_ABBR:
 		// check max arg count
 		if (argc > 2)
 		{
@@ -53,10 +95,10 @@ int main(int argc, char *argv[])
 
 		// exec
 		cmd_help();
-	}
-	else if ((djb2_hash(CMD_ADD_PROJECT) == cmd_hash) ||
-		(djb2_hash(CMD_ADD_PROJECT_LONG) == cmd_hash))
-	{
+		break;
+
+	case DJB2_ADD_PROJECT:
+	case DJB2_ADD_PROJECT_ABBR:
 		// check max arg count
 		if (argc > 3)
 		{
@@ -67,8 +109,7 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_ADD_PROJECT, CMD_ADD_PROJECT, CMD_ADD_PROJECT_LONG);
-			printf("\n");
+			print_cmd_help(CMD_ADD_PROJECT);
 			return 0;
 		}
 
@@ -81,10 +122,10 @@ int main(int argc, char *argv[])
 
 		// exec
 		cmd_add_project(argv[2]);
-	}
-	else if ((djb2_hash(CMD_SHOW_PROJECTS) == cmd_hash) ||
-		(djb2_hash(CMD_SHOW_PROJECTS_LONG) == cmd_hash))
-	{
+		break;
+
+	case DJB2_SHOW_PROJECTS:
+	case DJB2_SHOW_PROJECTS_ABBR:
 		// check max arg count
 		if (argc > 2)
 		{
@@ -93,12 +134,10 @@ int main(int argc, char *argv[])
 
 		// exec
 		cmd_show_projects();
-	}
-	else if ((djb2_hash(CMD_EDIT_PROJECT) == cmd_hash) ||
-		(djb2_hash(CMD_EDIT_PROJECT_LONG) == cmd_hash))
-	{
-		int32_t id;
+		break;
 
+	case DJB2_EDIT_PROJECT:
+	case DJB2_EDIT_PROJECT_ABBR:
 		// check max arg count
 		if (argc > 4)
 		{
@@ -109,29 +148,25 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_EDIT_PROJECT, CMD_EDIT_PROJECT, CMD_EDIT_PROJECT_LONG);
-			printf("\n");
+			print_cmd_help(CMD_EDIT_PROJECT);
 			return 0;
 		}
 
 		// check min arg count
 		else if (argc < 4)
 		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
+			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, DATA_COMMANDS[CMD_HELP].name);
 			return 0;
 		}
 
 		// parse args
-		id = strtol(argv[2], NULL, 10);
+		project_id = strtol(argv[2], NULL, 10);
 
 		// exec
-		cmd_edit_project(id, argv[3]);
-	}
-	else if(djb2_hash(CMD_DELETE_PROJECT_LONG) == cmd_hash)
-	{
-		int32_t id;
-		bool force = false;
+		cmd_edit_project(project_id, argv[3]);
+		break;
 
+	case DJB2_DELETE_PROJECT:
 		// check max arg count
 		if (argc > 4)
 		{
@@ -142,8 +177,7 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_DELETE_PROJECT, CMD_DELETE_PROJECT_LONG);
-			printf("\n");
+			print_cmd_help(CMD_DELETE_PROJECT);
 			return 0;
 		}
 
@@ -155,19 +189,17 @@ int main(int argc, char *argv[])
 		}*/
 
 		// parse args
-		id = strtol(argv[2], NULL, 10);
+		project_id = strtol(argv[2], NULL, 10);
 
 		if (argc > 3)
 			force = strtoul(argv[3], NULL, 10);
 
 		// exec
-		cmd_delete_project(id, force);
-	}
-	else if ((djb2_hash(CMD_RECORD) == cmd_hash) ||
-		(djb2_hash(CMD_RECORD_LONG) == cmd_hash))
-	{
-		int32_t id;
+		cmd_delete_project(project_id, force);
+		break;
 
+	case DJB2_RECORD:
+	case DJB2_RECORD_ABBR:
 		// check max arg count
 		if (argc > 3)
 		{
@@ -178,8 +210,7 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_RECORD, CMD_RECORD, CMD_RECORD_LONG);
-			printf("\n");
+			print_cmd_help(CMD_RECORD);
 			return 0;
 		}
 
@@ -191,13 +222,13 @@ int main(int argc, char *argv[])
 		}*/
 
 		// parse args
-		id = strtol(argv[2], NULL, 10);
+		project_id = strtol(argv[2], NULL, 10);
 
 		// exec
-		cmd_record(id);
-	}
-	else if (djb2_hash(CMD_STATUS_LONG) == cmd_hash)
-	{
+		cmd_record(project_id);
+		break;
+
+	case DJB2_STATUS:
 		// check max arg count
 		if (argc > 2)
 		{
@@ -206,10 +237,10 @@ int main(int argc, char *argv[])
 
 		// exec
 		cmd_status();
-	}
-	else if((djb2_hash(CMD_STOP) == cmd_hash) ||
-		(djb2_hash(CMD_STOP_LONG) == cmd_hash))
-	{
+		break;
+
+	case DJB2_STOP:
+	case DJB2_STOP_ABBR:
 		// check max arg count
 		if (argc > 3)
 		{
@@ -220,8 +251,7 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_STOP, CMD_STOP, CMD_STOP_LONG);
-			printf("\n");
+			print_cmd_help(CMD_STOP);
 			return 0;
 		}
 
@@ -234,12 +264,10 @@ int main(int argc, char *argv[])
 
 		// exec
 		cmd_stop(argv[2]);
-	}
-	else if((djb2_hash(CMD_EDIT_RECORD_PROJECT) == cmd_hash) ||
-		(djb2_hash(CMD_EDIT_RECORD_PROJECT_LONG) == cmd_hash))
-	{
-		int32_t id[2];
+		break;
 
+	case DJB2_EDIT_RECORD_PROJECT:
+	case DJB2_EDIT_RECORD_PROJECT_ABBR:
 		// check max arg count
 		if (argc > 4)
 		{
@@ -250,45 +278,33 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_EDIT_RECORD_PROJECT, CMD_EDIT_RECORD_PROJECT, CMD_EDIT_RECORD_PROJECT_LONG);
-			printf("\n");
+			print_cmd_help(CMD_EDIT_RECORD_PROJECT);
 			return 0;
 		}
 
 		// check min arg count
 		else if (argc < 4)
 		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
+			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, DATA_COMMANDS[CMD_HELP].name);
 			return 0;
 		}
 
 		// parse args
-		id[0] = strtol(argv[2], NULL, 10);
-		id[1] = strtol(argv[3], NULL, 10);
+		record_id = strtol(argv[2], NULL, 10);
+		project_id = strtol(argv[3], NULL, 10);
 
 		// exec
-		cmd_edit_record_project(id[0],id[1]);
-	}
-	else if((djb2_hash(CMD_EDIT_RECORD_BEGIN) == cmd_hash) ||
-		(djb2_hash(CMD_EDIT_RECORD_BEGIN_LONG) == cmd_hash) ||
-		(djb2_hash(CMD_EDIT_RECORD_END) == cmd_hash) ||
-		(djb2_hash(CMD_EDIT_RECORD_END_LONG) == cmd_hash))
-	{
-		int32_t id;
-		bool edit_begin = true;
-		uint16_t year;
-		uint8_t month;
-		uint8_t day;
-		uint8_t hour;
-		uint8_t minute;
+		cmd_edit_record_project(record_id, project_id);
+		break;
 
-		// check if user edits begin or end, save in flag
-		if ((djb2_hash(CMD_EDIT_RECORD_END) == cmd_hash) ||
-			(djb2_hash(CMD_EDIT_RECORD_END_LONG) == cmd_hash))
-		{
-			edit_begin = false;
-		}
+	case DJB2_EDIT_RECORD_BEGIN:
+	case DJB2_EDIT_RECORD_BEGIN_ABBR:
+		edit_begin = true;
+		goto EDIT_RECORD_CASE;
 
+	case DJB2_EDIT_RECORD_END:
+	case DJB2_EDIT_RECORD_END_ABBR:
+		EDIT_RECORD_CASE:
 		// check max arg count
 		if (argc > 8)
 		{
@@ -300,23 +316,22 @@ int main(int argc, char *argv[])
 		{
 			// print help, stop
 			if (edit_begin == true)
-				printf(MSG_HELP_EDIT_RECORD_BEGIN, CMD_EDIT_RECORD_BEGIN, CMD_EDIT_RECORD_BEGIN_LONG);
+				print_cmd_help(CMD_EDIT_RECORD_BEGIN);
 			else
-				printf(MSG_HELP_EDIT_RECORD_END, CMD_EDIT_RECORD_END, CMD_EDIT_RECORD_END_LONG);
+				print_cmd_help(CMD_EDIT_RECORD_END);
 
-			printf("\n");
 			return 0;
 		}
 
 		// check min arg count
 		else if (argc < 8)
 		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
+			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, DATA_COMMANDS[CMD_HELP].name);
 			return 0;
 		}
 
 		// parse args
-		id = strtoul(argv[2], NULL, 10);
+		record_id = strtoul(argv[2], NULL, 10);
 
 #ifdef MAJOR_DATEFORMAT
 		hour = strtoul(argv[3], NULL, 10);
@@ -333,13 +348,11 @@ int main(int argc, char *argv[])
 #endif
 
 		// exec
-		cmd_edit_record_time(edit_begin, id, year, month, day, hour, minute);
-	}
-	else if((djb2_hash(CMD_EDIT_RECORD_DESC) == cmd_hash) ||
-		(djb2_hash(CMD_EDIT_RECORD_DESC_LONG) == cmd_hash))
-	{
-		int32_t id;
+		cmd_edit_record_time(edit_begin, record_id, year, month, day, hour, minute);
+		break;
 
+    case DJB2_EDIT_RECORD_DESCRIPTION:
+    case DJB2_EDIT_RECORD_DESCRIPTION_ABBR:
 		// check max arg count
 		if (argc > 4)
 		{
@@ -350,28 +363,25 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_EDIT_RECORD_DESC, CMD_EDIT_RECORD_DESC, CMD_EDIT_RECORD_DESC_LONG);
-			printf("\n");
+			print_cmd_help(CMD_EDIT_RECORD_DESCRIPTION);
 			return 0;
 		}
 
 		// check min arg count
 		else if (argc < 4)
 		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
+			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, DATA_COMMANDS[CMD_HELP].name);
 			return 0;
 		}
 
 		// parse args
-		id = strtol(argv[2], NULL, 10);
+		record_id = strtol(argv[2], NULL, 10);
 
 		// exec
-		cmd_edit_record_description(id, argv[3]);
-	}
-	else if(djb2_hash(CMD_DELETE_RECORD_LONG) == cmd_hash)
-	{
-		int32_t id;
+		cmd_edit_record_description(record_id, argv[3]);
+		break;
 
+	case DJB2_DELETE_RECORD:
 		// check max arg count
 		if (argc > 3)
 		{
@@ -382,8 +392,7 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_DELETE_RECORD, CMD_DELETE_RECORD_LONG);
-			printf("\n");
+			print_cmd_help(CMD_DELETE_RECORD);
 			return 0;
 		}
 
@@ -395,15 +404,13 @@ int main(int argc, char *argv[])
 		}*/
 
 		// parse args
-		id = strtol(argv[2], NULL, 10);
+		record_id = strtol(argv[2], NULL, 10);
 
 		// exec
-		cmd_delete_record(id);
-	}
-	else if (djb2_hash(CMD_TRANSFER_PROJECT_RECORDS_LONG) == cmd_hash)
-	{
-		int32_t old_id, new_id;
+		cmd_delete_record(record_id);
+		break;
 
+	case DJB2_TRANSFER_PROJECT_RECORDS:
 		// check max arg count
 		if (argc > 4)
 		{
@@ -414,32 +421,27 @@ int main(int argc, char *argv[])
 		else if (argc == 2)
 		{
 			// print help, stop
-			printf(MSG_HELP_TRANSFER_PROJECT_RECORDS, CMD_TRANSFER_PROJECT_RECORDS_LONG);
-			printf("\n");
+			print_cmd_help(CMD_TRANSFER_PROJECT_RECORDS);
 			return 0;
 		}
 
 		// check min arg count
 		else if (argc < 4)
 		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
+			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, DATA_COMMANDS[CMD_HELP].name);
 			return 0;
 		}
 
 		// parse
-		old_id = strtol(argv[2], NULL, 10);
-		new_id = strtol(argv[3], NULL, 10);
+		src_project_id = strtol(argv[2], NULL, 10);
+		dest_project_id = strtol(argv[3], NULL, 10);
 
 		// execute
-		cmd_transfer_project_records(old_id, new_id);
-	}
-	else if((djb2_hash(CMD_SHOW_WEEK) == cmd_hash) ||
-		(djb2_hash(CMD_SHOW_WEEK_LONG) == cmd_hash))
-	{
-		int8_t day = -1;
-		int8_t month = -1;
-		int16_t year = -1;
+		cmd_transfer_project_records(src_project_id, dest_project_id);
+		break;
 
+	case DJB2_SHOW_WEEK:
+	case DJB2_SHOW_WEEK_ABBR:
 		// check max arg count
 		if (argc > 5)
 		{
@@ -449,7 +451,7 @@ int main(int argc, char *argv[])
 		// check min arg count
 		else if (argc > 2 && argc < 5)
 		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
+			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, DATA_COMMANDS[CMD_HELP].name);
 			return 0;
 		}
 
@@ -469,13 +471,10 @@ int main(int argc, char *argv[])
 
 		// exec
 		cmd_show_records_week(year, month, day);
-	}
-	else if((djb2_hash(CMD_SHOW_MONTH) == cmd_hash) ||
-		(djb2_hash(CMD_SHOW_MONTH_LONG) == cmd_hash))
-	{
-		int8_t month = -1;
-		int16_t year = -1;
+		break;
 
+	case DJB2_SHOW_MONTH:
+	case DJB2_SHOW_MONTH_ABBR:
 		// check max arg count
 		if (argc > 4)
 		{
@@ -485,7 +484,7 @@ int main(int argc, char *argv[])
 		// check min arg count
 		else if (argc > 2 && argc < 4)
 		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
+			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, DATA_COMMANDS[CMD_HELP].name);
 			return 0;
 		}
 
@@ -503,11 +502,12 @@ int main(int argc, char *argv[])
 
 		// exec
 		cmd_show_records_month(year, month);
-	}
-	else
-	{
+		break;
+
+	default:
 		// unknown command passed, print
-		printf("Command not recognised.\nType '%s %s' for information on usage.\n", APP_NAME, CMD_HELP_LONG);
+		printf("Command not recognised.\nType '%s %s' for information on usage.\n", APP_NAME, DATA_COMMANDS[CMD_HELP].name);
+		break;
 	}
 
 	return 0;

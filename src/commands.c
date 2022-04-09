@@ -16,12 +16,29 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "app.h"
 #include "commands.h"
-#include "constants.h"
 #include "tools.h"
 #include "sql.h"
+#include "config.h"
 #include <stdio.h>
 #include <sqlite3.h>
+
+static const char MSG_HELP_APP[] =
+	"Usage:\n" \
+	"  %s [COMMAND] [ARGS]\n";
+
+static const char MSG_HELP_EXTRA[] =
+	"Id's:\n" \
+	"If you use negative numbers as id's then the most recent tuple is used.\n" \
+	"For example -1 is the newest and -2 the one that was created before.\n" \
+	"But don't use 0. That would do nothing.\n";
+
+static const char MSG_HELP_APP_INFO[] =
+	"%s %u.%u.%u is licensed under the %s.\n" \
+	"%s" \
+	"The source code of this program is available at\n" \
+	"%s\n";
 
 void cmd_help(void)
 {
@@ -29,57 +46,15 @@ void cmd_help(void)
 	printf(MSG_HELP_APP, APP_NAME);
 	printf("\n");
 
-	printf(MSG_HELP_HELP, CMD_HELP, CMD_HELP_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_ADD_PROJECT, CMD_ADD_PROJECT, CMD_ADD_PROJECT_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_SHOW_PROJECTS, CMD_SHOW_PROJECTS, CMD_SHOW_PROJECTS_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_EDIT_PROJECT, CMD_EDIT_PROJECT, CMD_EDIT_PROJECT_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_DELETE_PROJECT, CMD_DELETE_PROJECT_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_RECORD, CMD_RECORD, CMD_RECORD_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_STATUS, CMD_STATUS_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_STOP, CMD_STOP, CMD_STOP_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_EDIT_RECORD_PROJECT, CMD_EDIT_RECORD_PROJECT, CMD_EDIT_RECORD_PROJECT_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_EDIT_RECORD_BEGIN, CMD_EDIT_RECORD_BEGIN, CMD_EDIT_RECORD_BEGIN_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_EDIT_RECORD_END, CMD_EDIT_RECORD_END, CMD_EDIT_RECORD_END_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_EDIT_RECORD_DESC, CMD_EDIT_RECORD_DESC, CMD_EDIT_RECORD_DESC_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_DELETE_RECORD, CMD_DELETE_RECORD_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_TRANSFER_PROJECT_RECORDS, CMD_TRANSFER_PROJECT_RECORDS_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_SHOW_WEEK, CMD_SHOW_WEEK, CMD_SHOW_WEEK_LONG);
-	printf("\n");
-
-	printf(MSG_HELP_SHOW_MONTH, CMD_SHOW_MONTH, CMD_SHOW_MONTH_LONG);
-	printf("\n");
+	for (uint_fast32_t i = 0; i <= CMD_LAST; i++)
+	{
+		print_cmd_help(i);
+	}
 
 	printf(MSG_HELP_EXTRA);
 	printf("\n");
 
+	// print app info
 	printf(
 		MSG_HELP_APP_INFO,
 		APP_NAME, APP_MAJOR, APP_MINOR, APP_PATCH, APP_LICENSE,
@@ -751,7 +726,7 @@ void cmd_delete_record(int32_t p_record_id)
 	sqlite3_close(db);
 }
 
-void cmd_transfer_project_records(int32_t p_old_project_id, int32_t p_new_project_id)
+void cmd_transfer_project_records(int32_t p_src_project_id, int32_t p_dest_project_id)
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -773,8 +748,8 @@ void cmd_transfer_project_records(int32_t p_old_project_id, int32_t p_new_projec
 
 	// prepare sql
 	rc_prep = sqlite3_prepare_v2(db, SQL_TRANSFER_PROJECT_RECORDS, -1, &stmt, 0);
-	rc_bind[0] = sqlite3_bind_int(stmt, 1, p_new_project_id);
-	rc_bind[1] = sqlite3_bind_int(stmt, 2, p_old_project_id);
+	rc_bind[0] = sqlite3_bind_int(stmt, 1, p_dest_project_id);
+	rc_bind[1] = sqlite3_bind_int(stmt, 2, p_src_project_id);
 
 	if ((rc_prep != SQLITE_OK) ||
 		(rc_bind[0] != SQLITE_OK) ||

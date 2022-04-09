@@ -16,29 +16,17 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TOOLS_H
-#define TOOLS_H
+#ifndef APP_H
+#define APP_H
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <time.h>
-#include "config.h"
+static const char APP_NAME[] = "smng";
+static const char APP_LICENSE[] = "GPLv3";
+static const char APP_LICENSE_NOTICE[] =
+"You should have received a copy of the GNU General Public License\n" \
+"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
+static const char APP_SOURCE[] = "https://github.com/SchokiCoder/smng";
+#define APP_MAJOR 1
+#define APP_MINOR 2
+#define APP_PATCH 1
 
-typedef struct sqlite3 sqlite3;
-typedef enum Command Command;
-
-void print_cmd_help( Command cmd );
-
-int32_t database_connect(sqlite3 **p_db);
-
-uint8_t is_prev_record_done(sqlite3 *p_db, uint32_t *p_work_record_id, bool *p_work_record_done);
-
-uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end);
-
-int32_t parse_id(sqlite3 *p_db, int32_t p_raw, bool p_is_project, int32_t *p_result);
-
-#ifdef SANITIZE_DATETIME
-int32_t sanitize_datetime(int16_t p_year, int8_t p_month, int8_t p_day, int8_t p_hour, int8_t p_minute);
-#endif
-
-#endif /* TOOLS_H */
+#endif // APP_H

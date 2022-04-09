@@ -21,9 +21,45 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <sqlite3.h>
+#include <SM_string.h>
+#include "app.h"
 #include "config.h"
+#include "commands.h"
 #include "sql.h"
 #include "tools.h"
+
+#define PATH_MAX_LEN 256
+
+#ifndef STATIC_DATABASE_PATH
+# ifdef _WIN32
+#  define SLASH "\\"
+# else
+#  define SLASH "/"
+# endif
+
+static const char PATH_BASE[] = "%s" SLASH ".%s";
+static const char FILE_DATABASE[] = "worktimes.db";
+#endif
+
+void print_cmd_help( Command cmd )
+{
+	printf("  %s:\n", DATA_COMMANDS[cmd].desc);
+
+	SM_String cmd_naming = SM_String_from(DATA_COMMANDS[cmd].name);
+
+	if (DATA_COMMANDS[cmd].has_abbr)
+	{
+		SM_String_append_cstr(&cmd_naming, ", ");
+		SM_String_append_cstr(&cmd_naming, DATA_COMMANDS[cmd].abbr);
+	}
+
+	printf("  %-32s%s\n", cmd_naming.str, DATA_COMMANDS[cmd].args);
+
+	printf("\n");
+
+	SM_String_clear(&cmd_naming);
+}
 
 int32_t database_connect(sqlite3 **p_db)
 {
@@ -338,15 +374,3 @@ int32_t sanitize_datetime(int16_t p_year, int8_t p_month, int8_t p_day, int8_t p
 	return 0;
 }
 #endif
-
-uint32_t djb2_hash(const char *p_str)
-{
-	// credits to Daniel J. Bernstein for the upcoming algorithm
-	uint32_t result = 5381;
-	char temp;
-
-	while ((temp = *(p_str++)))
-		result += ((result << 5) + result) + temp;
-
-	return result;
-}

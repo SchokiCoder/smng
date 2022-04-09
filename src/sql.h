@@ -19,7 +19,6 @@
 #ifndef SQL_H
 #define SQL_H
 
-#include "constants.h"
 #include "config.h"
 
 static const char SQL_ACTIVATE_FKEYS[] =

@@ -16,8 +16,9 @@
 
 CC = cc
 APP_NAME = smng
-CFLAGS = -std=c99 -Wall -Wextra -pedantic -O3
-LIBS = -lsqlite3
+CFLAGS = -std=c99 -Wall -Wextra -O3
+LIBS = -lschoki_misc -lsqlite3
+INCLUDE = -I /usr/include/schoki_misc
 
 INSTALL_BIN_DIR = /usr/bin
 
@@ -31,7 +32,7 @@ clean:
 	rm -f ${APP_NAME} *.o
 
 install:
-	${CC} src/*.c ${CFLAGS} ${LIBS} -o ${APP_NAME}
+	${CC} src/*.c ${CFLAGS} ${INCLUDE} ${LIBS} -o ${APP_NAME}
 	mkdir -p ${INSTALL_BIN_DIR}
 	mv -f ${APP_NAME} ${INSTALL_BIN_DIR}
 	chmod 755 ${INSTALL_BIN_DIR}/${APP_NAME}
