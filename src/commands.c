@@ -40,7 +40,7 @@ static const char MSG_HELP_APP_INFO[] =
 	"The source code of this program is available at\n" \
 	"%s\n";
 
-void cmd_help(void)
+void cmd_help( void )
 {
 	// print every help message
 	printf(MSG_HELP_APP, APP_NAME);
@@ -63,7 +63,7 @@ void cmd_help(void)
 	printf("\n");
 }
 
-void cmd_add_project(const char *p_project_name)
+void cmd_add_project( const char *project_name )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -79,7 +79,7 @@ void cmd_add_project(const char *p_project_name)
 	rc_prepare = sqlite3_prepare_v2(db, SQL_ADD_PROJECT, -1, &stmt, 0);
 
 	// try binding parameters
-	rc_bind = sqlite3_bind_text(stmt, 1, p_project_name, -1, NULL);
+	rc_bind = sqlite3_bind_text(stmt, 1, project_name, -1, NULL);
 
 	if ((rc_prepare != SQLITE_OK) ||
 		(rc_bind != SQLITE_OK))
@@ -101,11 +101,11 @@ void cmd_add_project(const char *p_project_name)
 			printf(
 				"Sqlite-ERROR (%i): Statement failed on a constraint.\n"
 				"Make sure \"%s\" is not already used as a project name.\n",
-				rc_step, p_project_name);
+				rc_step, project_name);
 			break;
 
 		case SQLITE_DONE:
-			printf("Project \"%s\" added.\n", p_project_name);
+			printf("Project \"%s\" added.\n", project_name);
 			break;
 
 		default:
@@ -118,7 +118,7 @@ void cmd_add_project(const char *p_project_name)
 	sqlite3_close(db);
 }
 
-void cmd_show_projects(void)
+void cmd_show_projects( void )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -161,7 +161,7 @@ void cmd_show_projects(void)
 	sqlite3_close(db);
 }
 
-void cmd_edit_project(int32_t p_project_id, const char *p_project_name)
+void cmd_edit_project( const int32_t project_id, const char *project_name )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -178,14 +178,14 @@ void cmd_edit_project(int32_t p_project_id, const char *p_project_name)
 	rc_prepare = sqlite3_prepare_v2(db, SQL_EDIT_PROJECT, -1, &stmt, 0);
 
 	// bind parameters
-	if (parse_id(db, p_project_id, true, &id) != 0)
+	if (parse_id(db, project_id, true, &id) != 0)
 	{
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return;
 	}
 
-	rc_bind[0] = sqlite3_bind_text(stmt, 1, p_project_name, -1, NULL);
+	rc_bind[0] = sqlite3_bind_text(stmt, 1, project_name, -1, NULL);
 	rc_bind[1] = sqlite3_bind_int(stmt, 2, id);
 
 	// if prepare failed, print error
@@ -211,11 +211,11 @@ void cmd_edit_project(int32_t p_project_id, const char *p_project_name)
 			printf(
 				"Sqlite-ERROR (%i): Statement failed on a constraint.\n"
 				"Make sure \"%s\" is not already used as a project name.\n",
-				rc_step, p_project_name);
+				rc_step, project_name);
 			break;
 
 		case SQLITE_DONE:
-			printf("Project %i name set to \"%s\".\n", id, p_project_name);
+			printf("Project %i name set to \"%s\".\n", id, project_name);
 			break;
 
 		default:
@@ -228,7 +228,7 @@ void cmd_edit_project(int32_t p_project_id, const char *p_project_name)
 	sqlite3_close(db);
 }
 
-void cmd_delete_project(int32_t p_project_id, bool p_purge)
+void cmd_delete_project( const int32_t project_id, const bool purge )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -241,14 +241,14 @@ void cmd_delete_project(int32_t p_project_id, bool p_purge)
 		return;
 
 	// parse id
-	if (parse_id(db, p_project_id, true, &id) != 0)
+	if (parse_id(db, project_id, true, &id) != 0)
 	{
 		sqlite3_close(db);
 		return;
 	}
 
 	// if purge mode activated, get confirmation to proceed
-	if (p_purge == true)
+	if (purge == true)
 	{
 		printf("WARNING: The purge option was given.\n"
 			"This will delete every record linking to this project.\n"
@@ -264,7 +264,7 @@ void cmd_delete_project(int32_t p_project_id, bool p_purge)
 	}
 
 	// if purge mode activated and confirmation given
-	if (p_purge == true && confirmation == 'y')
+	if (purge == true && confirmation == 'y')
 	{
 		// prepare, deleting all records linking to project
 		rc_prep = sqlite3_prepare_v2(db, SQL_DELETE_PROJECT_RECORDS, -1, &stmt, 0);
@@ -324,7 +324,7 @@ void cmd_delete_project(int32_t p_project_id, bool p_purge)
 	sqlite3_close(db);
 }
 
-void cmd_record(int32_t p_project_id)
+void cmd_record( const int32_t project_id )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -352,7 +352,7 @@ void cmd_record(int32_t p_project_id)
 		// invalid record found, print
 		printf(
 			"ERROR: Before starting a new work-record finish the last one.\n"
-			"last work_record_id: %i\n", prev_record_id);
+			"last record_id: %i\n", prev_record_id);
 		sqlite3_close(db);
 		return;
 	}
@@ -362,7 +362,7 @@ void cmd_record(int32_t p_project_id)
 
 	rc_prepare = sqlite3_prepare_v2(db, SQL_START_WORK_RECORD, -1, &stmt, 0);
 
-	if (parse_id(db, p_project_id, true, &id) != 0)
+	if (parse_id(db, project_id, true, &id) != 0)
 	{
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -395,7 +395,7 @@ void cmd_record(int32_t p_project_id)
 	sqlite3_close(db);
 }
 
-void cmd_status(void)
+void cmd_status( void )
 {
 	sqlite3 *db;
 	bool prev_record_done;
@@ -419,7 +419,7 @@ void cmd_status(void)
 		(prev_record_done == false ? "NOT " : ""));
 }
 
-void cmd_stop(const char *p_description)
+void cmd_stop( const char *description )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -444,7 +444,7 @@ void cmd_stop(const char *p_description)
 	// if last work record is closed, print and stop
 	if (prev_record_done == true)
 	{
-		printf("ERROR: Your previous record is already finished.\nlast work_record_id: %i\n", prev_record_id);
+		printf("ERROR: Your previous record is already finished.\nlast record_id: %i\n", prev_record_id);
 		sqlite3_close(db);
 		return;
 	}
@@ -454,7 +454,7 @@ void cmd_stop(const char *p_description)
 
 	rc_prepare = sqlite3_prepare_v2(db, SQL_FINISH_WORK_RECORD, -1, &stmt, 0);
 	rc_bind[0] = sqlite3_bind_int(stmt, 1, record_end);
-	rc_bind[1] = sqlite3_bind_text(stmt, 2, p_description, -1, NULL);
+	rc_bind[1] = sqlite3_bind_text(stmt, 2, description, -1, NULL);
 
 	if ((rc_prepare != SQLITE_OK) ||
 		(rc_bind[0] != SQLITE_OK) ||
@@ -470,13 +470,13 @@ void cmd_stop(const char *p_description)
 	if (rc_step != SQLITE_DONE)
 		printf("Sqlite-ERROR (%i): Statement to finish the work record could not be executed.\n", rc_step);
 	else
-		printf("Work record finished with following description:\n%s\n", p_description);
+		printf("Work record finished with following description:\n%s\n", description);
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
 }
 
-void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id)
+void cmd_edit_record_project( const int32_t record_id, const int32_t project_id )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -493,8 +493,8 @@ void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id)
 	// update record
 	rc_prepare = sqlite3_prepare_v2(db, SQL_EDIT_RECORD_PROJECT, -1, &stmt, 0);
 
-	if ((parse_id(db, p_project_id, true, &pro_id) != 0) ||
-		(parse_id(db, p_work_record_id, false, &rec_id) != 0))
+	if ((parse_id(db, project_id, true, &pro_id) != 0) ||
+		(parse_id(db, record_id, false, &rec_id) != 0))
 	{
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -526,7 +526,7 @@ void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id)
 		case SQLITE_CONSTRAINT:
 			printf(
 				"Sqlite-ERROR (%i): Statement failed on a constraint.\n"
-				"Make sure project %i exists.\n", rc_step, p_project_id);
+				"Make sure project %i exists.\n", rc_step, project_id);
 			break;
 
 		default:
@@ -539,9 +539,9 @@ void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id)
 }
 
 void cmd_edit_record_time(
-	bool p_work_record_begin, int32_t p_work_record_id,
-	int16_t p_year, int8_t p_month, int8_t p_day,
-	int8_t p_hour, int8_t p_minute)
+	const bool work_record_begin, const int32_t record_id,
+	const int16_t year, const int8_t month, const int8_t day,
+	const int8_t hour, const int8_t minute )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -560,7 +560,7 @@ void cmd_edit_record_time(
 
 	// if enabled, make sure given datetime makes sense
 #ifdef SANITIZE_DATETIME
-	if (sanitize_datetime(p_year, p_month, p_day, p_hour, p_minute) != 0)
+	if (sanitize_datetime(year, month, day, hour, minute) != 0)
 		return;
 #endif
 
@@ -568,29 +568,29 @@ void cmd_edit_record_time(
 	time(&ts_now);
 	now = localtime(&ts_now);
 
-	if (p_year < 0)
+	if (year < 0)
 		dt.tm_year = now->tm_year;
 	else
-		dt.tm_year = p_year - 1900;
+		dt.tm_year = year - 1900;
 
-	if (p_month < 0)
+	if (month < 0)
 		dt.tm_mon = now->tm_mon;
 	else
-		dt.tm_mon = p_month - 1;
+		dt.tm_mon = month - 1;
 
-	if (p_day < 0)
+	if (day < 0)
 		dt.tm_mday = now->tm_mday;
 	else
-		dt.tm_mday = p_day;
+		dt.tm_mday = day;
 
-	dt.tm_hour = p_hour;
-	dt.tm_min = p_minute;
+	dt.tm_hour = hour;
+	dt.tm_min = minute;
 	dt.tm_sec = 0;
 
 	record_time = mktime(&dt);
 
 	// prepare sql
-	if (parse_id(db, p_work_record_id, false, &id) != 0)
+	if (parse_id(db, record_id, false, &id) != 0)
 	{
 		sqlite3_close(db);
 		return;
@@ -598,7 +598,7 @@ void cmd_edit_record_time(
 
 	rc_prepare = sqlite3_prepare_v2(
 		db,
-		(p_work_record_begin == true ? SQL_EDIT_RECORD_BEGIN : SQL_EDIT_RECORD_END),
+		(work_record_begin == true ? SQL_EDIT_RECORD_BEGIN : SQL_EDIT_RECORD_END),
 		-1,
 		&stmt,
 		0);
@@ -629,14 +629,14 @@ void cmd_edit_record_time(
 	else
 		printf(
 			"Record %i project %s set to %i-%02i-%02i %02i:%02i.\n",
-			id, (p_work_record_begin == true ? "begin" : "end"),
-			(1900 + dt.tm_year), (1 + dt.tm_mon), dt.tm_mday, p_hour, p_minute);
+			id, (work_record_begin == true ? "begin" : "end"),
+			(1900 + dt.tm_year), (1 + dt.tm_mon), dt.tm_mday, hour, minute);
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
 }
 
-void cmd_edit_record_description(int32_t p_work_record_id, const char *p_desc)
+void cmd_edit_record_description( const int32_t record_id, const char *desc )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -648,14 +648,14 @@ void cmd_edit_record_description(int32_t p_work_record_id, const char *p_desc)
 		return;
 
 	// prepare
-	if (parse_id(db, p_work_record_id, false, &id) != 0)
+	if (parse_id(db, record_id, false, &id) != 0)
 	{
 		sqlite3_close(db);
 		return;
 	}
 
 	rc_prep = sqlite3_prepare_v2(db, SQL_EDIT_RECORD_DESC, -1, &stmt, 0);
-	rc_bind[0] = sqlite3_bind_text(stmt, 1, p_desc, -1, NULL);
+	rc_bind[0] = sqlite3_bind_text(stmt, 1, desc, -1, NULL);
 	rc_bind[1] = sqlite3_bind_int(stmt, 2, id);
 
 	if ((rc_prep != SQLITE_OK) ||
@@ -676,13 +676,13 @@ void cmd_edit_record_description(int32_t p_work_record_id, const char *p_desc)
 	if (rc_step != SQLITE_DONE)
 		printf("Sqlite-ERROR (%i): Statement to edit record description could not be executed.\n", rc_step);
 	else
-		printf("Record %i description changed to:\n%s\n", id, p_desc);
+		printf("Record %i description changed to:\n%s\n", id, desc);
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
 }
 
-void cmd_delete_record(int32_t p_record_id)
+void cmd_delete_record( const int32_t record_id )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -694,7 +694,7 @@ void cmd_delete_record(int32_t p_record_id)
 		return;
 
 	// prepare
-	if (parse_id(db, p_record_id, false, &id) != 0)
+	if (parse_id(db, record_id, false, &id) != 0)
 	{
 		sqlite3_close(db);
 		return;
@@ -726,7 +726,7 @@ void cmd_delete_record(int32_t p_record_id)
 	sqlite3_close(db);
 }
 
-void cmd_transfer_project_records(int32_t p_src_project_id, int32_t p_dest_project_id)
+void cmd_transfer_project_records( const int32_t src_project_id, const int32_t dest_project_id )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -748,8 +748,8 @@ void cmd_transfer_project_records(int32_t p_src_project_id, int32_t p_dest_proje
 
 	// prepare sql
 	rc_prep = sqlite3_prepare_v2(db, SQL_TRANSFER_PROJECT_RECORDS, -1, &stmt, 0);
-	rc_bind[0] = sqlite3_bind_int(stmt, 1, p_dest_project_id);
-	rc_bind[1] = sqlite3_bind_int(stmt, 2, p_src_project_id);
+	rc_bind[0] = sqlite3_bind_int(stmt, 1, dest_project_id);
+	rc_bind[1] = sqlite3_bind_int(stmt, 2, src_project_id);
 
 	if ((rc_prep != SQLITE_OK) ||
 		(rc_bind[0] != SQLITE_OK) ||
@@ -778,7 +778,7 @@ void cmd_transfer_project_records(int32_t p_src_project_id, int32_t p_dest_proje
 	sqlite3_close(db);
 }
 
-void cmd_show_records_month(int16_t p_year, int8_t p_month)
+void cmd_show_records_month( const int16_t year, const int8_t month )
 {
 	sqlite3 *db;
 	time_t begin, end;
@@ -794,7 +794,7 @@ void cmd_show_records_month(int16_t p_year, int8_t p_month)
 	time(&ts_now);
 	now = localtime(&ts_now);
 
-	if (p_year < 0 || p_month < 0)
+	if (year < 0 || month < 0)
 	{
 		temp_begin.tm_year = now->tm_year;
 		temp_end.tm_year = now->tm_year;
@@ -805,14 +805,14 @@ void cmd_show_records_month(int16_t p_year, int8_t p_month)
 	{
 		// if enabled sanitize date
 #ifdef SANITIZE_DATETIME
-		if (sanitize_datetime(p_year, p_month, 1, 0, 0) != 0)
+		if (sanitize_datetime(year, month, 1, 0, 0) != 0)
 			return;
 #endif
 
-		temp_begin.tm_year = p_year - 1900;
-		temp_end.tm_year = p_year -1900;
-		temp_begin.tm_mon = p_month - 1;
-		temp_end.tm_mon = p_month;
+		temp_begin.tm_year = year - 1900;
+		temp_end.tm_year = year -1900;
+		temp_begin.tm_mon = month - 1;
+		temp_end.tm_mon = month;
 	}
 
 	// get first and last second of month
@@ -838,7 +838,7 @@ void cmd_show_records_month(int16_t p_year, int8_t p_month)
 	sqlite3_close(db);
 }
 
-void cmd_show_records_week(int16_t p_year, int8_t p_month, int8_t p_day)
+void cmd_show_records_week( const int16_t year, const int8_t month, const int8_t day )
 {
 	sqlite3 *db;
 	time_t begin, end;
@@ -853,7 +853,7 @@ void cmd_show_records_week(int16_t p_year, int8_t p_month, int8_t p_day)
 	date = localtime(&begin);
 	date->tm_isdst = -1;
 
-	if (p_year < 0 || p_month < 0 || p_day < 0)
+	if (year < 0 || month < 0 || day < 0)
 	{
 		date->tm_hour = 0;
 		date->tm_min = 0;
@@ -869,13 +869,13 @@ void cmd_show_records_week(int16_t p_year, int8_t p_month, int8_t p_day)
 	{
 		// if enabled sanitize date
 #ifdef SANITIZE_DATETIME
-	if (sanitize_datetime(p_year, p_month, p_day, 0, 0) != 0)
+	if (sanitize_datetime(year, month, day, 0, 0) != 0)
 		return;
 #endif
 
-		date->tm_year = p_year - 1900;
-		date->tm_mon = p_month - 1;
-		date->tm_mday = p_day;
+		date->tm_year = year - 1900;
+		date->tm_mon = month - 1;
+		date->tm_mday = day;
 
 		date->tm_hour = 0;
 		date->tm_min = 0;

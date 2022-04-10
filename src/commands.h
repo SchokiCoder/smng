@@ -192,37 +192,37 @@ static const CommandData DATA_COMMANDS[] = {
 	},
 };
 
-void cmd_help(void);
+void cmd_help( void );
 
-void cmd_add_project(const char *p_project_name);
+void cmd_add_project( const char *project_name );
 
-void cmd_show_projects(void);
+void cmd_show_projects( void );
 
-void cmd_edit_project(int32_t p_project_id, const char *p_project_name);
+void cmd_edit_project( const int32_t project_id, const char *project_name );
 
-void cmd_delete_project(int32_t p_project_id, bool p_purge);
+void cmd_delete_project( const int32_t project_id, const bool purge );
 
-void cmd_record(int32_t p_project_id);
+void cmd_record( const int32_t project_id );
 
-void cmd_status(void);
+void cmd_status( void );
 
-void cmd_stop(const char *p_description);
+void cmd_stop( const char *description );
 
-void cmd_edit_record_project(int32_t p_work_record_id, int32_t p_project_id);
+void cmd_edit_record_project( const int32_t record_id, const int32_t project_id );
 
 void cmd_edit_record_time(
-	bool p_work_record_begin, int32_t p_work_record_id,
-	int16_t p_year, int8_t p_month, int8_t p_day,
-	int8_t p_hour, int8_t p_minute);
+	const bool work_record_begin, const int32_t record_id,
+	const int16_t year, const int8_t month, const int8_t day,
+	const int8_t hour, const int8_t minute );
 
-void cmd_edit_record_description(int32_t p_work_record_id, const char *p_desc);
+void cmd_edit_record_description( const int32_t record_id, const char *desc );
 
-void cmd_delete_record(int32_t p_record_id);
+void cmd_delete_record( const int32_t record_id );
 
-void cmd_transfer_project_records(int32_t p_src_project_id, int32_t p_dest_project_id);
+void cmd_transfer_project_records( const int32_t src_project_id, const int32_t dest_project_id );
 
-void cmd_show_records_month(int16_t p_year, int8_t p_month);
+void cmd_show_records_month( const int16_t year, const int8_t month );
 
-void cmd_show_records_week(int16_t p_year, int8_t p_month, int8_t p_day);
+void cmd_show_records_week( const int16_t year, const int8_t month, const int8_t day );
 
 #endif /* COMMANDS_H */

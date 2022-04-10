@@ -42,7 +42,7 @@ static const char PATH_BASE[] = "%s" SLASH ".%s";
 static const char FILE_DATABASE[] = "worktimes.db";
 #endif
 
-void print_cmd_help( Command cmd )
+void print_cmd_help( const Command cmd )
 {
 	printf("  %s:\n", DATA_COMMANDS[cmd].desc);
 
@@ -61,7 +61,7 @@ void print_cmd_help( Command cmd )
 	SM_String_clear(&cmd_naming);
 }
 
-int32_t database_connect(sqlite3 **p_db)
+int32_t database_connect(sqlite3 **db)
 {
 	int32_t rc_connect;
 	int32_t rc_empty;
@@ -102,10 +102,10 @@ int32_t database_connect(sqlite3 **p_db)
 	strcat(path, FILE_DATABASE);
 
 	// try connecting to db (with dynamic path)
-	rc_connect = sqlite3_open(path, p_db);
+	rc_connect = sqlite3_open(path, db);
 #else
 	// try connecting to db (with static path)
-	rc_connect = sqlite3_open(PATH_DATABASE, p_db);
+	rc_connect = sqlite3_open(PATH_DATABASE, db);
 #endif /* STATIC_DATABASE_PATH */
 
 	// if no connection possible, end
@@ -118,20 +118,20 @@ int32_t database_connect(sqlite3 **p_db)
 
 	// if db is empty, create tables etc.
 	rc_empty = sqlite3_table_column_metadata(
-		*p_db, NULL, "tbl_work_records", "work_record_id", NULL, NULL, NULL, NULL, NULL);
+		*db, NULL, "tbl_work_records", "work_record_id", NULL, NULL, NULL, NULL, NULL);
 
 	if (rc_empty == 1)
 	{
-		rc_activate_fkeys = sqlite3_exec(*p_db, SQL_ACTIVATE_FKEYS, NULL, NULL, NULL);
-		rc_create_work_records = sqlite3_exec(*p_db, SQL_CREATE_WORKRECORDS, NULL, NULL, NULL);
-		rc_create_projects = sqlite3_exec(*p_db, SQL_CREATE_PROJECTS, NULL, NULL, NULL);
-		rc_create_indices = sqlite3_exec(*p_db, SQL_CREATE_INDICES, NULL, NULL, NULL);
+		rc_activate_fkeys = sqlite3_exec(*db, SQL_ACTIVATE_FKEYS, NULL, NULL, NULL);
+		rc_create_work_records = sqlite3_exec(*db, SQL_CREATE_WORKRECORDS, NULL, NULL, NULL);
+		rc_create_projects = sqlite3_exec(*db, SQL_CREATE_PROJECTS, NULL, NULL, NULL);
+		rc_create_indices = sqlite3_exec(*db, SQL_CREATE_INDICES, NULL, NULL, NULL);
 	}
 
 	// else activate fkeys and end
 	else
 	{
-		rc_activate_fkeys = sqlite3_exec(*p_db, SQL_ACTIVATE_FKEYS, NULL, NULL, NULL);
+		rc_activate_fkeys = sqlite3_exec(*db, SQL_ACTIVATE_FKEYS, NULL, NULL, NULL);
 
 		if (rc_activate_fkeys != SQLITE_OK)
 		{
@@ -151,8 +151,8 @@ int32_t database_connect(sqlite3 **p_db)
 		(rc_create_indices != SQLITE_OK))
 	{
 		printf("ERROR: The database was missing and an attempt to create it failed.\n");
-		sqlite3_close(*p_db);
-		*p_db = NULL;
+		sqlite3_close(*db);
+		*db = NULL;
 		return 2;
 	}
 
@@ -161,14 +161,14 @@ int32_t database_connect(sqlite3 **p_db)
 	return 0;
 }
 
-uint8_t is_prev_record_done(sqlite3 *p_db, uint32_t *p_work_record_id, bool *p_work_record_done)
+uint8_t is_prev_record_done(sqlite3 *db, uint32_t *record_id, bool *record_done)
 {
 	sqlite3_stmt *stmt;
 	int32_t rc_prepare;
 	int32_t rc_step;
 
 	// check if there is an open record left
-	rc_prepare = sqlite3_prepare_v2(p_db, SQL_CHECK_PREVIOUS_RECORD, -1, &stmt, 0);
+	rc_prepare = sqlite3_prepare_v2(db, SQL_CHECK_PREVIOUS_RECORD, -1, &stmt, 0);
 
 	if (rc_prepare != SQLITE_OK)
 	{
@@ -183,8 +183,8 @@ uint8_t is_prev_record_done(sqlite3 *p_db, uint32_t *p_work_record_id, bool *p_w
 	// if there are no previous records, just skip
 	if (rc_step == SQLITE_DONE)
 	{
-		*p_work_record_id = 0;
-		*p_work_record_done = true;
+		*record_id = 0;
+		*record_done = true;
 		sqlite3_finalize(stmt);
 		return 0;
 	}
@@ -198,14 +198,14 @@ uint8_t is_prev_record_done(sqlite3 *p_db, uint32_t *p_work_record_id, bool *p_w
 	}
 
 	// save values to output pointers
-	*p_work_record_id = sqlite3_column_int(stmt, 0);
-	*p_work_record_done = (bool) (sqlite3_column_int(stmt, 1));
+	*record_id = sqlite3_column_int(stmt, 0);
+	*record_done = (bool) (sqlite3_column_int(stmt, 1));
 
 	sqlite3_finalize(stmt);
 	return 0;
 }
 
-uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
+uint8_t show_records(sqlite3 *db, const time_t begin, const time_t end)
 {
 	sqlite3_stmt *stmt;
 	int32_t rc_prepare;
@@ -219,9 +219,9 @@ uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
 	uint32_t sum_hours, sum_minutes;
 
 	// prepare sql
-	rc_prepare = sqlite3_prepare_v2(p_db, SQL_SHOW_RECORDS, -1, &stmt, 0);
-	rc_bind[0] = sqlite3_bind_int(stmt, 1, p_begin);
-	rc_bind[1] = sqlite3_bind_int(stmt, 2, p_end);
+	rc_prepare = sqlite3_prepare_v2(db, SQL_SHOW_RECORDS, -1, &stmt, 0);
+	rc_bind[0] = sqlite3_bind_int(stmt, 1, begin);
+	rc_bind[1] = sqlite3_bind_int(stmt, 2, end);
 
 	if ((rc_prepare != SQLITE_OK) ||
 		(rc_bind[0] != SQLITE_OK) ||
@@ -238,10 +238,10 @@ uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
 	if (rc_step == SQLITE_ROW)
 	{
 		// print header
-		temp = localtime(&p_begin);
+		temp = localtime(&begin);
 		strftime(timespan[0], sizeof(timespan[0]), "%Y-%m-%d", temp);
 
-		temp = localtime(&p_end);
+		temp = localtime(&end);
 		strftime(timespan[1], sizeof(timespan[1]), "%Y-%m-%d", temp);
 
 		printf("Summarize from %s to %s:\n\nrec_id\tbegin	 end	  time	prj_id\tdesc\n",
@@ -291,20 +291,20 @@ uint8_t show_records(sqlite3 *p_db, time_t p_begin, time_t p_end)
 	return 0;
 }
 
-int32_t parse_id(sqlite3 *p_db, int32_t p_raw, bool p_is_project, int32_t *p_result)
+int32_t parse_id(sqlite3 *db, const int32_t raw, const bool is_project, int32_t *result)
 {
 	sqlite3_stmt *stmt;
 	int32_t rc_prep;
 	int32_t rc_step;
 
 	// if number is negative
-	if (p_raw < 0)
+	if (raw < 0)
 	{
 		// find real id
-		if (p_is_project == true)
-			rc_prep = sqlite3_prepare_v2(p_db, SQL_MAX_PROJECT_ID, -1, &stmt, 0);
+		if (is_project == true)
+			rc_prep = sqlite3_prepare_v2(db, SQL_MAX_PROJECT_ID, -1, &stmt, 0);
 		else
-			rc_prep = sqlite3_prepare_v2(p_db, SQL_MAX_RECORD_ID, -1, &stmt, 0);
+			rc_prep = sqlite3_prepare_v2(db, SQL_MAX_RECORD_ID, -1, &stmt, 0);
 
 		if (rc_prep != SQLITE_OK)
 		{
@@ -322,52 +322,54 @@ int32_t parse_id(sqlite3 *p_db, int32_t p_raw, bool p_is_project, int32_t *p_res
 			return 2;
 		}
 
-		*p_result = sqlite3_column_int(stmt, 0) + 1 + p_raw;
+		*result = sqlite3_column_int(stmt, 0) + 1 + raw;
 		sqlite3_finalize(stmt);
 	}
 	else
 	{
-		*p_result = p_raw;
+		*result = raw;
 	}
 
 	return	0;
 }
 
 #ifdef SANITIZE_DATETIME
-int32_t sanitize_datetime(int16_t p_year, int8_t p_month, int8_t p_day, int8_t p_hour, int8_t p_minute)
+int32_t sanitize_datetime(
+	const int16_t year, const int8_t month, const int8_t day,
+	const int8_t hour, const int8_t minute )
 {
-	if (p_year < DT_YEAR_MIN ||
-		p_year > DT_YEAR_MAX)
+	if (year < DT_YEAR_MIN ||
+		year > DT_YEAR_MAX)
 	{
-		printf("Given year %u is not allowed.\n", p_year);
+		printf("Given year %u is not allowed.\n", year);
 		return 1;
 	}
 
-	if (p_month < DT_MONTH_MIN ||
-		p_month > DT_MONTH_MAX)
+	if (month < DT_MONTH_MIN ||
+		month > DT_MONTH_MAX)
 	{
-		printf("Given month %u is not allowed.\n", p_month);
+		printf("Given month %u is not allowed.\n", month);
 		return 2;
 	}
 
-	if (p_day < DT_DAY_MIN ||
-		p_day > DT_DAY_MAX)
+	if (day < DT_DAY_MIN ||
+		day > DT_DAY_MAX)
 	{
-		printf("Given day %u is not allowed.\n", p_day);
+		printf("Given day %u is not allowed.\n", day);
 		return 3;
 	}
 
-	if (p_hour < DT_HOUR_MIN ||
-		p_hour > DT_HOUR_MAX)
+	if (hour < DT_HOUR_MIN ||
+		hour > DT_HOUR_MAX)
 	{
-		printf("Given hour %u is not allowed.\n", p_hour);
+		printf("Given hour %u is not allowed.\n", hour);
 		return 4;
 	}
 
-	if (p_minute < DT_MINUTE_MIN ||
-		p_minute > DT_MINUTE_MAX)
+	if (minute < DT_MINUTE_MIN ||
+		minute > DT_MINUTE_MAX)
 	{
-		printf("Given minute %u is not allowed.\n", p_minute);
+		printf("Given minute %u is not allowed.\n", minute);
 		return 5;
 	}
 

@@ -27,6 +27,6 @@ static const char APP_LICENSE_NOTICE[] =
 static const char APP_SOURCE[] = "https://github.com/SchokiCoder/smng";
 #define APP_MAJOR 1
 #define APP_MINOR 2
-#define APP_PATCH 1
+#define APP_PATCH 2
 
 #endif // APP_H

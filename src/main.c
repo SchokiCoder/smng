@@ -55,7 +55,7 @@ void print_cmd_djb2( void )
 	fclose(file);
 }
 
-int main(int argc, char *argv[])
+int main( int argc, char *argv[] )
 {
 	uint32_t cmd_hash;
 	bool edit_begin = false;
@@ -112,13 +112,6 @@ int main(int argc, char *argv[])
 			print_cmd_help(CMD_ADD_PROJECT);
 			return 0;
 		}
-
-		/*check min arg count
-		else if (argc < 3)
-		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
-			return 0;
-		}*/
 
 		// exec
 		cmd_add_project(argv[2]);
@@ -181,13 +174,6 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 
-		/*check min arg count
-		else if (argc < 3)
-		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
-			return 0;
-		}*/
-
 		// parse args
 		project_id = strtol(argv[2], NULL, 10);
 
@@ -213,13 +199,6 @@ int main(int argc, char *argv[])
 			print_cmd_help(CMD_RECORD);
 			return 0;
 		}
-
-		/*check min arg count
-		else if (argc < 3)
-		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
-			return 0;
-		}*/
 
 		// parse args
 		project_id = strtol(argv[2], NULL, 10);
@@ -254,13 +233,6 @@ int main(int argc, char *argv[])
 			print_cmd_help(CMD_STOP);
 			return 0;
 		}
-
-		/*check min arg count
-		else if (argc < 3)
-		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
-			return 0;
-		}*/
 
 		// exec
 		cmd_stop(argv[2]);
@@ -395,13 +367,6 @@ int main(int argc, char *argv[])
 			print_cmd_help(CMD_DELETE_RECORD);
 			return 0;
 		}
-
-		/*check min arg count
-		else if (argc < 3)
-		{
-			printf("ERROR: Not enough arguments were passed.\nType %s %s for help.\n", APP_NAME, CMD_HELP_LONG);
-			return 0;
-		}*/
 
 		// parse args
 		record_id = strtol(argv[2], NULL, 10);
