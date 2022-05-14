@@ -19,8 +19,7 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <SM_types.h>
 
 typedef enum Command
 {
@@ -48,10 +47,10 @@ typedef enum Command
 typedef struct CommandData
 {
 	char *name;
-	bool has_abbr;
+	bool_t has_abbr;
 	char *abbr;
 	char *desc;
-	bool has_args;
+	bool_t has_args;
 	char *args;
 } CommandData ;
 
@@ -103,45 +102,45 @@ typedef enum CommandDJB2
 } CommandDJB2 ;
 
 static const CommandData DATA_COMMANDS[] = {
-	{"help", true, "h",
+	{"help", TRUE, "h",
 	"show this message",
-	false, "",},
+	FALSE, "",},
 
-	{"add-project", true, "ap",
+	{"add-project", TRUE, "ap",
 	"add a project",
-	true, "PROJECT_NAME"},
+	TRUE, "PROJECT_NAME"},
 
-	{"show-projects", true, "sp",
+	{"show-projects", TRUE, "sp",
 	"show projects",
-	false, ""},
+	FALSE, ""},
 
-	{"edit-project", true, "ep",
+	{"edit-project", TRUE, "ep",
 	"edit project",
-	true, "PROJECT_ID PROJECT_NAME"},
+	TRUE, "PROJECT_ID PROJECT_NAME"},
 
-	{"delete-project", false, "",
+	{"delete-project", FALSE, "",
 	"delete project",
-	true, "PROJECT_ID [PURGE]"},
+	TRUE, "PROJECT_ID [PURGE]"},
 
-	{"record", true, "r",
+	{"record", TRUE, "r",
 	"record work time",
-	true, "PROJECT_ID"},
+	TRUE, "PROJECT_ID"},
 
-	{"status", false, "",
+	{"status", FALSE, "",
 	"show current work status",
-	false, ""},
+	FALSE, ""},
 
-	{"stop", true, "s",
+	{"stop", TRUE, "s",
 	"stop recording work time",
-	true, "DESCRIPTION"},
+	TRUE, "DESCRIPTION"},
 
-	{"edit-record-project", true, "erp",
+	{"edit-record-project", TRUE, "erp",
 	"edit work record's project",
-	true, "RECORD_ID PROJECT_ID"},
+	TRUE, "RECORD_ID PROJECT_ID"},
 
-	{"edit-record-begin", true, "erb",
+	{"edit-record-begin", TRUE, "erb",
 	"edit work record's begin",
-	true,
+	TRUE,
 #ifdef MAJOR_DATEFORMAT
 	"RECORD_ID HOUR MINUTE DAY MONTH YEAR"
 #else
@@ -149,9 +148,9 @@ static const CommandData DATA_COMMANDS[] = {
 #endif
 	},
 
-	{"edit-record-end", true, "ere",
+	{"edit-record-end", TRUE, "ere",
 	"edit work record's end",
-	true,
+	TRUE,
 #ifdef MAJOR_DATEFORMAT
 	"RECORD_ID HOUR MINUTE DAY MONTH YEAR"
 #else
@@ -159,21 +158,21 @@ static const CommandData DATA_COMMANDS[] = {
 #endif
 	},
 
-	{"edit-record-description", true, "erd",
+	{"edit-record-description", TRUE, "erd",
 	"edit work record's description",
-	true, "RECORD_ID DESCRIPTION"},
+	TRUE, "RECORD_ID DESCRIPTION"},
 
-	{"delete-record", false, "",
+	{"delete-record", FALSE, "",
 	"delete a work record",
-	true, "RECORD_ID"},
+	TRUE, "RECORD_ID"},
 
-	{"transfer-project-records", false, "",
+	{"transfer-project-records", FALSE, "",
 	"transfer all records from one project to another",
-	true, "OLD_PROJECT_ID NEW_PORJECT_ID"},
+	TRUE, "OLD_PROJECT_ID NEW_PORJECT_ID"},
 
-	{"show-week", true, "sw",
+	{"show-week", TRUE, "sw",
 	"show work records of a certain week",
-	true,
+	TRUE,
 #ifdef MAJOR_DATEFORMAT
 	"[DAY MONTH YEAR]"
 #else
@@ -181,9 +180,9 @@ static const CommandData DATA_COMMANDS[] = {
 #endif
 	},
 
-	{"show-month", true, "sm",
+	{"show-month", TRUE, "sm",
 	"show work records of a certain month",
-	true,
+	TRUE,
 #ifdef MAJOR_DATEFORMAT
 	"[MONTH YEAR]"
 #else
@@ -198,31 +197,31 @@ void cmd_add_project( const char *project_name );
 
 void cmd_show_projects( void );
 
-void cmd_edit_project( const int32_t project_id, const char *project_name );
+void cmd_edit_project( const sl32_t project_id, const char *project_name );
 
-void cmd_delete_project( const int32_t project_id, const bool purge );
+void cmd_delete_project( const sl32_t project_id, const bool_t purge );
 
-void cmd_record( const int32_t project_id );
+void cmd_record( const sl32_t project_id );
 
 void cmd_status( void );
 
 void cmd_stop( const char *description );
 
-void cmd_edit_record_project( const int32_t record_id, const int32_t project_id );
+void cmd_edit_record_project( const sl32_t record_id, const sl32_t project_id );
 
 void cmd_edit_record_time(
-	const bool work_record_begin, const int32_t record_id,
-	const int16_t year, const int8_t month, const int8_t day,
-	const int8_t hour, const int8_t minute );
+	const bool_t work_record_begin, const sl32_t record_id,
+	const sl16_t year, const sl8_t month, const sl8_t day,
+	const sl8_t hour, const sl8_t minute );
 
-void cmd_edit_record_description( const int32_t record_id, const char *desc );
+void cmd_edit_record_description( const sl32_t record_id, const char *desc );
 
-void cmd_delete_record( const int32_t record_id );
+void cmd_delete_record( const sl32_t record_id );
 
-void cmd_transfer_project_records( const int32_t src_project_id, const int32_t dest_project_id );
+void cmd_transfer_project_records( const sl32_t src_project_id, const sl32_t dest_project_id );
 
-void cmd_show_records_month( const int16_t year, const int8_t month );
+void cmd_show_records_month( const sl16_t year, const sl8_t month );
 
-void cmd_show_records_week( const int16_t year, const int8_t month, const int8_t day );
+void cmd_show_records_week( const sl16_t year, const sl8_t month, const sl8_t day );
 
 #endif /* COMMANDS_H */

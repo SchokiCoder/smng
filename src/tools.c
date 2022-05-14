@@ -17,6 +17,8 @@
 */
 
 #include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,7 +42,22 @@
 
 static const char PATH_BASE[] = "%s" SLASH ".%s";
 static const char FILE_DATABASE[] = "worktimes.db";
-#endif
+#endif // STATIC_DATABASE_PATH
+
+#define DIGITSIZE_INT 9				// 400.000.000
+#define DIGITSTR_INT "9"
+#define DIGITSIZE_DAY_AND_TIME 8	// 01 08:15
+#define DIGITSTR_DAY_AND_TIME "8"
+#define DIGITSIZE_TIME 5			// 12:35
+#define DIGITSTR_TIME "5"
+
+void stdout_stream_char( const char c, const ul32_t amount )
+{
+	for (ul32_t i = 0; i < amount; i++)
+	{
+		putchar(c);
+	}
+}
 
 void print_cmd_help( const Command cmd )
 {
@@ -61,16 +78,12 @@ void print_cmd_help( const Command cmd )
 	SM_String_clear(&cmd_naming);
 }
 
-int32_t database_connect(sqlite3 **db)
+sl32_t database_connect(sqlite3 **db)
 {
-	int32_t rc_connect;
-	int32_t rc_empty;
-	int32_t rc_activate_fkeys;
-	int32_t rc_create_work_records;
-	int32_t rc_create_projects;
-	int32_t rc_create_indices;
+	sl32_t rc_connect, rc_empty, rc_activate_fkeys, rc_create_work_records, rc_create_projects,
+		rc_create_indices;
 #ifndef STATIC_DATABASE_PATH
-	int32_t rc_dir;
+	sl32_t rc_dir;
 	char path[PATH_MAX_LEN] = "";
 #endif /* STATIC_DATABASE_PATH */
 
@@ -111,7 +124,7 @@ int32_t database_connect(sqlite3 **db)
 	// if no connection possible, end
 	if (rc_connect != SQLITE_OK)
 	{
-		printf("Sqlite-ERROR (%i): The database is missing or access is not given.\n"
+		printf("Sqlite-ERROR (%li): The database is missing or access is not given.\n"
 			"Check the path in the config and make sure permissions are not missing.\n", rc_connect);
 		return 1;
 	}
@@ -136,7 +149,7 @@ int32_t database_connect(sqlite3 **db)
 		if (rc_activate_fkeys != SQLITE_OK)
 		{
 			printf(
-				"Sqlite-ERROR (%i): The activation of foreign keys in this database did not work.\n",
+				"Sqlite-ERROR (%li): The activation of foreign keys in this database did not work.\n",
 				rc_activate_fkeys);
 			return 3;
 		}
@@ -161,11 +174,11 @@ int32_t database_connect(sqlite3 **db)
 	return 0;
 }
 
-uint8_t is_prev_record_done(sqlite3 *db, uint32_t *record_id, bool *record_done)
+ul8_t is_prev_record_done(sqlite3 *db, sl32_t *record_id, bool_t *record_done)
 {
 	sqlite3_stmt *stmt;
-	int32_t rc_prepare;
-	int32_t rc_step;
+	sl32_t rc_prepare;
+	sl32_t rc_step;
 
 	// check if there is an open record left
 	rc_prepare = sqlite3_prepare_v2(db, SQL_CHECK_PREVIOUS_RECORD, -1, &stmt, 0);
@@ -173,7 +186,7 @@ uint8_t is_prev_record_done(sqlite3 *db, uint32_t *record_id, bool *record_done)
 	if (rc_prepare != SQLITE_OK)
 	{
 		printf(
-			"Sqlite-ERROR (%i): Statement to check validity of previous record could not prepared.\n",
+			"Sqlite-ERROR (%li): Statement to check validity of previous record could not prepared.\n",
 			rc_prepare);
 		return 1;
 	}
@@ -184,14 +197,14 @@ uint8_t is_prev_record_done(sqlite3 *db, uint32_t *record_id, bool *record_done)
 	if (rc_step == SQLITE_DONE)
 	{
 		*record_id = 0;
-		*record_done = true;
+		*record_done = TRUE;
 		sqlite3_finalize(stmt);
 		return 0;
 	}
 	else if (rc_step != SQLITE_ROW)
 	{
 		printf(
-			"Sqlite-ERROR (%i): Statement to check validity of previous record could not be executed.\n",
+			"Sqlite-ERROR (%li): Statement to check validity of previous record could not be executed.\n",
 			rc_step);
 		sqlite3_finalize(stmt);
 		return 2;
@@ -199,24 +212,29 @@ uint8_t is_prev_record_done(sqlite3 *db, uint32_t *record_id, bool *record_done)
 
 	// save values to output pointers
 	*record_id = sqlite3_column_int(stmt, 0);
-	*record_done = (bool) (sqlite3_column_int(stmt, 1));
+	*record_done = (bool_t) (sqlite3_column_int(stmt, 1));
 
 	sqlite3_finalize(stmt);
 	return 0;
 }
 
-uint8_t show_records(sqlite3 *db, const time_t begin, const time_t end)
+ul8_t show_records(sqlite3 *db, const time_t begin, const time_t end)
 {
 	sqlite3_stmt *stmt;
-	int32_t rc_prepare;
-	int32_t rc_bind[2];
-	int32_t rc_step;
+	sl32_t rc_prepare;
+	sl32_t rc_bind[2];
+	sl32_t rc_step;
 	char timespan[2][14];
 	char worked_time[16];
 	struct tm *temp;
-	uint32_t hours, minutes, seconds;
-	uint32_t sum_seconds = 0;
-	uint32_t sum_hours, sum_minutes;
+	ul32_t hours, minutes, seconds;
+	ul32_t sum_seconds = 0;
+	ul32_t sum_hours, sum_minutes;
+
+	// get terminal width
+	struct winsize ws;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+	const ul32_t term_len = ws.ws_col;
 
 	// prepare sql
 	rc_prepare = sqlite3_prepare_v2(db, SQL_SHOW_RECORDS, -1, &stmt, 0);
@@ -227,7 +245,7 @@ uint8_t show_records(sqlite3 *db, const time_t begin, const time_t end)
 		(rc_bind[0] != SQLITE_OK) ||
 		(rc_bind[1] != SQLITE_OK))
 	{
-		printf("Sqlite-ERROR (%i): Statement to show records could not be prepared.\n", rc_prepare);
+		printf("Sqlite-ERROR (%li): Statement to show records could not be prepared.\n", rc_prepare);
 		sqlite3_finalize(stmt);
 		return 1;
 	}
@@ -244,9 +262,19 @@ uint8_t show_records(sqlite3 *db, const time_t begin, const time_t end)
 		temp = localtime(&end);
 		strftime(timespan[1], sizeof(timespan[1]), "%Y-%m-%d", temp);
 
-		printf("Summarize from %s to %s:\n\nrec_id\tbegin	 end	  time	prj_id\tdesc\n",
-			timespan[0],
-			timespan[1]);
+		printf("Summarize from %s to %s:\n\n", timespan[0], timespan[1]);
+
+		printf(
+			"%-" DIGITSTR_INT "s | %-" DIGITSTR_DAY_AND_TIME "s | %-" DIGITSTR_DAY_AND_TIME "s |"
+			" %-" DIGITSTR_TIME "s | %-" DIGITSTR_INT "s | %s\n",
+			"rec_id", "begin", "end", "time", "prj_id", "desc");
+
+		const ul32_t digitsize_header = DIGITSIZE_INT + DIGITSIZE_DAY_AND_TIME + DIGITSIZE_DAY_AND_TIME +
+			DIGITSIZE_TIME + DIGITSIZE_INT + (3 * 5) + 4;
+
+		stdout_stream_char('-', digitsize_header);
+
+		printf("\n");
 
 		do
 		{
@@ -258,16 +286,35 @@ uint8_t show_records(sqlite3 *db, const time_t begin, const time_t end)
 			minutes = minutes % 60;
 
 			// generate worked_time string as "hours(2):minutes(2)"
-			sprintf(worked_time, "%02i:%02i", hours, minutes);
+			sprintf(worked_time, "%02lu:%02lu", hours, minutes);
 
 			// print results
-			printf("%i\t%s %s %s %i\t%s\n",
+			printf(
+				"%-" DIGITSTR_INT "i | %-" DIGITSTR_DAY_AND_TIME "s | %-" DIGITSTR_DAY_AND_TIME "s |"
+				" %-" DIGITSTR_TIME "s | %-" DIGITSTR_INT "i | ",
 				sqlite3_column_int(stmt, 0),
 				sqlite3_column_text(stmt, 1),
 				sqlite3_column_text(stmt, 2),
 				worked_time,
-				sqlite3_column_int(stmt, 4),
-				sqlite3_column_text(stmt, 5));
+				sqlite3_column_int(stmt, 4));
+
+			// print desc
+			const ul32_t desc_len = SM_strlen((const char*) sqlite3_column_text(stmt, 5));
+
+			for (ul32_t pos = 0, i = 0; i < desc_len - 1; i++, pos++)
+			{
+                if (pos > term_len - (digitsize_header - 4) - 1)
+                {
+					printf("\n");
+					stdout_stream_char(' ', digitsize_header - 4);
+					pos = 0;
+				}
+
+				putchar(sqlite3_column_text(stmt, 5)[i]);
+
+			}
+
+			printf("\n");
 		}
 		while ((rc_step = sqlite3_step(stmt)) == SQLITE_ROW);
 
@@ -275,13 +322,13 @@ uint8_t show_records(sqlite3 *db, const time_t begin, const time_t end)
 		sum_minutes = sum_seconds / 60;
 		sum_hours = sum_minutes / 60;
 		sum_minutes = sum_minutes % 60;
-		printf("\nSummarized work time: %02i:%02i\n", sum_hours, sum_minutes);
+		printf("\nSummarized work time: %02lu:%02lu\n", sum_hours, sum_minutes);
 	}
 	else if (rc_step == SQLITE_DONE)
 		printf("No records available.\n");
 	else
 	{
-		printf("Sqlite-Error (%i): Statement to show work-records could not be executed.\n", rc_step);
+		printf("Sqlite-Error (%li): Statement to show work-records could not be executed.\n", rc_step);
 		sqlite3_finalize(stmt);
 		return 2;
 	}
@@ -291,24 +338,23 @@ uint8_t show_records(sqlite3 *db, const time_t begin, const time_t end)
 	return 0;
 }
 
-int32_t parse_id(sqlite3 *db, const int32_t raw, const bool is_project, int32_t *result)
+sl32_t parse_id(sqlite3 *db, const sl32_t raw, const bool_t is_project, sl32_t *result)
 {
 	sqlite3_stmt *stmt;
-	int32_t rc_prep;
-	int32_t rc_step;
+	sl32_t rc_prep, rc_step;
 
 	// if number is negative
 	if (raw < 0)
 	{
 		// find real id
-		if (is_project == true)
+		if (is_project == TRUE)
 			rc_prep = sqlite3_prepare_v2(db, SQL_MAX_PROJECT_ID, -1, &stmt, 0);
 		else
 			rc_prep = sqlite3_prepare_v2(db, SQL_MAX_RECORD_ID, -1, &stmt, 0);
 
 		if (rc_prep != SQLITE_OK)
 		{
-			printf("Sqlite-ERROR (%i): Statement to find real id could not be prepared.\n", rc_prep);
+			printf("Sqlite-ERROR (%li): Statement to find real id could not be prepared.\n", rc_prep);
 			sqlite3_finalize(stmt);
 			return 1;
 		}
@@ -317,7 +363,7 @@ int32_t parse_id(sqlite3 *db, const int32_t raw, const bool is_project, int32_t 
 
 		if (rc_step != SQLITE_ROW)
 		{
-			printf("Sqlite-ERROR (%i): Statement to find real id could not be executed.\n", rc_step);
+			printf("Sqlite-ERROR (%li): Statement to find real id could not be executed.\n", rc_step);
 			sqlite3_finalize(stmt);
 			return 2;
 		}
@@ -334,42 +380,42 @@ int32_t parse_id(sqlite3 *db, const int32_t raw, const bool is_project, int32_t 
 }
 
 #ifdef SANITIZE_DATETIME
-int32_t sanitize_datetime(
-	const int16_t year, const int8_t month, const int8_t day,
-	const int8_t hour, const int8_t minute )
+sl32_t sanitize_datetime(
+	const sl16_t year, const sl8_t month, const sl8_t day,
+	const sl8_t hour, const sl8_t minute )
 {
 	if (year < DT_YEAR_MIN ||
 		year > DT_YEAR_MAX)
 	{
-		printf("Given year %u is not allowed.\n", year);
+		printf("Given year %li is not allowed.\n", year);
 		return 1;
 	}
 
 	if (month < DT_MONTH_MIN ||
 		month > DT_MONTH_MAX)
 	{
-		printf("Given month %u is not allowed.\n", month);
+		printf("Given month %i is not allowed.\n", month);
 		return 2;
 	}
 
 	if (day < DT_DAY_MIN ||
 		day > DT_DAY_MAX)
 	{
-		printf("Given day %u is not allowed.\n", day);
+		printf("Given day %i is not allowed.\n", day);
 		return 3;
 	}
 
 	if (hour < DT_HOUR_MIN ||
 		hour > DT_HOUR_MAX)
 	{
-		printf("Given hour %u is not allowed.\n", hour);
+		printf("Given hour %i is not allowed.\n", hour);
 		return 4;
 	}
 
 	if (minute < DT_MINUTE_MIN ||
 		minute > DT_MINUTE_MAX)
 	{
-		printf("Given minute %u is not allowed.\n", minute);
+		printf("Given minute %i is not allowed.\n", minute);
 		return 5;
 	}
 

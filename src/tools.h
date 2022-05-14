@@ -19,8 +19,6 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <time.h>
 #include "config.h"
 
@@ -29,18 +27,18 @@ typedef enum Command Command;
 
 void print_cmd_help( const Command cmd );
 
-int32_t database_connect( sqlite3 **db );
+sl32_t database_connect( sqlite3 **db );
 
-uint8_t is_prev_record_done( sqlite3 *db, uint32_t *record_id, bool *record_done );
+ul8_t is_prev_record_done( sqlite3 *db, sl32_t *record_id, bool_t *record_done );
 
-uint8_t show_records( sqlite3 *db, const time_t begin, const time_t end );
+ul8_t show_records( sqlite3 *db, const time_t begin, const time_t end );
 
-int32_t parse_id( sqlite3 *db, const int32_t raw, const bool is_project, int32_t *result );
+sl32_t parse_id( sqlite3 *db, const sl32_t raw, const bool_t is_project, sl32_t *result );
 
 #ifdef SANITIZE_DATETIME
-int32_t sanitize_datetime(
-	const int16_t year, const int8_t month, const int8_t day,
-	const int8_t hour, const int8_t minute );
+sl32_t sanitize_datetime(
+	const sl16_t year, const sl8_t month, const sl8_t day,
+	const sl8_t hour, const sl8_t minute );
 #endif
 
 #endif /* TOOLS_H */

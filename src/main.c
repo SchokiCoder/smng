@@ -16,10 +16,8 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <SM_crypto.h>
 #include "app.h"
@@ -57,18 +55,18 @@ void print_cmd_djb2( void )
 
 int main( int argc, char *argv[] )
 {
-	uint32_t cmd_hash;
-	bool edit_begin = false;
-	bool force = false;
-	int32_t record_id;
-	int32_t project_id;
-	int32_t dest_project_id;
-	int32_t src_project_id;
-	uint16_t year = -1;
-	uint8_t month = -1;
-	uint8_t day = -1;
-	uint8_t hour = -1;
-	uint8_t minute = -1;
+	u32_t cmd_hash;
+	bool_t edit_begin = FALSE;
+	bool_t force = FALSE;
+	sl32_t record_id;
+	sl32_t project_id;
+	sl32_t dest_project_id;
+	sl32_t src_project_id;
+	ul16_t year = -1;
+	ul8_t month = -1;
+	ul8_t day = -1;
+	ul8_t hour = -1;
+	ul8_t minute = -1;
 
 	// if no command given, print help and end
 	if (argc < 2)
@@ -271,7 +269,7 @@ int main( int argc, char *argv[] )
 
 	case DJB2_EDIT_RECORD_BEGIN:
 	case DJB2_EDIT_RECORD_BEGIN_ABBR:
-		edit_begin = true;
+		edit_begin = TRUE;
 		goto EDIT_RECORD_CASE;
 
 	case DJB2_EDIT_RECORD_END:
@@ -287,7 +285,7 @@ int main( int argc, char *argv[] )
 		else if (argc == 2)
 		{
 			// print help, stop
-			if (edit_begin == true)
+			if (edit_begin == TRUE)
 				print_cmd_help(CMD_EDIT_RECORD_BEGIN);
 			else
 				print_cmd_help(CMD_EDIT_RECORD_END);

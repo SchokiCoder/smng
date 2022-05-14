@@ -161,14 +161,11 @@ void cmd_show_projects( void )
 	sqlite3_close(db);
 }
 
-void cmd_edit_project( const int32_t project_id, const char *project_name )
+void cmd_edit_project( const sl32_t project_id, const char *project_name )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
-	int32_t id;
-	int32_t rc_prepare;
-	int32_t rc_bind[2];
-	int32_t rc_step;
+	sl32_t id, rc_prepare, rc_bind[2], rc_step;
 
 	// connect to db
 	if (database_connect(&db) != 0)
@@ -178,7 +175,7 @@ void cmd_edit_project( const int32_t project_id, const char *project_name )
 	rc_prepare = sqlite3_prepare_v2(db, SQL_EDIT_PROJECT, -1, &stmt, 0);
 
 	// bind parameters
-	if (parse_id(db, project_id, true, &id) != 0)
+	if (parse_id(db, project_id, TRUE, &id) != 0)
 	{
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -194,7 +191,7 @@ void cmd_edit_project( const int32_t project_id, const char *project_name )
 		(rc_bind[1] != SQLITE_OK))
 	{
 		printf(
-			"Sqlite-ERROR (%i, %i, %i): Statement to edit project could not be prepared.\n",
+			"Sqlite-ERROR (%li, %li, %li): Statement to edit project could not be prepared.\n",
 			rc_prepare, rc_bind[0], rc_bind[1]);
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -209,17 +206,17 @@ void cmd_edit_project( const int32_t project_id, const char *project_name )
 	{
 		case SQLITE_CONSTRAINT:
 			printf(
-				"Sqlite-ERROR (%i): Statement failed on a constraint.\n"
+				"Sqlite-ERROR (%li): Statement failed on a constraint.\n"
 				"Make sure \"%s\" is not already used as a project name.\n",
 				rc_step, project_name);
 			break;
 
 		case SQLITE_DONE:
-			printf("Project %i name set to \"%s\".\n", id, project_name);
+			printf("Project %li name set to \"%s\".\n", id, project_name);
 			break;
 
 		default:
-			printf("Sqlite-ERROR (%i): Statement to edit project could not be executed.\n", rc_step);
+			printf("Sqlite-ERROR (%li): Statement to edit project could not be executed.\n", rc_step);
 			break;
 	}
 
@@ -228,12 +225,12 @@ void cmd_edit_project( const int32_t project_id, const char *project_name )
 	sqlite3_close(db);
 }
 
-void cmd_delete_project( const int32_t project_id, const bool purge )
+void cmd_delete_project( const sl32_t project_id, const bool_t purge )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
-	int32_t id;
-	int32_t rc_prep, rc_bind, rc_step;
+	sl32_t id;
+	sl32_t rc_prep, rc_bind, rc_step;
 	char confirmation = 'n';
 
 	// connect to db
@@ -241,14 +238,14 @@ void cmd_delete_project( const int32_t project_id, const bool purge )
 		return;
 
 	// parse id
-	if (parse_id(db, project_id, true, &id) != 0)
+	if (parse_id(db, project_id, TRUE, &id) != 0)
 	{
 		sqlite3_close(db);
 		return;
 	}
 
 	// if purge mode activated, get confirmation to proceed
-	if (purge == true)
+	if (purge == TRUE)
 	{
 		printf("WARNING: The purge option was given.\n"
 			"This will delete every record linking to this project.\n"
@@ -264,7 +261,7 @@ void cmd_delete_project( const int32_t project_id, const bool purge )
 	}
 
 	// if purge mode activated and confirmation given
-	if (purge == true && confirmation == 'y')
+	if (purge == TRUE && confirmation == 'y')
 	{
 		// prepare, deleting all records linking to project
 		rc_prep = sqlite3_prepare_v2(db, SQL_DELETE_PROJECT_RECORDS, -1, &stmt, 0);
@@ -274,7 +271,7 @@ void cmd_delete_project( const int32_t project_id, const bool purge )
 			(rc_bind != SQLITE_OK))
 		{
 			printf(
-				"Sqlite-ERROR (%i, %i): Statement to delete project's records could not be prepared.\n",
+				"Sqlite-ERROR (%li, %li): Statement to delete project's records could not be prepared.\n",
 				rc_prep, rc_bind);
 			sqlite3_finalize(stmt);
 			sqlite3_close(db);
@@ -286,10 +283,10 @@ void cmd_delete_project( const int32_t project_id, const bool purge )
 
 		if (rc_step != SQLITE_DONE)
 			printf(
-				"Sqlite-ERROR (%i): Statement to delete project's records could not be executed.\n",
+				"Sqlite-ERROR (%li): Statement to delete project's records could not be executed.\n",
 				rc_step);
 		else
-			printf("Records of project %i deleted.\n", id);
+			printf("Records of project %li deleted.\n", id);
 
 		sqlite3_finalize(stmt);
 	}
@@ -302,7 +299,7 @@ void cmd_delete_project( const int32_t project_id, const bool purge )
 		(rc_bind != SQLITE_OK))
 	{
 		printf(
-			"Sqlite-ERROR (%i, %i): Statement to delete project could not be prepared.\n",
+			"Sqlite-ERROR (%li, %li): Statement to delete project could not be prepared.\n",
 			rc_prep, rc_bind);
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -314,26 +311,26 @@ void cmd_delete_project( const int32_t project_id, const bool purge )
 
 	if (rc_step != SQLITE_DONE)
 		printf(
-			"Sqlite-ERROR (%i): Statement to delete project could not be executed.\n"
+			"Sqlite-ERROR (%li): Statement to delete project could not be executed.\n"
 			"Make sure that no records link to this project anymore or pass the purge option.\n",
 			rc_step);
 	else
-		printf("Project %i deleted.\n", id);
+		printf("Project %li deleted.\n", id);
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
 }
 
-void cmd_record( const int32_t project_id )
+void cmd_record( const sl32_t project_id )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
-	int32_t id;
-	uint32_t prev_record_id;
-	bool prev_record_done;
-	int32_t rc_prepare;
-	int32_t rc_bind[2];
-	int32_t rc_step;
+	sl32_t id;
+	sl32_t prev_record_id;
+	bool_t prev_record_done;
+	sl32_t rc_prepare;
+	sl32_t rc_bind[2];
+	sl32_t rc_step;
 	time_t record_begin;
 
 	// connect
@@ -347,12 +344,12 @@ void cmd_record( const int32_t project_id )
 		return;
 	}
 
-	if (prev_record_done == false)
+	if (prev_record_done == FALSE)
 	{
 		// invalid record found, print
 		printf(
 			"ERROR: Before starting a new work-record finish the last one.\n"
-			"last record_id: %i\n", prev_record_id);
+			"last record_id: %li\n", prev_record_id);
 		sqlite3_close(db);
 		return;
 	}
@@ -362,7 +359,7 @@ void cmd_record( const int32_t project_id )
 
 	rc_prepare = sqlite3_prepare_v2(db, SQL_START_WORK_RECORD, -1, &stmt, 0);
 
-	if (parse_id(db, project_id, true, &id) != 0)
+	if (parse_id(db, project_id, TRUE, &id) != 0)
 	{
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -377,7 +374,7 @@ void cmd_record( const int32_t project_id )
 		(rc_bind[1] != SQLITE_OK))
 	{
 		printf(
-			"Sqlite-ERROR (%i, %i, %i): Statement to add new work record could not be prepared.\n",
+			"Sqlite-ERROR (%li, %li, %li): Statement to add new work record could not be prepared.\n",
 			rc_prepare, rc_bind[0], rc_bind[1]);
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -387,9 +384,9 @@ void cmd_record( const int32_t project_id )
 	rc_step = sqlite3_step(stmt);
 
 	if (rc_step != SQLITE_DONE)
-		printf("Sqlite-ERROR (%i): Statement to add new  work record could not be executed.\n", rc_step);
+		printf("Sqlite-ERROR (%li): Statement to add new  work record could not be executed.\n", rc_step);
 	else
-		printf("Work record for project %i added.\n", id);
+		printf("Work record for project %li added.\n", id);
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
@@ -398,8 +395,8 @@ void cmd_record( const int32_t project_id )
 void cmd_status( void )
 {
 	sqlite3 *db;
-	bool prev_record_done;
-	uint32_t prev_record_id;
+	bool_t prev_record_done;
+	sl32_t prev_record_id;
 
 	// try connect to db
 	if (database_connect(&db) != 0)
@@ -414,20 +411,18 @@ void cmd_status( void )
 
 	// print result
 	printf(
-		"Previous work record (%u) is " "%s" "done.\n",
+		"Previous work record (%li) is " "%s" "done.\n",
 		prev_record_id,
-		(prev_record_done == false ? "NOT " : ""));
+		(prev_record_done == FALSE ? "NOT " : ""));
 }
 
 void cmd_stop( const char *description )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
-	int32_t rc_prepare;
-	int32_t rc_bind[2];
-	int32_t rc_step;
-	bool prev_record_done;
-	uint32_t prev_record_id;
+	sl32_t rc_prepare, rc_bind[2], rc_step;
+	bool_t prev_record_done;
+	sl32_t prev_record_id;
 	time_t record_end;
 
 	// try connect to db
@@ -442,9 +437,9 @@ void cmd_stop( const char *description )
 	}
 
 	// if last work record is closed, print and stop
-	if (prev_record_done == true)
+	if (prev_record_done == TRUE)
 	{
-		printf("ERROR: Your previous record is already finished.\nlast record_id: %i\n", prev_record_id);
+		printf("ERROR: Your previous record is already finished.\nlast record_id: %li\n", prev_record_id);
 		sqlite3_close(db);
 		return;
 	}
@@ -460,7 +455,8 @@ void cmd_stop( const char *description )
 		(rc_bind[0] != SQLITE_OK) ||
 		(rc_bind[1] != SQLITE_OK))
 	{
-		printf("Sqlite-ERROR (%i): Statement to finish the work-record could not be prepared.\n", rc_prepare);
+		printf("Sqlite-ERROR (%li): Statement to finish the work-record could not be prepared.\n",
+			rc_prepare);
 		sqlite3_close(db);
 		return;
 	}
@@ -468,7 +464,10 @@ void cmd_stop( const char *description )
 	rc_step = sqlite3_step(stmt);
 
 	if (rc_step != SQLITE_DONE)
-		printf("Sqlite-ERROR (%i): Statement to finish the work record could not be executed.\n", rc_step);
+	{
+		printf("Sqlite-ERROR (%li): Statement to finish the work record could not be executed.\n",
+			rc_step);
+	}
 	else
 		printf("Work record finished with following description:\n%s\n", description);
 
@@ -476,15 +475,13 @@ void cmd_stop( const char *description )
 	sqlite3_close(db);
 }
 
-void cmd_edit_record_project( const int32_t record_id, const int32_t project_id )
+void cmd_edit_record_project( const sl32_t record_id, const sl32_t project_id )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
-	int32_t rec_id;
-	int32_t pro_id;
-	int32_t rc_prepare;
-	int32_t rc_bind[2];
-	int32_t rc_step;
+	sl32_t rec_id;
+	sl32_t pro_id;
+	sl32_t rc_prepare, rc_bind[2], rc_step;
 
 	// connect
 	if (database_connect(&db) != 0)
@@ -493,8 +490,8 @@ void cmd_edit_record_project( const int32_t record_id, const int32_t project_id 
 	// update record
 	rc_prepare = sqlite3_prepare_v2(db, SQL_EDIT_RECORD_PROJECT, -1, &stmt, 0);
 
-	if ((parse_id(db, project_id, true, &pro_id) != 0) ||
-		(parse_id(db, record_id, false, &rec_id) != 0))
+	if ((parse_id(db, project_id, TRUE, &pro_id) != 0) ||
+		(parse_id(db, record_id, FALSE, &rec_id) != 0))
 	{
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -509,7 +506,7 @@ void cmd_edit_record_project( const int32_t record_id, const int32_t project_id 
 		(rc_bind[1] != SQLITE_OK))
 	{
 		printf(
-			"Sqlite-ERROR (%i, %i, %i): Statement to edit the work-record could not be prepared.\n",
+			"Sqlite-ERROR (%li, %li, %li): Statement to edit the work-record could not be prepared.\n",
 			rc_prepare, rc_bind[0], rc_bind[1]);
 		sqlite3_close(db);
 		return;
@@ -520,17 +517,18 @@ void cmd_edit_record_project( const int32_t record_id, const int32_t project_id 
 	switch (rc_step)
 	{
 		case SQLITE_DONE:
-			printf("Record %i project set to %i.\n", rec_id, pro_id);
+			printf("Record %li project set to %li.\n", rec_id, pro_id);
 			break;
 
 		case SQLITE_CONSTRAINT:
 			printf(
-				"Sqlite-ERROR (%i): Statement failed on a constraint.\n"
-				"Make sure project %i exists.\n", rc_step, project_id);
+				"Sqlite-ERROR (%li): Statement failed on a constraint.\n"
+				"Make sure project %li exists.\n", rc_step, project_id);
 			break;
 
 		default:
-			printf("Sqlite-ERROR (%i): Statement to edit the work-record could not be executed.\n", rc_step);
+			printf("Sqlite-ERROR (%li): Statement to edit the work-record could not be executed.\n",
+				rc_step);
 			break;
 	}
 
@@ -539,9 +537,9 @@ void cmd_edit_record_project( const int32_t record_id, const int32_t project_id 
 }
 
 void cmd_edit_record_time(
-	const bool work_record_begin, const int32_t record_id,
-	const int16_t year, const int8_t month, const int8_t day,
-	const int8_t hour, const int8_t minute )
+	const bool_t work_record_begin, const sl32_t record_id,
+	const sl16_t year, const sl8_t month, const sl8_t day,
+	const sl8_t hour, const sl8_t minute )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
@@ -549,10 +547,8 @@ void cmd_edit_record_time(
 	struct tm *now;
 	time_t record_time;
 	struct tm dt;
-	int32_t id;
-	int32_t rc_prepare;
-	int32_t rc_bind[2];
-	int32_t rc_step;
+	sl32_t id;
+	sl32_t rc_prepare, rc_bind[2], rc_step;
 
 	// connect
 	if (database_connect(&db) != 0)
@@ -590,7 +586,7 @@ void cmd_edit_record_time(
 	record_time = mktime(&dt);
 
 	// prepare sql
-	if (parse_id(db, record_id, false, &id) != 0)
+	if (parse_id(db, record_id, FALSE, &id) != 0)
 	{
 		sqlite3_close(db);
 		return;
@@ -598,7 +594,7 @@ void cmd_edit_record_time(
 
 	rc_prepare = sqlite3_prepare_v2(
 		db,
-		(work_record_begin == true ? SQL_EDIT_RECORD_BEGIN : SQL_EDIT_RECORD_END),
+		(work_record_begin == TRUE ? SQL_EDIT_RECORD_BEGIN : SQL_EDIT_RECORD_END),
 		-1,
 		&stmt,
 		0);
@@ -610,7 +606,7 @@ void cmd_edit_record_time(
 		(rc_bind[1] != SQLITE_OK))
 	{
 		printf(
-			"Sqlite-ERROR (%i, %i, %i): Statement to edit the work-record could not be prepared.\n",
+			"Sqlite-ERROR (%li, %li, %li): Statement to edit the work-record could not be prepared.\n",
 			rc_prepare, rc_bind[0], rc_bind[1]);
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -622,33 +618,33 @@ void cmd_edit_record_time(
 
 	if (rc_step == SQLITE_CONSTRAINT)
 		printf(
-			"Sqlite-ERROR (%i): Statement failed on a constraint."
+			"Sqlite-ERROR (%li): Statement failed on a constraint."
 			"\nMake sure the record's begin is before the end.\n", rc_step);
 	else if (rc_step != SQLITE_DONE)
-		printf("Sqlite-ERROR (%i): Statement to edit work-record could not be executed.\n", rc_step);
+		printf("Sqlite-ERROR (%li): Statement to edit work-record could not be executed.\n", rc_step);
 	else
 		printf(
-			"Record %i project %s set to %i-%02i-%02i %02i:%02i.\n",
-			id, (work_record_begin == true ? "begin" : "end"),
+			"Record %li project %s set to %i-%02i-%02i %02i:%02i.\n",
+			id, (work_record_begin == TRUE ? "begin" : "end"),
 			(1900 + dt.tm_year), (1 + dt.tm_mon), dt.tm_mday, hour, minute);
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
 }
 
-void cmd_edit_record_description( const int32_t record_id, const char *desc )
+void cmd_edit_record_description( const sl32_t record_id, const char *desc )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
-	int32_t id;
-	int32_t rc_prep, rc_step, rc_bind[2];
+	sl32_t id;
+	sl32_t rc_prep, rc_step, rc_bind[2];
 
 	// connect
 	if (database_connect(&db) != 0)
 		return;
 
 	// prepare
-	if (parse_id(db, record_id, false, &id) != 0)
+	if (parse_id(db, record_id, FALSE, &id) != 0)
 	{
 		sqlite3_close(db);
 		return;
@@ -663,7 +659,7 @@ void cmd_edit_record_description( const int32_t record_id, const char *desc )
 		(rc_bind[1] != SQLITE_OK))
 	{
 		printf(
-			"Sqlite-ERROR (%i, %i, %i): Statement to edit record description could not be prepared.\n",
+			"Sqlite-ERROR (%li, %li, %li): Statement to edit record description could not be prepared.\n",
 			rc_prep, rc_bind[0], rc_bind[1]);
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -674,27 +670,30 @@ void cmd_edit_record_description( const int32_t record_id, const char *desc )
 	rc_step = sqlite3_step(stmt);
 
 	if (rc_step != SQLITE_DONE)
-		printf("Sqlite-ERROR (%i): Statement to edit record description could not be executed.\n", rc_step);
+	{
+		printf("Sqlite-ERROR (%li): Statement to edit record description could not be executed.\n",
+			rc_step);
+	}
 	else
-		printf("Record %i description changed to:\n%s\n", id, desc);
+		printf("Record %li description changed to:\n%s\n", id, desc);
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
 }
 
-void cmd_delete_record( const int32_t record_id )
+void cmd_delete_record( const sl32_t record_id )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
-	int32_t id;
-	int32_t rc_prep, rc_bind, rc_step;
+	sl32_t id;
+	sl32_t rc_prep, rc_bind, rc_step;
 
 	// connect to db
 	if (database_connect(&db) != 0)
 		return;
 
 	// prepare
-	if (parse_id(db, record_id, false, &id) != 0)
+	if (parse_id(db, record_id, FALSE, &id) != 0)
 	{
 		sqlite3_close(db);
 		return;
@@ -707,7 +706,7 @@ void cmd_delete_record( const int32_t record_id )
 		(rc_bind != SQLITE_OK))
 	{
 		printf(
-			"Sqlite-ERROR (%i, %i): Statement to delete record could not be prepared.\n",
+			"Sqlite-ERROR (%li, %li): Statement to delete record could not be prepared.\n",
 			rc_prep, rc_bind);
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
@@ -718,19 +717,19 @@ void cmd_delete_record( const int32_t record_id )
 	rc_step = sqlite3_step(stmt);
 
 	if (rc_step != SQLITE_DONE)
-		printf("Sqlite-ERROR (%i): Statement to delete record could not be executed.\n", rc_step);
+		printf("Sqlite-ERROR (%li): Statement to delete record could not be executed.\n", rc_step);
 	else
-		printf("Record %i deleted.\n", id);
+		printf("Record %li deleted.\n", id);
 
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
 }
 
-void cmd_transfer_project_records( const int32_t src_project_id, const int32_t dest_project_id )
+void cmd_transfer_project_records( const sl32_t src_project_id, const sl32_t dest_project_id )
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt;
-	int32_t rc_prep, rc_bind[2], rc_step;
+	sl32_t rc_prep, rc_bind[2], rc_step;
 	char confirmation = 'n';
 
 	// get user confirmation
@@ -755,7 +754,7 @@ void cmd_transfer_project_records( const int32_t src_project_id, const int32_t d
 		(rc_bind[0] != SQLITE_OK) ||
 		(rc_bind[1] != SQLITE_OK))
 	{
-		printf("Sqlite-ERROR (%i): Statement to transfer records could not be prepared.\n", rc_prep);
+		printf("Sqlite-ERROR (%li): Statement to transfer records could not be prepared.\n", rc_prep);
 		sqlite3_finalize(stmt);
 		return;
 	}
@@ -770,7 +769,7 @@ void cmd_transfer_project_records( const int32_t src_project_id, const int32_t d
 
 	if (rc_step != SQLITE_DONE)
 	{
-		printf("Sqlite-ERROR (%i): Statement to transfer records failed.\n", rc_step);
+		printf("Sqlite-ERROR (%li): Statement to transfer records failed.\n", rc_step);
 	}
 
 	// done
@@ -778,7 +777,7 @@ void cmd_transfer_project_records( const int32_t src_project_id, const int32_t d
 	sqlite3_close(db);
 }
 
-void cmd_show_records_month( const int16_t year, const int8_t month )
+void cmd_show_records_month( const sl16_t year, const sl8_t month )
 {
 	sqlite3 *db;
 	time_t begin, end;
@@ -838,7 +837,7 @@ void cmd_show_records_month( const int16_t year, const int8_t month )
 	sqlite3_close(db);
 }
 
-void cmd_show_records_week( const int16_t year, const int8_t month, const int8_t day )
+void cmd_show_records_week( const sl16_t year, const sl8_t month, const sl8_t day )
 {
 	sqlite3 *db;
 	time_t begin, end;
