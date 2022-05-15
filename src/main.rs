@@ -16,45 +16,17 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <SM_crypto.h>
-#include "app.h"
-#include "tools.h"
-#include "commands.h"
+mod commands;
+use std::env;
 
-void print_cmd_djb2( void )
-{
-	FILE *file = fopen("djb2_hash.txt", "w");
+fn main() {
+	//let args: Vec<String> = env::args().collect();
 
-	fprintf(file, "%-32s| %-10s | %-10s\n", "cmd", "name", "abbr");
-
-	for (uint32_t i = 0; i <= CMD_LAST; i++)
-	{
-		if (DATA_COMMANDS[i].has_abbr)
-		{
-			fprintf(file,
-				"%-32s| %-10u | %-10u\n",
-				DATA_COMMANDS[i].name,
-				SM_djb2_encode(DATA_COMMANDS[i].name),
-				SM_djb2_encode(DATA_COMMANDS[i].abbr));
-		}
-		else
-		{
-			fprintf(file,
-				"%-32s| %-10u |\n",
-				DATA_COMMANDS[i].name,
-				SM_djb2_encode(DATA_COMMANDS[i].name));
-
-		}
-	}
-
-	fclose(file);
+	commands::help();
 }
 
-int main( int argc, char *argv[] )
-{
+
+/*
 	u32_t cmd_hash;
 	bool_t edit_begin = FALSE;
 	bool_t force = FALSE;
@@ -475,3 +447,4 @@ int main( int argc, char *argv[] )
 
 	return 0;
 }
+*/
