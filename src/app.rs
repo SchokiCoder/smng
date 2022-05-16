@@ -16,17 +16,6 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef APP_H
-#define APP_H
-
-static const char APP_NAME[] = "smng";
-static const char APP_LICENSE[] = "GPLv3";
-static const char APP_LICENSE_NOTICE[] =
-"You should have received a copy of the GNU General Public License\n" \
-"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
-static const char APP_SOURCE[] = "https://github.com/SchokiCoder/smng";
-#define APP_MAJOR 1
-#define APP_MINOR 2
-#define APP_PATCH 2
-
-#endif // APP_H
+pub const NAME: &str = "smng";
+pub const LICENSE: &str = "GPLv3";
+pub const SOURCE: &str = "https://github.com/SchokiCoder/smng";
