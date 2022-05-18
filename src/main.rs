@@ -22,8 +22,8 @@ pub mod commands;
 
 fn main() {
 	//let args: Vec<String> = env::args().collect();
-
-	commands::edit_record_begin(198, 2022, 05, 16, 20, 00);
+	
+	commands::edit_record_description(196, String::from("time tests"));
 }
 
 

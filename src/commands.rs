@@ -344,16 +344,25 @@ pub fn edit_record_project(record_id: i64, project_id: i64) {
 	stmt.next().unwrap();
 }
 
-pub fn edit_record_begin(record_id: i64, year: i64, month: i64, day: i64, hour: i64, minute: i64) {
+fn edit_record_time(begin: bool, record_id: i64, year: i64, month: i64, day: i64, hour: i64, minute: i64) {
 	let db = database_open();
 
-	let mut stmt = db
-		.prepare(
-			"UPDATE tbl_work_records\n\
-	 		 SET begin = unixepoch('?-?-? ?:?:00')\n\
-	 		 WHERE work_record_id = ?;")
-	 	.unwrap();
+	let mut sql = String::from("UPDATE tbl_work_records\nSET ");
 
+	if begin == true {
+		sql.push_str("begin");
+	}
+	else {
+		sql.push_str("end");
+	}
+
+	sql.push_str(" = strftime('%s', printf('%04i-%02i-%02i %02i:%02i:00', ?, ?, ?, ?, ?))");
+	sql.push_str("WHERE work_record_id = ?;");
+
+	let mut stmt = db
+		.prepare(sql.as_str())
+	 	.unwrap();
+	
 	stmt.bind(1, year).unwrap();
 	stmt.bind(2, month).unwrap();
 	stmt.bind(3, day).unwrap();
@@ -361,4 +370,35 @@ pub fn edit_record_begin(record_id: i64, year: i64, month: i64, day: i64, hour: 
 	stmt.bind(5, minute).unwrap();
 	stmt.bind(6, record_id).unwrap();
 	stmt.next().unwrap();
+}
+
+pub fn edit_record_begin(record_id: i64, year: i64, month: i64, day: i64, hour: i64, minute: i64) {
+	edit_record_time(true, record_id, year, month, day, hour, minute);
+}
+
+pub fn edit_record_end(record_id: i64, year: i64, month: i64, day: i64, hour: i64, minute: i64) {
+	edit_record_time(false, record_id, year, month, day, hour, minute);
+}
+
+pub fn edit_record_description(record_id: i64, description: String) {
+	let db = database_open();
+
+	let mut stmt = db
+		.prepare(
+			"UPDATE tbl_work_records\n \
+			 SET description = ?\n \
+			 WHERE work_record_id = ?;")
+		.unwrap();
+
+	stmt.bind(1, description.as_str()).unwrap();
+	stmt.bind(2, record_id).unwrap();
+	stmt.next().unwrap();
+}
+
+pub fn transfer_project_records(src_record_id: i64, dest_record_id: i64) {
+	let db = database_open();
+
+	let mut stmt = db
+		.prepare("")
+		.unwrap();
 }
