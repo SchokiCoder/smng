@@ -395,10 +395,103 @@ pub fn edit_record_description(record_id: i64, description: String) {
 	stmt.next().unwrap();
 }
 
-pub fn transfer_project_records(src_record_id: i64, dest_record_id: i64) {
+pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 	let db = database_open();
 
 	let mut stmt = db
-		.prepare("")
+		.prepare(
+			"UPDATE tbl_work_records\n \
+			 SET project_id = ? \
+			 WHERE project_id = ?;")
 		.unwrap();
+
+	stmt.bind(1, dest_project_id).unwrap();
+	stmt.bind(2, src_project_id).unwrap();
+
+	while sqlite::State::Row == stmt.next().unwrap() {}
+}
+
+fn show_records(ts_begin: i64, ts_end: i64) {
+	// execute sql
+	let db = database_open();
+
+	let mut stmt = db.prepare(
+		"SELECT work_record_id, \
+		 strftime('%d', begin, 'unixepoch') as begin_day, \
+		 strftime('%H:%M', begin, 'unixepoch') as begin_time, \
+		 strftime('%d', end, 'unixepoch') as end_day, \
+		 strftime('%H:%M', end, 'unixepoch') as end_time, \
+		 strftime('%H:%M', end - begin, 'unixepoch') AS worktime, \
+		 project_id, description\n \
+		 FROM tbl_work_records\n \
+		 WHERE begin > ? AND end < ?;")
+		.unwrap();
+
+	stmt.bind(1, ts_begin).unwrap();
+	stmt.bind(2, ts_end).unwrap();
+
+	// print	
+	println!("{:9} | {:8} | {:8} | {:5} | {:9} | {}",
+		"id", "begin", "end", "time", "project", "description");
+	
+	while stmt.next().unwrap() == sqlite::State::Row {
+		println!(
+			"{:9} | {:8} | {:8} | {:5} | {:9} | {}",
+			stmt.read::<i64>(0).unwrap(),
+			stmt.read::<String>(2).unwrap(),
+			stmt.read::<String>(4).unwrap(),
+			stmt.read::<String>(5).unwrap(),
+			stmt.read::<i64>(6).unwrap(),
+			stmt.read::<String>(7).unwrap());
+	}
+}
+
+use chrono::prelude::*;
+
+const DAY_SECONDS: i64 = 60 * 60 * 24;
+
+pub fn show_week(year: i32, month: u32, day: u32) {
+	// find begin and end of week
+	let dt_given = Utc
+		.ymd(year, month, day)
+		.and_hms(0, 0, 0);
+
+	let ts_given = dt_given.timestamp();
+		
+	let weekday = dt_given
+		.weekday()
+		.num_days_from_sunday();
+		
+	let weekbegin: i64 = i64::from(weekday);
+	let weekend: i64 = 7 - i64::from(weekday);
+	
+	let ts_begin = ts_given - (weekbegin * DAY_SECONDS);
+	let ts_end = ts_given + (weekend * DAY_SECONDS);
+
+	// print
+	show_records(ts_begin, ts_end);
+}
+
+pub fn show_month(year: i32, month: u32) {
+	// find begin and end of month
+	let ts_begin = Utc
+		.ymd(year, month, 1)
+		.and_hms(0, 0, 0)
+		.timestamp();
+		
+	let ts_temp = Utc
+		.ymd(year, month, 28)
+		.and_hms(0, 0, 0)
+		.timestamp();
+		
+	let mut ts_end: i64 = 0;
+
+	for i in 1..4 {
+		if Utc.timestamp(ts_temp + (i * DAY_SECONDS), 0).month() != Utc.timestamp(ts_temp, 0).month() {
+			ts_end = ts_temp + ((i - 1) * DAY_SECONDS);
+		}
+	}
+
+	// print
+	show_records(ts_begin, ts_end);
 }

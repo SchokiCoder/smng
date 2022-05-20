@@ -7,4 +7,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sqlite = "*"
+sqlite = "0.26.*"
+chrono = "0.4.*"

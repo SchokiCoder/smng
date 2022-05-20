@@ -23,7 +23,8 @@ pub mod commands;
 fn main() {
 	//let args: Vec<String> = env::args().collect();
 	
-	commands::edit_record_description(196, String::from("time tests"));
+	commands::show_month(2022, 02);
+	//commands::show_week();
 }
 
 
