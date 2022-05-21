@@ -153,27 +153,78 @@ fn print_cmd_help(cmd: CommandData) {
 }
 
 fn database_open() -> sqlite::Connection {
+	let mut db_empty: bool = false;
+	let mut path = String::from(std::env::var("HOME").unwrap());
+	path.push_str("/.");
+	path.push_str(app::NAME);
+	path.push_str("/worktimes.db");
+
+	// if db doesn't exist, flag
+	if std::fs::metadata(path.as_str()).is_ok() == false {
+		db_empty = true;
+	}
 
 	// open db
-	#[cfg(all(static_db_path))]
 	let db = {
-		sqlite::open(cfg(static_db_path)).unwrap()
-	};
+		let temp = sqlite::open(path.as_str());
 
-	#[cfg(not(static_db_path))]
-	let db = {
-		let mut path = String::from(std::env::var("HOME").unwrap());
-		path.push_str("/.");
-		path.push_str(app::NAME);
-		path.push_str("/worktimes.db");
+		// if connection ok, set db
+		if temp.is_ok() {
+			temp.unwrap()
+		}
 
-		sqlite::open(path).unwrap()
+		// else panic
+		else {
+			panic!("Connection to database \"{}\" failed.", path.as_str());
+		}
 	};
 
 	// activate foreign keys
 	db
 		.execute("PRAGMA foreign_keys = ON;")
 		.unwrap();
+
+	// if flagged, create database
+	if db_empty {
+		println!("WARNING: Database does not exist and will be newly created at \"{}\".", path.as_str());
+		
+		db
+			.execute(
+				"CREATE TABLE tbl_projects( \
+				 project_id INTEGER PRIMARY KEY, \
+				 project_name VARCHAR(32) NOT NULL UNIQUE);")
+			.unwrap();
+
+		db
+			.execute(
+				"CREATE TABLE tbl_work_records( \
+				 work_record_id INTEGER PRIMARY KEY, \
+				 project_id INTEGER NOT NULL REFERENCES tbl_projects(project_id), \
+				 begin INTEGER NOT NULL, \
+				 end INTEGER CHECK(end > begin), \
+				 description VARCHAR(50));")
+			.unwrap();
+
+		db
+			.execute(
+				"CREATE INDEX idx_work_record_id ON tbl_work_records(work_record_id);")
+			.unwrap();
+
+		db
+			.execute(
+				"CREATE INDEX idx_project_id ON tbl_projects(project_id);")
+			.unwrap();
+
+		db
+			.execute(
+				"CREATE INDEX idx_begin ON tbl_work_records(begin);")
+			.unwrap();
+
+		db
+			.execute(
+				"CREATE INDEX idx_end ON tbl_work_records(end);")
+			.unwrap();
+	}
 
 	return db;
 }
