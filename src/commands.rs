@@ -18,135 +18,89 @@
 
 use super::app;
 
-pub struct CommandData {
-	short: &'static str,
-	name: &'static str,
-	abbr: Option<&'static str>,
-	args: Option<&'static str>,
-}
+pub const HELP_INFO: &str = "prints all help messages";
+pub const HELP_NAME: &str = "help";
+pub const HELP_ABBR: &str = "h";
 
-pub const DATA_HELP: CommandData = CommandData {
-	short: "prints all help messages",
-	name: "help",
-	abbr: Some("h"),
-	args: None,
-};
+pub const ADD_PROJECT_INFO: &str = "add a project";
+pub const ADD_PROJECT_NAME: &str = "add-project";
+pub const ADD_PROJECT_ABBR: &str = "ap";
+pub const ADD_PROJECT_ARGS: &str = "project_name";
 
-pub const DATA_ADD_PROJECT: CommandData = CommandData {
-	short: "add a project",
-	name: "add-project",
-	abbr: Some("ap"),
-	args: Some("project_name"),
-};
+pub const SHOW_PROJECTS_INFO: &str = "show projects";
+pub const SHOW_PROJECTS_NAME: &str = "show-projects";
+pub const SHOW_PROJECTS_ABBR: &str = "sp";
 
-pub const DATA_SHOW_PROJECTS: CommandData = CommandData {
-	short: "show projects",
-	name: "show-project",
-	abbr: Some("sp"),
-	args: None,
-};
+pub const EDIT_PROJECT_INFO: &str = "edit project name";
+pub const EDIT_PROJECT_NAME: &str = "edit-project";
+pub const EDIT_PROJECT_ABBR: &str = "ep";
+pub const EDIT_PROJECT_ARGS: &str = "project_id project_name";
 
-pub const DATA_EDIT_PROJECT: CommandData = CommandData {
-	short: "edit project name",
-	name: "edit-project",
-	abbr: Some("ep"),
-	args: Some("project_name"),
-};
+pub const DELETE_PROJECT_INFO: &str = "delete a project and if wished purge all records";
+pub const DELETE_PROJECT_NAME: &str = "delete-project";
+pub const DELETE_PROJECT_ARGS: &str = "project_id [purge]";
 
-pub const DATA_DELETE_PROJECT: CommandData = CommandData {
-	short: "delete a project and if wished purge all entries",
-	name: "delete-project",
-	abbr: None,
-	args: Some("project_id [purge]"),
-};
+pub const RECORD_INFO: &str = "record work time on given project";
+pub const RECORD_NAME: &str = "record";
+pub const RECORD_ABBR: &str = "r";
+pub const RECORD_ARGS: &str = "project_id";
 
-pub const DATA_RECORD: CommandData = CommandData {
-	short: "record work time on given project",
-	name: "record",
-	abbr: Some("r"),
-	args: Some("project_id"),
-};
+pub const STATUS_INFO: &str = "show current work status";
+pub const STATUS_NAME: &str = "status";
 
-pub const DATA_STATUS: CommandData = CommandData {
-	short: "show current work status",
-	name: "status",
-	abbr: None,
-	args: None,
-};
+pub const STOP_INFO: &str = "stop recording work time";
+pub const STOP_NAME: &str = "stop";
+pub const STOP_ABBR: &str = "s";
+pub const STOP_ARGS: &str = "description";
 
-pub const DATA_STOP: CommandData = CommandData {
-	short: "stop recording work time",
-	name: "stop",
-	abbr: Some("s"),
-	args: Some("description"),
-};
+pub const EDIT_RECORD_PROJECT_INFO: &str = "edit record's project";
+pub const EDIT_RECORD_PROJECT_NAME: &str = "edit-record-project";
+pub const EDIT_RECORD_PROJECT_ABBR: &str = "erp";
+pub const EDIT_RECORD_PROJECT_ARGS: &str = "record_id project_id";
 
-pub const DATA_EDIT_RECORD_PROJECT: CommandData = CommandData {
-	short: "edit record's project",
-	name: "edit-record-project",
-	abbr: Some("erp"),
-	args: Some("record_id project_id"),
-};
+pub const EDIT_RECORD_BEGIN_INFO: &str = "edit record's begin";
+pub const EDIT_RECORD_BEGIN_NAME: &str = "edit-record-begin";
+pub const EDIT_RECORD_BEGIN_ABBR: &str = "erb";
+pub const EDIT_RECORD_BEGIN_ARGS: &str = "record_id year month day hour minute";
 
-pub const DATA_EDIT_RECORD_BEGIN: CommandData = CommandData {
-	short: "edit record's begin",
-	name: "edit-record-begin",
-	abbr: Some("erb"),
-	args: Some("record_id year month day hour minute"),
-};
+pub const EDIT_RECORD_END_INFO: &str = "edit record's end";
+pub const EDIT_RECORD_END_NAME: &str = "edit-record-end";
+pub const EDIT_RECORD_END_ABBR: &str = "ere";
+pub const EDIT_RECORD_END_ARGS: &str = "record_id year month day hour minute";
 
-pub const DATA_EDIT_RECORD_END: CommandData = CommandData {
-	short: "edit record's end",
-	name: "edit-record-end",
-	abbr: Some("ere"),
-	args: Some("record_id year month day hour minute"),
-};
+pub const EDIT_RECORD_DESCRIPTION_INFO: &str = "edit record's description";
+pub const EDIT_RECORD_DESCRIPTION_NAME: &str = "edit-record-description";
+pub const EDIT_RECORD_DESCRIPTION_ABBR: &str = "erd";
+pub const EDIT_RECORD_DESCRIPTION_ARGS: &str = "record_id description";
 
-pub const DATA_EDIT_RECORD_DESCRIPTION: CommandData = CommandData {
-	short: "edit record's description",
-	name: "edit-record-description",
-	abbr: Some("erd"),
-	args: Some("record_id description"),
-};
+pub const DELETE_RECORD_INFO: &str = "delete given record";
+pub const DELETE_RECORD_NAME: &str = "delete-record";
+pub const DELETE_RECORD_ARGS: &str = "record_id";
 
-pub const DATA_DELETE_RECORD: CommandData = CommandData {
-	short: "delete given record",
-	name: "delete-record",
-	abbr: None,
-	args: Some("record_id"),
-};
+pub const TRANSFER_PROJECT_RECORDS_INFO: &str = "transfer all records from one project to another";
+pub const TRANSFER_PROJECT_RECORDS_NAME: &str = "transfer-project-records";
+pub const TRANSFER_PROJECT_RECORDS_ARGS: &str = "source_project_id destination_project_id";
 
-pub const DATA_TRANSFER_PROJECT_RECORDS: CommandData = CommandData {
-	short: "transfer all records from one project to another",
-	name: "transfer-project-records",
-	abbr: None,
-	args: Some("source_project_id destination_project_id"),
-};
+pub const SHOW_WEEK_INFO: &str = "show records of a certain week or current";
+pub const SHOW_WEEK_NAME: &str = "show-week";
+pub const SHOW_WEEK_ABBR: &str = "sw";
+pub const SHOW_WEEK_ARGS: &str = "[year month day]";
 
-pub const DATA_SHOW_WEEK: CommandData = CommandData {
-	short: "show record's of a certain week or current",
-	name: "show-week",
-	abbr: Some("sw"),
-	args: Some("[year month day]"),
-};
+pub const SHOW_MONTH_INFO: &str = "show records of a certain month or current";
+pub const SHOW_MONTH_NAME: &str = "show-month";
+pub const SHOW_MONTH_ABBR: &str = "sm";
+pub const SHOW_MONTH_ARGS: &str = "[year month]";
 
-pub const DATA_SHOW_MONTH: CommandData = CommandData {
-	short: "show work record's of a certain month or current",
-	name: "show-month",
-	abbr: Some("sm"),
-	args: Some("[year month]"),
-};
+fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&str>) {
+	println!("  {}:", info);
+	print!("  {}", name);
 
-fn print_cmd_help(cmd: CommandData) {
-	println!("  {}:", cmd.short);
-	print!("  {}", cmd.name);
-
-	if cmd.abbr.is_some() {
-		print!(", {}", cmd.abbr.unwrap());
+	if abbr.is_some() {
+		print!(", {}", abbr.unwrap());
 	}
 
-	if cmd.args.is_some() {
-		print!(" | {}", cmd.args.unwrap());
+	if args.is_some() {
+		print!(" | {}", args.unwrap());
 	}
 
 	println!("\n");	
@@ -234,27 +188,47 @@ pub fn help() {
 	println!("{} [COMMAND] [ARGS]", app::NAME);
 	println!("");
 
-	print_cmd_help(DATA_HELP);
-	print_cmd_help(DATA_ADD_PROJECT);
-	print_cmd_help(DATA_SHOW_PROJECTS);
-	print_cmd_help(DATA_EDIT_PROJECT);
-	print_cmd_help(DATA_DELETE_PROJECT);
-	print_cmd_help(DATA_RECORD);
-	print_cmd_help(DATA_STATUS);
-	print_cmd_help(DATA_STOP);
-	print_cmd_help(DATA_EDIT_RECORD_PROJECT);
-	print_cmd_help(DATA_EDIT_RECORD_BEGIN);
-	print_cmd_help(DATA_EDIT_RECORD_END);
-	print_cmd_help(DATA_EDIT_RECORD_DESCRIPTION);
-	print_cmd_help(DATA_DELETE_RECORD);
-	print_cmd_help(DATA_TRANSFER_PROJECT_RECORDS);
-	print_cmd_help(DATA_SHOW_WEEK);
-	print_cmd_help(DATA_SHOW_MONTH);
+	print_cmd_help(HELP_INFO, HELP_NAME, Some(HELP_ABBR), None);
+	print_cmd_help(ADD_PROJECT_INFO, ADD_PROJECT_NAME, Some(ADD_PROJECT_ABBR), Some(ADD_PROJECT_ARGS));
+	print_cmd_help(SHOW_PROJECTS_INFO, SHOW_PROJECTS_NAME, Some(SHOW_PROJECTS_ABBR), None);
+	print_cmd_help(EDIT_PROJECT_INFO, EDIT_PROJECT_NAME, Some(EDIT_PROJECT_ABBR), Some(EDIT_PROJECT_ARGS));
+	print_cmd_help(DELETE_PROJECT_INFO, DELETE_PROJECT_NAME, None, Some(DELETE_PROJECT_ARGS));
+	print_cmd_help(RECORD_INFO, RECORD_NAME, Some(RECORD_ABBR), Some(RECORD_ARGS));
+	print_cmd_help(STATUS_INFO, STATUS_NAME, None, None);
+	print_cmd_help(STOP_INFO, STOP_NAME, Some(STOP_ABBR), Some(STOP_ARGS));
+	print_cmd_help(
+		EDIT_RECORD_PROJECT_INFO,
+		EDIT_RECORD_PROJECT_NAME,
+		Some(EDIT_RECORD_PROJECT_ABBR),
+		Some(EDIT_RECORD_PROJECT_ARGS));
+	print_cmd_help(
+		EDIT_RECORD_BEGIN_INFO,
+		EDIT_RECORD_BEGIN_NAME,
+		Some(EDIT_RECORD_BEGIN_ABBR),
+		Some(EDIT_RECORD_BEGIN_ARGS));
+	print_cmd_help(
+		EDIT_RECORD_END_INFO,
+		EDIT_RECORD_END_NAME,
+		Some(EDIT_RECORD_END_ABBR),
+		Some(EDIT_RECORD_END_ARGS));
+	print_cmd_help(
+		EDIT_RECORD_DESCRIPTION_INFO,
+		EDIT_RECORD_DESCRIPTION_NAME,
+		Some(EDIT_RECORD_DESCRIPTION_ABBR),
+		Some(EDIT_RECORD_DESCRIPTION_ARGS));
+	print_cmd_help(DELETE_RECORD_INFO, DELETE_RECORD_NAME, None, Some(DELETE_RECORD_ARGS));
+	print_cmd_help(
+		TRANSFER_PROJECT_RECORDS_INFO,
+		TRANSFER_PROJECT_RECORDS_NAME,
+		None,
+		Some(TRANSFER_PROJECT_RECORDS_ARGS));
+	print_cmd_help(SHOW_WEEK_INFO, SHOW_WEEK_NAME, Some(SHOW_WEEK_ABBR), Some(SHOW_WEEK_ARGS));
+	print_cmd_help(SHOW_MONTH_INFO, SHOW_MONTH_NAME, Some(SHOW_MONTH_ABBR), Some(SHOW_MONTH_ARGS));
 
 	println!("You can also use negative id's to count from the other end.");
 }
 
-pub fn add_project(project_name: String) {
+pub fn add_project(project_name: &str) {
 	let db = database_open();
 
 	let mut stmt = db
@@ -263,7 +237,7 @@ pub fn add_project(project_name: String) {
 		 	 VALUES (?);")
 		.unwrap();
 
-	stmt.bind(1, project_name.as_str()).unwrap();
+	stmt.bind(1, project_name).unwrap();
 	stmt.next().unwrap();
 }
 
@@ -286,7 +260,7 @@ pub fn show_projects() {
 	}
 }
 
-pub fn edit_project(project_id: i64, project_name: String) {
+pub fn edit_project(project_id: i64, project_name: &str) {
 	let db = database_open();
 
 	let mut stmt = db
@@ -296,7 +270,7 @@ pub fn edit_project(project_id: i64, project_name: String) {
 			 WHERE project_id = ?;")
 		.unwrap();
 
-	stmt.bind(1, project_name.as_str()).unwrap();
+	stmt.bind(1, project_name).unwrap();
 	stmt.bind(2, project_id).unwrap();
 	stmt.next().unwrap();
 }
@@ -309,7 +283,7 @@ pub fn delete_project(project_id: i64, purge: bool) {
 		let mut stmt = db
 			.prepare(
 				"DELETE FROM tbl_work_records\n\
-			 	 WHERE record_id = ?;")
+			 	 WHERE work_record_id = ?;")
 			.unwrap();
 
 		stmt.bind(1, project_id).unwrap();
@@ -366,7 +340,7 @@ pub fn status() {
 		state_str);
 }
 
-pub fn stop(description: String) {
+pub fn stop(description: &str) {
 	let db = database_open();
 
 	let mut stmt = db
@@ -376,7 +350,7 @@ pub fn stop(description: String) {
 		 	 WHERE work_record_id = (SELECT MAX(work_record_id) FROM tbl_work_records);")
 		.unwrap();
 
-	stmt.bind(1, description.as_str()).unwrap();
+	stmt.bind(1, description).unwrap();
 	stmt.next().unwrap();
 }
 
@@ -431,7 +405,7 @@ pub fn edit_record_end(record_id: i64, year: i64, month: i64, day: i64, hour: i6
 	edit_record_time(false, record_id, year, month, day, hour, minute);
 }
 
-pub fn edit_record_description(record_id: i64, description: String) {
+pub fn edit_record_description(record_id: i64, description: &str) {
 	let db = database_open();
 
 	let mut stmt = db
@@ -441,7 +415,7 @@ pub fn edit_record_description(record_id: i64, description: String) {
 			 WHERE work_record_id = ?;")
 		.unwrap();
 
-	stmt.bind(1, description.as_str()).unwrap();
+	stmt.bind(1, description).unwrap();
 	stmt.bind(2, record_id).unwrap();
 	stmt.next().unwrap();
 }
