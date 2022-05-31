@@ -1,0 +1,14 @@
+{
+	-rewrite					v
+	-show week					v_09-26_31-05-2022
+	-record/stop check status	v_09-46
+	 before exec
+	-cmd feedback				v_10-00
+	-summary summarize worktime	.
+	-summary split days			.
+	-sw per week-no.			?
+	-make sure help text		.
+	 matches reality
+	
+	-v			. -> 2.0.0	
+}
