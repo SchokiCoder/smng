@@ -4,11 +4,23 @@
 	-record/stop check status	v_09-46
 	 before exec
 	-cmd feedback				v_10-00
-	-summary summarize worktime	.
-	-summary split days			.
+	-summary summarize worktime	v_09-59_01-06-2022
+	-summary split days			v_10-37
+	-description linebreak		.
 	-sw per week-no.			?
+	-show week/month without	.
+	 params
+	-utc/localtime needed		?
+	 in sql
+	-config						.
+	-negative ids				.
+	-when arguments needed but	.
+	 no arguments given,
+	 print help for that command
 	-make sure help text		.
 	 matches reality
+	-makefile					.
+	-README.md					.
 	
 	-v			. -> 2.0.0	
 }

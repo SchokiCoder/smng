@@ -184,26 +184,17 @@ fn main() {
 		},
 
 		commands::SHOW_WEEK_NAME | commands::SHOW_WEEK_ABBR => {
-			if argcount_check(args.len(), 2, 5) {
+			if argcount_check(args.len(), 5, 5) {
 				return;
 			}
 
-			let mut year: i32;
-			let mut month: i32;
-			let mut day: i32;
+			let year: i32;
+			let month: u32;
+			let day: u32;
 			
-			if args.len() <= 2 {
-				let today = chrono::offset::Utc::today();
-
-				year = today.year(); // when the today value has no way to give its numbers: thx chrono
-				month = today.month();
-				day = today.day();
-			}
-			else {
-				year = args[2].parse::<i32>().unwrap();
-				month = args[3].parse::<i32>().unwrap();
-				day = args[4].parse::<i32>().unwrap();
-			}
+			year = args[2].parse::<i32>().unwrap();
+			month = args[3].parse::<u32>().unwrap();
+			day = args[4].parse::<u32>().unwrap();
 
 			commands::show_week(year, month, day);
 		},

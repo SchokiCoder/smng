@@ -189,11 +189,31 @@ pub fn help() {
 	println!("");
 
 	print_cmd_help(HELP_INFO, HELP_NAME, Some(HELP_ABBR), None);
-	print_cmd_help(ADD_PROJECT_INFO, ADD_PROJECT_NAME, Some(ADD_PROJECT_ABBR), Some(ADD_PROJECT_ARGS));
-	print_cmd_help(SHOW_PROJECTS_INFO, SHOW_PROJECTS_NAME, Some(SHOW_PROJECTS_ABBR), None);
-	print_cmd_help(EDIT_PROJECT_INFO, EDIT_PROJECT_NAME, Some(EDIT_PROJECT_ABBR), Some(EDIT_PROJECT_ARGS));
-	print_cmd_help(DELETE_PROJECT_INFO, DELETE_PROJECT_NAME, None, Some(DELETE_PROJECT_ARGS));
-	print_cmd_help(RECORD_INFO, RECORD_NAME, Some(RECORD_ABBR), Some(RECORD_ARGS));
+	print_cmd_help(
+		ADD_PROJECT_INFO,
+		ADD_PROJECT_NAME,
+		Some(ADD_PROJECT_ABBR),
+		Some(ADD_PROJECT_ARGS));
+	print_cmd_help(
+		SHOW_PROJECTS_INFO,
+		SHOW_PROJECTS_NAME,
+		Some(SHOW_PROJECTS_ABBR),
+		None);
+	print_cmd_help(
+		EDIT_PROJECT_INFO,
+		EDIT_PROJECT_NAME,
+		Some(EDIT_PROJECT_ABBR),
+		Some(EDIT_PROJECT_ARGS));
+	print_cmd_help(
+		DELETE_PROJECT_INFO,
+		DELETE_PROJECT_NAME,
+		None,
+		Some(DELETE_PROJECT_ARGS));
+	print_cmd_help(
+		RECORD_INFO,
+		RECORD_NAME,
+		Some(RECORD_ABBR),
+		Some(RECORD_ARGS));
 	print_cmd_help(STATUS_INFO, STATUS_NAME, None, None);
 	print_cmd_help(STOP_INFO, STOP_NAME, Some(STOP_ABBR), Some(STOP_ARGS));
 	print_cmd_help(
@@ -216,14 +236,26 @@ pub fn help() {
 		EDIT_RECORD_DESCRIPTION_NAME,
 		Some(EDIT_RECORD_DESCRIPTION_ABBR),
 		Some(EDIT_RECORD_DESCRIPTION_ARGS));
-	print_cmd_help(DELETE_RECORD_INFO, DELETE_RECORD_NAME, None, Some(DELETE_RECORD_ARGS));
+	print_cmd_help(
+		DELETE_RECORD_INFO,
+		DELETE_RECORD_NAME,
+		None,
+		Some(DELETE_RECORD_ARGS));
 	print_cmd_help(
 		TRANSFER_PROJECT_RECORDS_INFO,
 		TRANSFER_PROJECT_RECORDS_NAME,
 		None,
 		Some(TRANSFER_PROJECT_RECORDS_ARGS));
-	print_cmd_help(SHOW_WEEK_INFO, SHOW_WEEK_NAME, Some(SHOW_WEEK_ABBR), Some(SHOW_WEEK_ARGS));
-	print_cmd_help(SHOW_MONTH_INFO, SHOW_MONTH_NAME, Some(SHOW_MONTH_ABBR), Some(SHOW_MONTH_ARGS));
+	print_cmd_help(
+		SHOW_WEEK_INFO,
+		SHOW_WEEK_NAME,
+		Some(SHOW_WEEK_ABBR),
+		Some(SHOW_WEEK_ARGS));
+	print_cmd_help(
+		SHOW_MONTH_INFO,
+		SHOW_MONTH_NAME,
+		Some(SHOW_MONTH_ABBR),
+		Some(SHOW_MONTH_ARGS));
 
 	println!("You can also use negative id's to count from the other end.");
 }
@@ -239,6 +271,8 @@ pub fn add_project(project_name: &str) {
 
 	stmt.bind(1, project_name).unwrap();
 	stmt.next().unwrap();
+
+	println!("Project \"{}\" added.", project_name);
 }
 
 pub fn show_projects() {
@@ -273,6 +307,8 @@ pub fn edit_project(project_id: i64, project_name: &str) {
 	stmt.bind(1, project_name).unwrap();
 	stmt.bind(2, project_id).unwrap();
 	stmt.next().unwrap();
+
+	println!("Project ({}) name set to \"{}\".", project_id, project_name);
 }
 
 pub fn delete_project(project_id: i64, purge: bool) {
@@ -298,9 +334,51 @@ pub fn delete_project(project_id: i64, purge: bool) {
 
 	stmt.bind(1, project_id).unwrap();
 	stmt.next().unwrap();
+
+	if purge {
+		println!("Project ({}) and its records deleted.", project_id);
+	}
+	else {
+		println!("Project ({}) deleted.", project_id);
+	}
+}
+
+struct RecordState {
+	id: i64,
+	state: i64,
+}
+
+impl RecordState {
+	pub fn last() -> RecordState {
+		let db = database_open();
+
+		let mut stmt = db
+			.prepare(
+				"SELECT work_record_id, \
+				 (CASE WHEN end IS NULL THEN 0 ELSE 1 END) as record_complete\n \
+				 FROM tbl_work_records\n \
+				 ORDER BY work_record_id DESC LIMIT 1;")
+			.unwrap();
+
+		stmt.next().unwrap();
+
+		return RecordState {
+			id: stmt.read::<i64>(0).unwrap(),
+			state: stmt.read::<i64>(1).unwrap(),
+		};
+	}
 }
 
 pub fn record(project_id: i64) {
+	// if last record is not done, stop
+	let rec_state = RecordState::last();
+
+	if rec_state.state == 0 {
+		println!("ERROR: Last record ({}) is not yet done.", rec_state.id);
+		return;
+	}
+
+	// exec
 	let db = database_open();
 
 	let mut stmt = db
@@ -311,36 +389,35 @@ pub fn record(project_id: i64) {
 
 	stmt.bind(1, project_id).unwrap();
 	stmt.next().unwrap();
+
+	println!("Record for project ({}) started.", project_id);
 }
 
 pub fn status() {
-	let db = database_open();
-
-	let mut stmt = db
-		.prepare(
-			"SELECT work_record_id, \
-			 (CASE WHEN end IS NULL THEN 0 ELSE 1 END) as record_complete\n \
-			 FROM tbl_work_records\n \
-			 ORDER BY work_record_id DESC LIMIT 1;")
-		.unwrap();
-
-	stmt.next().unwrap();
+	let rec_state = RecordState::last();
 
 	let state_str: &str;
 
-	if stmt.read::<i64>(1).unwrap() == 1 {
+	if rec_state.state == 1 {
 		state_str = "";
 	}
 	else {
 		state_str = "NOT ";
 	}
 
-	println!("Last record ({}) is {}done.",
-		stmt.read::<String>(0).unwrap(),
-		state_str);
+	println!("Last record ({}) is {}done.", rec_state.id, state_str);
 }
 
 pub fn stop(description: &str) {
+	// if last record is done, stop
+	let rec_state = RecordState::last();
+
+	if rec_state.state == 1 {
+		println!("ERROR: Last record ({}) is already done.", rec_state.id);
+		return;
+	}
+
+	//exec
 	let db = database_open();
 
 	let mut stmt = db
@@ -352,6 +429,8 @@ pub fn stop(description: &str) {
 
 	stmt.bind(1, description).unwrap();
 	stmt.next().unwrap();
+
+	println!("Record stopped with descritpion \"{}\".", description);
 }
 
 pub fn edit_record_project(record_id: i64, project_id: i64) {
@@ -367,9 +446,12 @@ pub fn edit_record_project(record_id: i64, project_id: i64) {
 	stmt.bind(1, project_id).unwrap();
 	stmt.bind(2, record_id).unwrap();
 	stmt.next().unwrap();
+
+	println!("Record ({}) project set to ({}).", record_id, project_id);
 }
 
-fn edit_record_time(begin: bool, record_id: i64, year: i64, month: i64, day: i64, hour: i64, minute: i64) {
+fn edit_record_time(begin: bool, record_id: i64, year: i64, month: i64, day: i64,
+                    hour: i64, minute: i64) {
 	let db = database_open();
 
 	let mut sql = String::from("UPDATE tbl_work_records\nSET ");
@@ -397,12 +479,24 @@ fn edit_record_time(begin: bool, record_id: i64, year: i64, month: i64, day: i64
 	stmt.next().unwrap();
 }
 
-pub fn edit_record_begin(record_id: i64, year: i64, month: i64, day: i64, hour: i64, minute: i64) {
+pub fn edit_record_begin(record_id: i64, year: i64, month: i64, day: i64,
+                         hour: i64, minute: i64) {
 	edit_record_time(true, record_id, year, month, day, hour, minute);
+
+	println!("Record ({}) begin set to {}-{}-{} {}:{}.",
+		record_id,
+		year, month, day,
+		hour, minute);
 }
 
-pub fn edit_record_end(record_id: i64, year: i64, month: i64, day: i64, hour: i64, minute: i64) {
+pub fn edit_record_end(record_id: i64, year: i64, month: i64, day: i64,
+                       hour: i64, minute: i64) {
 	edit_record_time(false, record_id, year, month, day, hour, minute);
+
+	println!("Record ({}) end set to {}-{}-{} {}:{}.",
+		record_id,
+		year, month, day,
+		hour, minute);
 }
 
 pub fn edit_record_description(record_id: i64, description: &str) {
@@ -418,6 +512,8 @@ pub fn edit_record_description(record_id: i64, description: &str) {
 	stmt.bind(1, description).unwrap();
 	stmt.bind(2, record_id).unwrap();
 	stmt.next().unwrap();
+
+	println!("Record ({}) description set to \"{}\".", record_id, description);
 }
 
 pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
@@ -434,6 +530,33 @@ pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 	stmt.bind(2, src_project_id).unwrap();
 
 	while sqlite::State::Row == stmt.next().unwrap() {}
+
+	println!("Records of project ({}) moved to project ({}).",
+		src_project_id, dest_project_id);
+}
+
+fn show_record(stmt: &sqlite::Statement) -> i64 {
+	// format seconds in worktime and print
+	let seconds = stmt.read::<i64>(5).unwrap();
+	let minutes: u32 = seconds as u32 / 60;
+	let hours: u32 = minutes / 60;
+
+	let worktime = Utc
+		.ymd(1970, 1, 1)
+		.and_hms(hours, minutes - hours * 60, 0)
+		.format("%H:%M")
+		.to_string();
+	
+	println!(
+		"{:9} | {:8} | {:8} | {:5} | {:9} | {}",
+		stmt.read::<i64>(0).unwrap(),
+		stmt.read::<String>(2).unwrap(),
+		stmt.read::<String>(4).unwrap(),
+		worktime,
+		stmt.read::<i64>(6).unwrap(),
+		stmt.read::<String>(7).unwrap());
+
+	return seconds;
 }
 
 fn show_records(ts_begin: i64, ts_end: i64) {
@@ -446,7 +569,7 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 		 strftime('%H:%M', begin, 'unixepoch') as begin_time, \
 		 strftime('%d', end, 'unixepoch') as end_day, \
 		 strftime('%H:%M', end, 'unixepoch') as end_time, \
-		 strftime('%H:%M', end - begin, 'unixepoch') AS worktime, \
+		 end - begin AS worktime, \
 		 project_id, description\n \
 		 FROM tbl_work_records\n \
 		 WHERE begin > ? AND end < ?;")
@@ -455,20 +578,80 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 	stmt.bind(1, ts_begin).unwrap();
 	stmt.bind(2, ts_end).unwrap();
 
-	// print	
+	// print header
 	println!("{:9} | {:8} | {:8} | {:5} | {:9} | {}",
 		"id", "begin", "end", "time", "project", "description");
-	
-	while stmt.next().unwrap() == sqlite::State::Row {
-		println!(
-			"{:9} | {:8} | {:8} | {:5} | {:9} | {}",
-			stmt.read::<i64>(0).unwrap(),
-			stmt.read::<String>(2).unwrap(),
-			stmt.read::<String>(4).unwrap(),
-			stmt.read::<String>(5).unwrap(),
-			stmt.read::<i64>(6).unwrap(),
-			stmt.read::<String>(7).unwrap());
+
+	let mut sum_seconds: u32 = 0;
+	let mut pre_day: i64;
+	let mut cur_day: i64 = 0;
+	let mut day_seconds: u32 = 0;
+
+	// print first record
+	// (because the if (cur_day change) would needlessly print day_worktime)
+	if stmt.next().unwrap() == sqlite::State::Row {
+		cur_day = stmt.read::<i64>(1).unwrap();
+		println!("- day {:3} -", cur_day);
+		
+		let seconds = show_record(&stmt);
+		
+		sum_seconds += seconds as u32;
+		day_seconds += seconds as u32;
 	}
+
+	// other records
+	while stmt.next().unwrap() == sqlite::State::Row {
+		// if current day changes
+		pre_day = cur_day;
+		cur_day = stmt.read::<i64>(1).unwrap();
+
+		if cur_day != pre_day {
+			
+			// print new day line
+			let minutes: u32 = day_seconds / 60;
+			let hours: u32 = minutes / 60;
+			
+			let worktime = Utc
+				.ymd(1970, 1, 1)
+				.and_hms(hours, minutes - hours * 60, 0)
+				.format("%H:%M")
+				.to_string();
+		
+			println!("{:32}- {:5} -", "", worktime);
+			println!("- day {:3} -", cur_day);
+
+			// reset day worktime
+			day_seconds = 0;
+		}
+
+		let seconds = show_record(&stmt);
+		
+		sum_seconds += seconds as u32;
+		day_seconds += seconds as u32;
+	}
+
+	// last day worktime
+	let minutes: u32 = day_seconds / 60;
+	let hours: u32 = minutes / 60;
+			
+	let worktime = Utc
+		.ymd(1970, 1, 1)
+		.and_hms(hours, minutes - hours * 60, 0)
+		.format("%H:%M")
+		.to_string();
+		
+	println!("{:32}- {:5} -", "", worktime);
+
+	// summarized worktime
+	let minutes: u32 = sum_seconds / 60;
+	let hours: u32 = minutes / 60;
+	let worktime = Utc
+			.ymd(1970, 1, 1)
+			.and_hms(hours, minutes - hours * 60, 0)
+			.format("%H:%M")
+			.to_string();
+			
+	println!("Summarized worktime: {}.", worktime);
 }
 
 use chrono::prelude::*;
@@ -512,7 +695,8 @@ pub fn show_month(year: i32, month: u32) {
 	let mut ts_end: i64 = 0;
 
 	for i in 1..4 {
-		if Utc.timestamp(ts_temp + (i * DAY_SECONDS), 0).month() != Utc.timestamp(ts_temp, 0).month() {
+		if Utc.timestamp(ts_temp + (i * DAY_SECONDS), 0).month() !=
+		   Utc.timestamp(ts_temp, 0).month() {
 			ts_end = ts_temp + ((i - 1) * DAY_SECONDS);
 		}
 	}
