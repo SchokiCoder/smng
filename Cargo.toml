@@ -12,3 +12,4 @@ publish = false
 [dependencies]
 sqlite = "0.26.*"
 chrono = "0.4.*"
+term_size = "0.3.*"

@@ -6,7 +6,7 @@
 	-cmd feedback				v_10-00
 	-summary summarize worktime	v_09-59_01-06-2022
 	-summary split days			v_10-37
-	-description linebreak		.
+	-description linebreak		v_12-17
 	-sw per week-no.			?
 	-show week/month without	.
 	 params

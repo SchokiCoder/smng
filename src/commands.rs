@@ -535,8 +535,8 @@ pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 		src_project_id, dest_project_id);
 }
 
-fn show_record(stmt: &sqlite::Statement) -> i64 {
-	// format seconds in worktime and print
+fn show_record(stmt: &sqlite::Statement, win_width: usize) -> i64 {
+	// format seconds in worktime
 	let seconds = stmt.read::<i64>(5).unwrap();
 	let minutes: u32 = seconds as u32 / 60;
 	let hours: u32 = minutes / 60;
@@ -546,20 +546,43 @@ fn show_record(stmt: &sqlite::Statement) -> i64 {
 		.and_hms(hours, minutes - hours * 60, 0)
 		.format("%H:%M")
 		.to_string();
-	
-	println!(
-		"{:9} | {:8} | {:8} | {:5} | {:9} | {}",
+
+	// print record
+	print!(
+		"{:9} | {:8} | {:8} | {:5} | {:9} | ",
 		stmt.read::<i64>(0).unwrap(),
 		stmt.read::<String>(2).unwrap(),
 		stmt.read::<String>(4).unwrap(),
 		worktime,
-		stmt.read::<i64>(6).unwrap(),
-		stmt.read::<String>(7).unwrap());
+		stmt.read::<i64>(6).unwrap());
+
+	// print desc
+	let desc = stmt.read::<String>(7).unwrap();
+	let mut i = 0;
+	let mut pos = 0;
+
+	while i < desc.len() {
+		if pos + 55 > win_width {
+			print!("\n{:9} | {:8} | {:8} | {:5} | {:9} | ",
+				"", "", "", "", "");
+			pos = 0;
+		}
+
+		print!("{}", desc.chars().nth(i).unwrap());
+
+		i += 1;
+		pos += 1;
+	}
+
+	println!("");
 
 	return seconds;
 }
 
 fn show_records(ts_begin: i64, ts_end: i64) {
+	// get window width
+	let win_width = term_size::dimensions_stdout().unwrap().0;
+
 	// execute sql
 	let db = database_open();
 
@@ -593,7 +616,7 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 		cur_day = stmt.read::<i64>(1).unwrap();
 		println!("- day {:3} -", cur_day);
 		
-		let seconds = show_record(&stmt);
+		let seconds = show_record(&stmt, win_width);
 		
 		sum_seconds += seconds as u32;
 		day_seconds += seconds as u32;
@@ -624,7 +647,7 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 			day_seconds = 0;
 		}
 
-		let seconds = show_record(&stmt);
+		let seconds = show_record(&stmt, win_width);
 		
 		sum_seconds += seconds as u32;
 		day_seconds += seconds as u32;
