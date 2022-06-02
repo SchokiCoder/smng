@@ -53,6 +53,11 @@ pub const STOP_NAME: &str = "stop";
 pub const STOP_ABBR: &str = "s";
 pub const STOP_ARGS: &str = "description";
 
+pub const ADD_RECORD_INFO: &str = "add a new complete record";
+pub const ADD_RECORD_NAME: &str = "add-record";
+pub const ADD_RECORD_ABBR: &str = "ar";
+pub const ADD_RECORD_ARGS: &str = "PROJECT_ID DESCRIPTION YEAR MONTH DAY HOUR MINUTE YEAR MONTH DAY HOUR MINUTE";
+
 pub const EDIT_RECORD_PROJECT_INFO: &str = "edit record's project";
 pub const EDIT_RECORD_PROJECT_NAME: &str = "edit-record-project";
 pub const EDIT_RECORD_PROJECT_ABBR: &str = "erp";
@@ -91,7 +96,7 @@ pub const SHOW_MONTH_NAME: &str = "show-month";
 pub const SHOW_MONTH_ABBR: &str = "sm";
 pub const SHOW_MONTH_ARGS: &str = "[year month]";
 
-fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&str>) {
+pub fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&str>) {
 	println!("  {}:", info);
 	print!("  {}", name);
 
@@ -433,6 +438,37 @@ pub fn stop(description: &str) {
 	println!("Record stopped with descritpion \"{}\".", description);
 }
 
+pub fn add_record(project_id: i64, description: &str,
+	b_year: i64, b_month: i64, b_day: i64, b_hour: i64, b_minute: i64,
+	e_year: i64, e_month: i64, e_day: i64, e_hour: i64, e_minute: i64) {
+
+	let db = database_open();
+
+	let mut stmt = db
+		.prepare(
+			"INSERT INTO tbl_work_records(project_id, description, begin, end)\n\
+			 VALUES(?, ?,
+			 strftime('%s', printf('%04i-%02i-%02i %02i:%02i:00', ?, ?, ?, ?, ?)),
+			 strftime('%s', printf('%04i-%02i-%02i %02i:%02i:00', ?, ?, ?, ?, ?)));")
+		.unwrap();
+
+	stmt.bind(1, project_id).unwrap();
+	stmt.bind(2, description).unwrap();
+	stmt.bind(3, b_year).unwrap();
+	stmt.bind(4, b_month).unwrap();
+	stmt.bind(5, b_day).unwrap();
+	stmt.bind(6, b_hour).unwrap();
+	stmt.bind(7, b_minute).unwrap();
+	stmt.bind(8, e_year).unwrap();
+	stmt.bind(9, e_month).unwrap();
+	stmt.bind(10, e_day).unwrap();
+	stmt.bind(11, e_hour).unwrap();
+	stmt.bind(12, e_minute).unwrap();
+	stmt.next().unwrap();
+
+	println!("Record added to project ({}).", project_id);
+}
+
 pub fn edit_record_project(record_id: i64, project_id: i64) {
 	let db = database_open();
 
@@ -711,27 +747,39 @@ pub fn show_week(year: i32, month: u32, day: u32) {
 	show_records(week.begin, week.end);
 }
 
-pub fn show_month(year: i32, month: u32) {
-	// find begin and end of month
-	let ts_begin = Utc
-		.ymd(year, month, 1)
-		.and_hms(0, 0, 0)
-		.timestamp();
-		
-	let ts_temp = Utc
-		.ymd(year, month, 28)
-		.and_hms(0, 0, 0)
-		.timestamp();
-		
-	let mut ts_end: i64 = 0;
+struct MonthBeginAndEnd {
+	begin: i64,
+	end: i64,
+}
 
-	for i in 1..4 {
-		if Utc.timestamp(ts_temp + (i * DAY_SECONDS as i64), 0).month() !=
-		   Utc.timestamp(ts_temp, 0).month() {
-			ts_end = ts_temp + ((i - 1) * DAY_SECONDS as i64);
+impl MonthBeginAndEnd {
+	pub fn from_date(date: Date<Local>) -> MonthBeginAndEnd {
+		let ts_begin = Local.ymd(date.year(), date.month(), 1).and_hms(0, 0, 0).timestamp();
+		let ts_temp = Local.ymd(date.year(), date.month(), 28).and_hms(23, 59, 59).timestamp();
+		let mut ts_end: i64 = 0;
+
+		for i in 1..4 {
+			if Local.timestamp(ts_temp + (i * DAY_SECONDS as i64), 0).month() !=
+		   		Local.timestamp(ts_temp, 0).month() {
+				ts_end = ts_temp + ((i - 1) * DAY_SECONDS as i64);
+			}
 		}
-	}
 
+		return MonthBeginAndEnd {
+			begin: ts_begin,
+			end: ts_end,
+		};
+	}
+}
+
+pub fn show_month_cur() {
 	// print
-	show_records(ts_begin, ts_end);
+	let month = MonthBeginAndEnd::from_date(Local::today());
+	show_records(month.begin, month.end);
+}
+
+pub fn show_month(year: i32, month: u32) {
+	// print
+	let month = MonthBeginAndEnd::from_date(Local.ymd(year, month, 1));
+	show_records(month.begin, month.end);
 }

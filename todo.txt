@@ -7,16 +7,20 @@
 	-summary summarize worktime	v_09-59_01-06-2022
 	-summary split days			v_10-37
 	-description linebreak		v_12-17
-	-sw per week-no.			?
-	-show week/month without	.
+	-show week/month without	v_12-01_02-06-2022
 	 params
-	-utc/localtime needed		?
-	 in sql
-	-config						.
-	-negative ids				.
-	-when arguments needed but	.
+	-when arguments needed but	v_12-20
 	 no arguments given,
 	 print help for that command
+	-cmd "add-record" "ar"		v_12-46
+	-check if range of			.
+	 sw/sm is ok
+	-config						.
+	 (db_path)
+	-sw per week-no.			?
+	-utc/localtime needed		?
+	 in sql //
+	 purge Utc use local?
 	-make sure help text		.
 	 matches reality
 	-makefile					.

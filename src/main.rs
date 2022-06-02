@@ -53,6 +53,15 @@ fn main() {
 		commands::HELP_NAME | commands::HELP_ABBR => commands::help(),
 
 		commands::ADD_PROJECT_NAME | commands::ADD_PROJECT_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::ADD_PROJECT_INFO,
+					commands::ADD_PROJECT_NAME,
+					Some(commands::ADD_PROJECT_ABBR),
+					Some(commands::ADD_PROJECT_ARGS));
+				return;
+			}
+			
 			if argcount_check(args.len(), 3, 3) {
 				return;
 			}
@@ -69,6 +78,15 @@ fn main() {
 		},
 
 		commands::EDIT_PROJECT_NAME | commands::EDIT_PROJECT_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::EDIT_PROJECT_INFO,
+					commands::EDIT_PROJECT_NAME,
+					Some(commands::EDIT_PROJECT_ABBR),
+					Some(commands::EDIT_PROJECT_ARGS));
+				return;
+			}
+			
 			if argcount_check(args.len(), 4, 4) {
 				return;
 			}
@@ -79,6 +97,15 @@ fn main() {
 		},
 
 		commands::DELETE_PROJECT_NAME => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::DELETE_PROJECT_INFO,
+					commands::DELETE_PROJECT_NAME,
+					None,
+					Some(commands::DELETE_PROJECT_ARGS));
+				return;
+			}
+			
 			if argcount_check(args.len(), 3, 4) {
 				return;
 			}
@@ -96,6 +123,15 @@ fn main() {
 		},
 
 		commands::RECORD_NAME | commands::RECORD_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::RECORD_INFO,
+					commands::RECORD_NAME,
+					Some(commands::RECORD_ABBR),
+					Some(commands::RECORD_ARGS));
+				return;
+			}
+			
 			if argcount_check(args.len(), 3, 3) {
 				return;
 			}
@@ -114,6 +150,15 @@ fn main() {
 		},
 
 		commands::STOP_NAME | commands::STOP_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::STOP_INFO,
+					commands::STOP_NAME,
+					Some(commands::STOP_ABBR),
+					Some(commands::STOP_ARGS));
+				return;
+			}
+
 			if argcount_check(args.len(), 3, 3) {
 				return;
 			}
@@ -121,7 +166,48 @@ fn main() {
 			commands::stop(args[2].as_str());
 		},
 
+		commands::ADD_RECORD_NAME | commands::ADD_RECORD_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::ADD_RECORD_INFO,
+					commands::ADD_RECORD_NAME,
+					Some(commands::ADD_RECORD_ABBR),
+					Some(commands::ADD_RECORD_ARGS));
+				return;
+			}
+
+			if argcount_check(args.len(), 14, 14) {
+				return;
+			}
+
+			let project_id = args[2].parse::<i64>().unwrap();
+			let b_year = args[4].parse::<i64>().unwrap();
+			let b_month = args[5].parse::<i64>().unwrap();
+			let b_day = args[6].parse::<i64>().unwrap();
+			let b_hour = args[7].parse::<i64>().unwrap();
+			let b_minute = args[8].parse::<i64>().unwrap();
+			let e_year = args[9].parse::<i64>().unwrap();
+			let e_month = args[10].parse::<i64>().unwrap();
+			let e_day = args[11].parse::<i64>().unwrap();
+			let e_hour = args[12].parse::<i64>().unwrap();
+			let e_minute = args[13].parse::<i64>().unwrap();
+
+			commands::add_record(
+				project_id, args[3].as_str(),
+				b_year, b_month, b_day, b_hour, b_minute,
+				e_year, e_month, e_day, e_hour, e_minute);
+		},
+
 		commands::EDIT_RECORD_PROJECT_NAME | commands::EDIT_RECORD_PROJECT_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::EDIT_RECORD_PROJECT_INFO,
+					commands::EDIT_RECORD_PROJECT_NAME,
+					Some(commands::EDIT_RECORD_PROJECT_ABBR),
+					Some(commands::EDIT_RECORD_PROJECT_ARGS));
+				return;
+			}
+
 			if argcount_check(args.len(), 4, 4) {
 				return;
 			}
@@ -133,6 +219,15 @@ fn main() {
 		},
 
 		commands::EDIT_RECORD_BEGIN_NAME | commands::EDIT_RECORD_BEGIN_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::EDIT_RECORD_BEGIN_INFO,
+					commands::EDIT_RECORD_BEGIN_NAME,
+					Some(commands::EDIT_RECORD_BEGIN_ABBR),
+					Some(commands::EDIT_RECORD_BEGIN_ARGS));
+				return;
+			}
+
 			if argcount_check(args.len(), 8, 8) {
 				return;
 			}
@@ -148,6 +243,15 @@ fn main() {
 		},
 
 		commands::EDIT_RECORD_END_NAME | commands::EDIT_RECORD_END_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::EDIT_RECORD_END_INFO,
+					commands::EDIT_RECORD_END_NAME,
+					Some(commands::EDIT_RECORD_END_ABBR),
+					Some(commands::EDIT_RECORD_END_ARGS));
+				return;
+			}
+
 			if argcount_check(args.len(), 8, 8) {
 				return;
 			}
@@ -163,6 +267,15 @@ fn main() {
 		},
 
 		commands::EDIT_RECORD_DESCRIPTION_NAME | commands::EDIT_RECORD_DESCRIPTION_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::EDIT_RECORD_DESCRIPTION_INFO,
+					commands::EDIT_RECORD_DESCRIPTION_NAME,
+					Some(commands::EDIT_RECORD_DESCRIPTION_ABBR),
+					Some(commands::EDIT_RECORD_DESCRIPTION_ARGS));
+				return;
+			}
+
 			if argcount_check(args.len(), 4, 4) {
 				return;
 			}
@@ -173,6 +286,15 @@ fn main() {
 		},
 
 		commands::TRANSFER_PROJECT_RECORDS_NAME => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::TRANSFER_PROJECT_RECORDS_INFO,
+					commands::TRANSFER_PROJECT_RECORDS_NAME,
+					None,
+					Some(commands::TRANSFER_PROJECT_RECORDS_ARGS));
+				return;
+			}
+
 			if argcount_check(args.len(), 4, 4) {
 				return;
 			}
@@ -197,7 +319,23 @@ fn main() {
 			}
 			else {
 				commands::show_week_cur();
-			}			
+			}
+		},
+
+		commands::SHOW_MONTH_NAME | commands::SHOW_MONTH_ABBR => {
+			if argcount_check(args.len(), 2, 4) {
+				return;
+			}
+
+			if args.len() > 2 {
+				let year = args[2].parse::<i32>().unwrap();
+				let month = args[3].parse::<u32>().unwrap();
+
+				commands::show_month(year, month);
+			}
+			else {
+				commands::show_month_cur();
+			}
 		},
 		
 		_ => println!("Command not recognised."),
