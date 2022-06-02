@@ -184,19 +184,20 @@ fn main() {
 		},
 
 		commands::SHOW_WEEK_NAME | commands::SHOW_WEEK_ABBR => {
-			if argcount_check(args.len(), 5, 5) {
+			if argcount_check(args.len(), 2, 5) {
 				return;
 			}
 
-			let year: i32;
-			let month: u32;
-			let day: u32;
-			
-			year = args[2].parse::<i32>().unwrap();
-			month = args[3].parse::<u32>().unwrap();
-			day = args[4].parse::<u32>().unwrap();
+			if args.len() > 2 {
+				let year = args[2].parse::<i32>().unwrap();
+				let month = args[3].parse::<u32>().unwrap();
+				let day = args[4].parse::<u32>().unwrap();
 
-			commands::show_week(year, month, day);
+				commands::show_week(year, month, day);
+			}
+			else {
+				commands::show_week_cur();
+			}			
 		},
 		
 		_ => println!("Command not recognised."),

@@ -679,28 +679,36 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 
 use chrono::prelude::*;
 
-const DAY_SECONDS: i64 = 60 * 60 * 24;
+const DAY_SECONDS: u32 = 60 * 60 * 24;
+
+struct WeekBeginAndEnd {
+	begin: i64,
+	end: i64,
+}
+
+impl WeekBeginAndEnd {
+	pub fn from_date(date: Date<Local>) -> WeekBeginAndEnd {
+		let weekday = date.weekday().num_days_from_sunday() as i64;
+
+		let result = WeekBeginAndEnd {
+			begin: date.and_hms(0, 0, 0).timestamp() - (weekday * DAY_SECONDS as i64),
+			end: date.and_hms(23, 59, 59).timestamp() + ((7 - weekday) * DAY_SECONDS as i64),
+		};
+
+		return result;
+	}
+}
+
+pub fn show_week_cur() {
+	// print
+	let week = WeekBeginAndEnd::from_date(Local::today());
+	show_records(week.begin, week.end);
+}
 
 pub fn show_week(year: i32, month: u32, day: u32) {
-	// find begin and end of week
-	let dt_given = Utc
-		.ymd(year, month, day)
-		.and_hms(0, 0, 0);
-
-	let ts_given = dt_given.timestamp();
-		
-	let weekday = dt_given
-		.weekday()
-		.num_days_from_sunday();
-		
-	let weekbegin: i64 = i64::from(weekday);
-	let weekend: i64 = 7 - i64::from(weekday);
-	
-	let ts_begin = ts_given - (weekbegin * DAY_SECONDS);
-	let ts_end = ts_given + (weekend * DAY_SECONDS);
-
 	// print
-	show_records(ts_begin, ts_end);
+	let week = WeekBeginAndEnd::from_date(Local.ymd(year, month, day));
+	show_records(week.begin, week.end);
 }
 
 pub fn show_month(year: i32, month: u32) {
@@ -718,9 +726,9 @@ pub fn show_month(year: i32, month: u32) {
 	let mut ts_end: i64 = 0;
 
 	for i in 1..4 {
-		if Utc.timestamp(ts_temp + (i * DAY_SECONDS), 0).month() !=
+		if Utc.timestamp(ts_temp + (i * DAY_SECONDS as i64), 0).month() !=
 		   Utc.timestamp(ts_temp, 0).month() {
-			ts_end = ts_temp + ((i - 1) * DAY_SECONDS);
+			ts_end = ts_temp + ((i - 1) * DAY_SECONDS as i64);
 		}
 	}
 
