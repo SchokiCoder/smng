@@ -20,15 +20,15 @@
 	 "delete-record"
 	-add 'localtime' to sql		v_10-55
 	  
-	-config						.
+	-config						v_11-52
 	 (db_path)
-	-sw per week-no.			?
 	-purge Utc use local		?
 	-make sure help text		.
 	 matches reality
 	-makefile					.
+	 (also install std etc)
 	-README.md					.
 	
 	-v							. -> 2.0.0
-	 (update app.rs, Cargo.toml)
+	 update app.rs, Cargo.toml
 }

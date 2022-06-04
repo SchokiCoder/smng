@@ -111,16 +111,26 @@ pub fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&
 	println!("\n");	
 }
 
+const ETC_DB_PATH: &str = "/etc/smng.d/db_path";
+
+use std::io::Read;
+
 fn database_open() -> sqlite::Connection {
-	let mut db_empty: bool = false;
-	let mut path = String::from(std::env::var("HOME").unwrap());
-	path.push_str("/.");
-	path.push_str(app::NAME);
-	path.push_str("/worktimes.db");
+	// read db path config
+	let mut f = std::fs::File::open(ETC_DB_PATH).unwrap();
+	let mut etc_raw = [0; 255];
+	let n = f.read(&mut etc_raw[..]).unwrap();
+	let temp = std::str::from_utf8(&etc_raw[..n]).unwrap();
+	let path = String::from(String::from(temp).trim());
 
 	// if db doesn't exist, flag
+	let db_empty: bool;
+	
 	if std::fs::metadata(path.as_str()).is_ok() == false {
 		db_empty = true;
+	}
+	else {
+		db_empty = false;
 	}
 
 	// open db
