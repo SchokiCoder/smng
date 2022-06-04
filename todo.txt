@@ -16,14 +16,14 @@
 	-fix range of sw/sm			v_09-47_04-06-2022
 	 (the c-variant actually
 	  had this bug too)
-	-add 'localtime' to sql		.
+	-add command				v_10-31
+	 "delete-record"
+	-add 'localtime' to sql		v_10-55
 	  
 	-config						.
 	 (db_path)
 	-sw per week-no.			?
-	-utc/localtime needed		?
-	 in sql //
-	 purge Utc use local?
+	-purge Utc use local		?
 	-make sure help text		.
 	 matches reality
 	-makefile					.

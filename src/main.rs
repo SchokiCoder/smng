@@ -285,6 +285,25 @@ fn main() {
 			commands::edit_record_description(record_id, args[3].as_str());
 		},
 
+		commands::DELETE_RECORD_NAME => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::DELETE_RECORD_INFO,
+					commands::DELETE_RECORD_NAME,
+					None,
+					Some(commands::DELETE_RECORD_ARGS));
+				return;
+			}
+
+			if argcount_check(args.len(), 3, 3) {
+				return;
+			}
+
+			let record_id = args[2].parse::<i64>().unwrap();
+
+			commands::delete_record(record_id);
+		}
+
 		commands::TRANSFER_PROJECT_RECORDS_NAME => {
 			if args.len() == 2 {
 				commands::print_cmd_help(

@@ -389,7 +389,7 @@ pub fn record(project_id: i64) {
 	let mut stmt = db
 		.prepare(
 			"INSERT INTO tbl_work_records(project_id, begin)\n \
-	 		 VALUES(?, strftime('%s'));")
+	 		 VALUES(?, strftime('%s', 'now', 'localtime'));")
 	 	.unwrap();
 
 	stmt.bind(1, project_id).unwrap();
@@ -428,14 +428,14 @@ pub fn stop(description: &str) {
 	let mut stmt = db
 		.prepare(
 			"UPDATE tbl_work_records\n\
-		 	 SET end = strftime('%s'), description = ?\n\
+		 	 SET end = strftime('%s', 'now', 'localtime'), description = ?\n\
 		 	 WHERE work_record_id = (SELECT MAX(work_record_id) FROM tbl_work_records);")
 		.unwrap();
 
 	stmt.bind(1, description).unwrap();
 	stmt.next().unwrap();
 
-	println!("Record stopped with descritpion \"{}\".", description);
+	println!("Record stopped with description \"{}\".", description);
 }
 
 pub fn add_record(project_id: i64, description: &str,
@@ -552,6 +552,22 @@ pub fn edit_record_description(record_id: i64, description: &str) {
 	println!("Record ({}) description set to \"{}\".", record_id, description);
 }
 
+pub fn delete_record(record_id: i64) {
+	let db = database_open();
+
+	let mut stmt = db
+		.prepare(
+			"DELETE\n\
+			 FROM tbl_work_records\n\
+			 WHERE work_record_id = ?;")
+		.unwrap();
+
+	stmt.bind(1, record_id).unwrap();
+	stmt.next().unwrap();
+
+	println!("Record ({}) deleted.", record_id);
+}
+
 pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 	let db = database_open();
 
@@ -624,10 +640,10 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 
 	let mut stmt = db.prepare(
 		"SELECT work_record_id, \
-		 strftime('%d', begin, 'unixepoch', 'localtime') as begin_day, \
-		 strftime('%H:%M', begin, 'unixepoch', 'localtime') as begin_time, \
-		 strftime('%d', end, 'unixepoch', 'localtime') as end_day, \
-		 strftime('%H:%M', end, 'unixepoch', 'localtime') as end_time, \
+		 strftime('%d', begin, 'unixepoch') as begin_day, \
+		 strftime('%H:%M', begin, 'unixepoch') as begin_time, \
+		 strftime('%d', end, 'unixepoch') as end_day, \
+		 strftime('%H:%M', end, 'unixepoch') as end_time, \
 		 end - begin AS worktime, \
 		 project_id, description\n \
 		 FROM tbl_work_records\n \
