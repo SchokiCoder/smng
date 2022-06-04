@@ -624,14 +624,15 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 
 	let mut stmt = db.prepare(
 		"SELECT work_record_id, \
-		 strftime('%d', begin, 'unixepoch') as begin_day, \
-		 strftime('%H:%M', begin, 'unixepoch') as begin_time, \
-		 strftime('%d', end, 'unixepoch') as end_day, \
-		 strftime('%H:%M', end, 'unixepoch') as end_time, \
+		 strftime('%d', begin, 'unixepoch', 'localtime') as begin_day, \
+		 strftime('%H:%M', begin, 'unixepoch', 'localtime') as begin_time, \
+		 strftime('%d', end, 'unixepoch', 'localtime') as end_day, \
+		 strftime('%H:%M', end, 'unixepoch', 'localtime') as end_time, \
 		 end - begin AS worktime, \
 		 project_id, description\n \
 		 FROM tbl_work_records\n \
-		 WHERE begin > ? AND end < ?;")
+		 WHERE begin > strftime('%s', ?, 'unixepoch', 'localtime') \
+		 AND end < strftime('%s', ?, 'unixepoch', 'localtime');")
 		.unwrap();
 
 	stmt.bind(1, ts_begin).unwrap();
@@ -728,7 +729,7 @@ impl WeekBeginAndEnd {
 
 		let result = WeekBeginAndEnd {
 			begin: date.and_hms(0, 0, 0).timestamp() - (weekday * DAY_SECONDS as i64),
-			end: date.and_hms(23, 59, 59).timestamp() + ((7 - weekday) * DAY_SECONDS as i64),
+			end: date.and_hms(23, 59, 59).timestamp() + ((7 - weekday - 1) * DAY_SECONDS as i64),
 		};
 
 		return result;

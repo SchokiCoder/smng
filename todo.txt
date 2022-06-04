@@ -13,8 +13,11 @@
 	 no arguments given,
 	 print help for that command
 	-cmd "add-record" "ar"		v_12-46
-	-check if range of			.
-	 sw/sm is ok
+	-fix range of sw/sm			v_09-47_04-06-2022
+	 (the c-variant actually
+	  had this bug too)
+	-add 'localtime' to sql		.
+	  
 	-config						.
 	 (db_path)
 	-sw per week-no.			?
@@ -26,5 +29,6 @@
 	-makefile					.
 	-README.md					.
 	
-	-v			. -> 2.0.0	
+	-v							. -> 2.0.0
+	 (update app.rs, Cargo.toml)
 }
