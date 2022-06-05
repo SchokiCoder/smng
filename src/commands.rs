@@ -16,11 +16,15 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-use super::app;
+use chrono::prelude::*;
 
 pub const HELP_INFO: &str = "prints all help messages";
 pub const HELP_NAME: &str = "help";
 pub const HELP_ABBR: &str = "h";
+
+pub const ABOUT_INFO: &str = "prints information about the application";
+pub const ABOUT_NAME: &str = "about";
+pub const ABOUT_ABBR: &str = "abt";
 
 pub const ADD_PROJECT_INFO: &str = "add a project";
 pub const ADD_PROJECT_NAME: &str = "add-project";
@@ -56,7 +60,7 @@ pub const STOP_ARGS: &str = "description";
 pub const ADD_RECORD_INFO: &str = "add a new complete record";
 pub const ADD_RECORD_NAME: &str = "add-record";
 pub const ADD_RECORD_ABBR: &str = "ar";
-pub const ADD_RECORD_ARGS: &str = "PROJECT_ID DESCRIPTION YEAR MONTH DAY HOUR MINUTE YEAR MONTH DAY HOUR MINUTE";
+pub const ADD_RECORD_ARGS: &str = "project_id description year month day hour minute year month day hour minute";
 
 pub const EDIT_RECORD_PROJECT_INFO: &str = "edit record's project";
 pub const EDIT_RECORD_PROJECT_NAME: &str = "edit-record-project";
@@ -113,15 +117,22 @@ pub fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&
 
 const ETC_DB_PATH: &str = "/etc/smng.d/db_path";
 
-use std::io::Read;
-
 fn database_open() -> sqlite::Connection {
 	// read db path config
-	let mut f = std::fs::File::open(ETC_DB_PATH).unwrap();
-	let mut etc_raw = [0; 255];
-	let n = f.read(&mut etc_raw[..]).unwrap();
-	let temp = std::str::from_utf8(&etc_raw[..n]).unwrap();
-	let path = String::from(String::from(temp).trim());
+	use std::io::Read;
+	
+	let f = std::fs::File::open(ETC_DB_PATH);
+	let path: String;
+
+	if f.is_ok() {
+		let mut etc_raw = [0; 255];
+		let n = f.unwrap().read(&mut etc_raw[..]).unwrap();
+		let temp = std::str::from_utf8(&etc_raw[..n]).unwrap();
+		path = String::from(String::from(temp).trim());
+	}
+	else {
+		panic!("Etc file \"{}\" could not be read.", ETC_DB_PATH);
+	}
 
 	// if db doesn't exist, flag
 	let db_empty: bool;
@@ -200,10 +211,19 @@ fn database_open() -> sqlite::Connection {
 
 pub fn help() {
 	println!("Usage:");
-	println!("{} [COMMAND] [ARGS]", app::NAME);
+	println!("{} [COMMAND] [ARGS]", env!("CARGO_PKG_NAME"));
 	println!("");
 
-	print_cmd_help(HELP_INFO, HELP_NAME, Some(HELP_ABBR), None);
+	print_cmd_help(
+		HELP_INFO,
+		HELP_NAME,
+		Some(HELP_ABBR),
+		None);
+	print_cmd_help(
+		ABOUT_INFO,
+		ABOUT_NAME,
+		Some(ABOUT_ABBR),
+		None);
 	print_cmd_help(
 		ADD_PROJECT_INFO,
 		ADD_PROJECT_NAME,
@@ -229,8 +249,21 @@ pub fn help() {
 		RECORD_NAME,
 		Some(RECORD_ABBR),
 		Some(RECORD_ARGS));
-	print_cmd_help(STATUS_INFO, STATUS_NAME, None, None);
-	print_cmd_help(STOP_INFO, STOP_NAME, Some(STOP_ABBR), Some(STOP_ARGS));
+	print_cmd_help(
+		STATUS_INFO,
+		STATUS_NAME,
+		None,
+		None);
+	print_cmd_help(
+		STOP_INFO,
+		STOP_NAME,
+		Some(STOP_ABBR),
+		Some(STOP_ARGS));
+	print_cmd_help(
+		ADD_RECORD_INFO,
+		ADD_RECORD_NAME,
+		Some(ADD_RECORD_ABBR),
+		Some(ADD_RECORD_ARGS));
 	print_cmd_help(
 		EDIT_RECORD_PROJECT_INFO,
 		EDIT_RECORD_PROJECT_NAME,
@@ -271,8 +304,16 @@ pub fn help() {
 		SHOW_MONTH_NAME,
 		Some(SHOW_MONTH_ABBR),
 		Some(SHOW_MONTH_ARGS));
+}
 
-	println!("You can also use negative id's to count from the other end.");
+pub fn about() {
+	println!("{} {} is licensed under the {}.",
+		env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"), env!("CARGO_PKG_LICENSE"));
+	println!("You should have received a copy of the license along with this program.");
+	println!("If not see <{}>\n",
+		"https://www.gnu.org/licenses/");
+	println!("The source code of this program is available at:\n{}\n",
+		env!("CARGO_PKG_REPOSITORY"));
 }
 
 pub fn add_project(project_name: &str) {
@@ -529,7 +570,7 @@ pub fn edit_record_begin(record_id: i64, year: i64, month: i64, day: i64,
                          hour: i64, minute: i64) {
 	edit_record_time(true, record_id, year, month, day, hour, minute);
 
-	println!("Record ({}) begin set to {}-{}-{} {}:{}.",
+	println!("Record ({}) begin set to {:04}-{:02}-{:02} {:02}:{:02}.",
 		record_id,
 		year, month, day,
 		hour, minute);
@@ -539,7 +580,7 @@ pub fn edit_record_end(record_id: i64, year: i64, month: i64, day: i64,
                        hour: i64, minute: i64) {
 	edit_record_time(false, record_id, year, month, day, hour, minute);
 
-	println!("Record ({}) end set to {}-{}-{} {}:{}.",
+	println!("Record ({}) end set to {:04}-{:02}-{:02} {:02}:{:02}.",
 		record_id,
 		year, month, day,
 		hour, minute);
@@ -739,8 +780,6 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 			
 	println!("Summarized worktime: {}.", worktime);
 }
-
-use chrono::prelude::*;
 
 const DAY_SECONDS: u32 = 60 * 60 * 24;
 

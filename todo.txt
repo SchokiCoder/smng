@@ -22,13 +22,13 @@
 	  
 	-config						v_11-52
 	 (db_path)
-	-purge Utc use local		?
-	-make sure help text		.
+	-make sure help text		v_09-55_05-06-2022
 	 matches reality
-	-makefile					.
+	-about command				v_10-31
+	 (show version, license)
+	-makefile					v_10-59
 	 (also install std etc)
-	-README.md					.
+	-README.md					v_11-03
 	
 	-v							. -> 2.0.0
-	 update app.rs, Cargo.toml
 }

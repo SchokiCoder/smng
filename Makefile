@@ -14,27 +14,26 @@
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-CC = cc
 APP_NAME = smng
-CFLAGS = -std=c99 -Wall -Wextra -O3
-LIBS = -lschoki_misc -lsqlite3
-INCLUDE = -I /usr/include/schoki_misc
-
 INSTALL_BIN_DIR = /usr/bin
+USERNAME = ""
 
-options:
-	@echo smng build options:
-	@echo "CFLAGS	= ${CFLAGS}"
-	@echo "CC		= ${CC}"
-	@echo "LIBS		= ${LIBS}"
+info:
+	@echo "1. Set username in Makefile.\n2. make install"
 
 clean:
 	rm -f ${APP_NAME} *.o
 
-install:
-	${CC} src/*.c ${CFLAGS} ${INCLUDE} ${LIBS} -o ${APP_NAME}
+build:
+	cargo rustc --release
+
+mkconfig:
+	mkdir -p /etc/smng.d
+	echo "/home/"${USERNAME}"/.smng/worktimes.db" >> "/etc/smng.d/db_path"
+
+install: build mkconfig
 	mkdir -p ${INSTALL_BIN_DIR}
-	mv -f ${APP_NAME} ${INSTALL_BIN_DIR}
+	mv -f ./target/release/${APP_NAME} ${INSTALL_BIN_DIR}
 	chmod 755 ${INSTALL_BIN_DIR}/${APP_NAME}
 
 uninstall:

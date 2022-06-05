@@ -4,23 +4,27 @@ Personal working time manager, to monitor the time you worked on each project.
 
 ## Dependencies
 
-+ [sqlite3](https://sqlite.org/)
-+ [schoki_misc](https://github.com/SchokiCoder/schoki_misc.git)
++ [sqlite](https://docs.rs/sqlite/)
++ [chrono](https://docs.rs/chrono/)
++ [term_size](https://docs.rs/term_size/)
 
 ## Installation
 
 ```
 git clone https://github.com/SchokiCoder/smng.git
 cd smng
-mv src/config.def.h src/config.h
-sudo make
+make info
+
+* follow instructions *
+
+sudo make install
 ```
 
 ## Example
 
 ```
 smng ap "MyNewProject"
-smng r -1
+smng r 1
 
 * later *
 

@@ -16,7 +16,6 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-pub mod app;
 pub mod commands;
 use std::env;
 
@@ -44,13 +43,17 @@ fn main() {
 
 	// if not args given, print usage help and end
 	if args.len() < 2 {
-		println!("Usage {} COMMAND [ARGUMENTS]:", app::NAME);
-		println!("Try '{} {}' for more information.", app::NAME, commands::HELP_NAME);
+		println!("Usage {} COMMAND [ARGUMENTS]:", env!("CARGO_PKG_NAME"));
+		println!("Try '{} {}' for more information.",
+			env!("CARGO_PKG_NAME"),
+			commands::HELP_NAME);
 		return;
 	}
 	
 	match args[1].as_str() {
 		commands::HELP_NAME | commands::HELP_ABBR => commands::help(),
+
+		commands::ABOUT_NAME | commands::ABOUT_ABBR => commands::about(),
 
 		commands::ADD_PROJECT_NAME | commands::ADD_PROJECT_ABBR => {
 			if args.len() == 2 {
