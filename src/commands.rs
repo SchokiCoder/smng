@@ -115,24 +115,48 @@ pub fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&
 	println!("\n");	
 }
 
-const ETC_DB_PATH: &str = "/etc/smng.d/db_path";
+const GLOB_ETC_DB_PATH: &str = "/etc/smng.d/db_path";
+const USER_ETC_DB_PATH: &str = "/.config/smng/db_path";
+const LOCL_ETC_DB_PATH: &str = "db_path";
 
 fn database_open() -> sqlite::Connection {
-	// read db path config
 	use std::io::Read;
-	
-	let f = std::fs::File::open(ETC_DB_PATH);
+
+	let args: Vec<String> = std::env::args().collect();
+	let mut temp = String::from(&args[0]);
+	temp.truncate(temp.rfind('/').unwrap());
+	temp.push('/');
+	temp.push_str(LOCL_ETC_DB_PATH);
+
+	// if config file is not next to binary
+	let mut f = std::fs::File::open(&temp);
+
+	if f.is_ok() == false {
+		// if conf is not in user config dir
+		temp = env!("HOME").to_string();
+		temp.push_str(USER_ETC_DB_PATH);
+
+		f = std::fs::File::open(temp);
+
+		if f.is_ok() == false {
+			// if there is no global config
+			f = std::fs::File::open(GLOB_ETC_DB_PATH);
+
+			if f.is_ok() == false {
+				// crash and burn
+				panic!("No config file could not be found or read.\n\
+					Create at least one on path \"{}\".", GLOB_ETC_DB_PATH);
+			}
+		}
+	}
+
+	// read db path config
 	let path: String;
 
-	if f.is_ok() {
-		let mut etc_raw = [0; 255];
-		let n = f.unwrap().read(&mut etc_raw[..]).unwrap();
-		let temp = std::str::from_utf8(&etc_raw[..n]).unwrap();
-		path = String::from(String::from(temp).trim());
-	}
-	else {
-		panic!("Etc file \"{}\" could not be read.", ETC_DB_PATH);
-	}
+	let mut etc_raw = [0; 255];
+	let n = f.unwrap().read(&mut etc_raw[..]).unwrap();
+	let temp = std::str::from_utf8(&etc_raw[..n]).unwrap();
+	path = String::from(String::from(temp).trim());
 
 	// if db doesn't exist, flag
 	let db_empty: bool;

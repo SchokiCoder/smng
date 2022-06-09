@@ -1,4 +1,22 @@
 {
+	-assign commands to				.
+	 groups in help print
+	-add administrative command		.
+	 "merge-db"
+}
+
+{
+	-config pos priority			v_11-19_09-06-2022
+	-if path to db doesn't exist,	.
+	 non-explicit panic
+	-first record cmd tells you to	.
+	 complete record 0
+	-Makefile uninstall: remove		.
+	 etc dir
+	-v								. -> 2.0.1
+}
+
+{
 	-rewrite					v
 	-show week					v_09-26_31-05-2022
 	-record/stop check status	v_09-46
