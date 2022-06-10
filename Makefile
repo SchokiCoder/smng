@@ -37,4 +37,5 @@ install: build mkconfig
 	chmod 755 ${INSTALL_BIN_DIR}/${APP_NAME}
 
 uninstall:
+	rm -r -f /etc/smng.d
 	rm -f ${INSTALL_BIN_DIR}/${APP_NAME}

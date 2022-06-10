@@ -100,6 +100,11 @@ pub const SHOW_MONTH_NAME: &str = "show-month";
 pub const SHOW_MONTH_ABBR: &str = "sm";
 pub const SHOW_MONTH_ARGS: &str = "[year month]";
 
+pub const MERGE_DB_INFO: &str = "merges projects and records of two databases";
+pub const MERGE_DB_NAME: &str = "merge-db";
+pub const MERGE_DB_ABBR: &str = "mdb";
+pub const MERGE_DB_ARGS: &str = "source_database_path destination_database_path";
+
 pub fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&str>) {
 	println!("  {}:", info);
 	print!("  {}", name);
@@ -238,6 +243,7 @@ pub fn help() {
 	println!("{} [COMMAND] [ARGS]", env!("CARGO_PKG_NAME"));
 	println!("");
 
+	println!("-- Info --");
 	print_cmd_help(
 		HELP_INFO,
 		HELP_NAME,
@@ -248,6 +254,8 @@ pub fn help() {
 		ABOUT_NAME,
 		Some(ABOUT_ABBR),
 		None);
+
+	println!("-- Projects --");
 	print_cmd_help(
 		ADD_PROJECT_INFO,
 		ADD_PROJECT_NAME,
@@ -268,6 +276,8 @@ pub fn help() {
 		DELETE_PROJECT_NAME,
 		None,
 		Some(DELETE_PROJECT_ARGS));
+
+	println!("-- Records --");
 	print_cmd_help(
 		RECORD_INFO,
 		RECORD_NAME,
@@ -318,6 +328,8 @@ pub fn help() {
 		TRANSFER_PROJECT_RECORDS_NAME,
 		None,
 		Some(TRANSFER_PROJECT_RECORDS_ARGS));
+
+	println!("-- Report --");
 	print_cmd_help(
 		SHOW_WEEK_INFO,
 		SHOW_WEEK_NAME,
@@ -328,6 +340,13 @@ pub fn help() {
 		SHOW_MONTH_NAME,
 		Some(SHOW_MONTH_ABBR),
 		Some(SHOW_MONTH_ARGS));
+
+	println!("-- Administration --");
+	print_cmd_help(
+		MERGE_DB_INFO,
+		MERGE_DB_NAME,
+		Some(MERGE_DB_ABBR),
+		Some(MERGE_DB_ARGS));
 }
 
 pub fn about() {
@@ -453,9 +472,11 @@ pub fn record(project_id: i64) {
 	// if last record is not done, stop
 	let rec_state = RecordState::last();
 
-	if rec_state.state == 0 {
-		println!("ERROR: Last record ({}) is not yet done.", rec_state.id);
-		return;
+	if rec_state.id != 0 {
+		if rec_state.state == 0 {
+			println!("ERROR: Last record ({}) is not yet done.", rec_state.id);
+			return;
+		}
 	}
 
 	// exec
@@ -489,9 +510,15 @@ pub fn status() {
 }
 
 pub fn stop(description: &str) {
-	// if last record is done, stop
 	let rec_state = RecordState::last();
 
+	// if last record is 0, stop
+	if rec_state.id == 0 {
+		println!("ERROR: There are no records yet.");
+		return;
+	}
+	
+	// if last record is done, stop
 	if rec_state.state == 1 {
 		println!("ERROR: Last record ({}) is already done.", rec_state.id);
 		return;
@@ -872,4 +899,113 @@ pub fn show_month(year: i32, month: u32) {
 	// print
 	let month = MonthBeginAndEnd::from_date(Local.ymd(year, month, 1));
 	show_records(month.begin, month.end);
+}
+
+pub fn merge_db(src_db_path: &str, dest_db_path: &str) {
+	use std::collections::HashMap;
+
+	// try connecting to src db
+	let src_db = sqlite::open(src_db_path);
+
+	if src_db.is_ok() == false {
+		panic!("ERROR: Could not connect to source database at \"{}\".", src_db_path);
+	}
+
+	let src_db = src_db.unwrap();
+
+	// try connecting to dest db
+	let dest_db = sqlite::open(dest_db_path);
+
+	if dest_db.is_ok() == false {
+		panic!("ERROR: Could not connect to destination database at \"{}\".", dest_db_path);
+	}
+
+	let dest_db = dest_db.unwrap();
+
+	// create a project_id map, so we can redirect records
+	// if project_ids differ but name doesn't
+	let mut src_projects = HashMap::<String, i64>::new();
+	let mut dest_projects = HashMap::<String, i64>::new();
+	let mut dest_highest_prjid: i64 = 0;
+
+	let mut stmt = src_db
+		.prepare(
+			"SELECT project_id, project_name\n\
+			 FROM tbl_projects\n\
+			 ORDER BY project_id;")
+		.unwrap();
+
+	while stmt.next().unwrap() == sqlite::State::Row {
+		src_projects.insert(
+			String::from(stmt.read::<String>(1).unwrap()),
+			stmt.read::<i64>(0).unwrap());
+	}
+		
+	let mut stmt = dest_db
+		.prepare(
+			"SELECT project_id, project_name\n\
+			 FROM tbl_projects\n\
+			 ORDER BY project_id;")
+		.unwrap();
+
+	while stmt.next().unwrap() == sqlite::State::Row {
+		let temp = stmt.read::<i64>(0).unwrap();
+
+		if temp > dest_highest_prjid {
+			dest_highest_prjid = temp;
+		}
+
+		dest_projects.insert(
+			stmt.read::<String>(1).unwrap(),
+			temp);
+	}
+
+	// in dest, create all projects that dest doesn't have
+	let mut stmt = dest_db
+		.prepare(
+			"INSERT INTO tbl_projects(project_name)\n\
+			 VALUES(?);")
+		.unwrap();
+
+	for prj in src_projects {
+		// if dest doesn't have this project
+		if dest_projects.contains_key(&prj.0) == false {
+			// bring over
+			stmt.bind(1, prj.0.as_str()).unwrap();
+			stmt.next().unwrap();
+
+			// add to map
+			dest_highest_prjid += 1;
+			dest_projects.insert(prj.0, dest_highest_prjid);
+		}
+	}
+
+	// bring all records over
+	let mut read_stmt = src_db
+		.prepare(
+			"SELECT project_id, begin, end, description\n\
+			 FROM tbl_work_records;")
+		.unwrap();
+
+	let mut write_stmt = dest_db
+		.prepare(
+			"INSERT INTO tbl_work_records(project_id, begin, end, description)\n\
+			 VALUES(?, ?, ?, ?);")
+		.unwrap();
+
+	while read_stmt.next().unwrap() == sqlite::State::Row {
+		let prj_id = read_stmt.read::<i64>(0).unwrap();
+		let begin = read_stmt.read::<i64>(1).unwrap();
+		let end = read_stmt.read::<i64>(2).unwrap();
+		let desc = read_stmt.read::<String>(3).unwrap();
+
+		write_stmt.bind(1, prj_id).unwrap();
+		write_stmt.bind(2, begin).unwrap();
+		write_stmt.bind(3, end).unwrap();
+		write_stmt.bind(4, desc.as_str()).unwrap();
+		write_stmt.next().unwrap();
+	}
+
+	println!("All projects and work-records successfully carried\nfrom: \"{}\"\nto  : \"{}\"",
+		src_db_path, dest_db_path);
 }

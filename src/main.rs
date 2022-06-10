@@ -359,6 +359,23 @@ fn main() {
 				commands::show_month_cur();
 			}
 		},
+
+		commands::MERGE_DB_NAME | commands::MERGE_DB_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::MERGE_DB_INFO,
+					commands::MERGE_DB_NAME,
+					Some(commands::MERGE_DB_ABBR),
+					Some(commands::MERGE_DB_ARGS));
+				return;
+			}
+
+			if argcount_check(args.len(), 4, 4) {
+				return;
+			}
+
+			commands::merge_db(&args[2], &args[3]);
+		},
 		
 		_ => println!("Command not recognised."),
 	}

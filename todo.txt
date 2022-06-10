@@ -1,19 +1,16 @@
-{
-	-assign commands to				.
-	 groups in help print
-	-add administrative command		.
-	 "merge-db"
-}
+{}
 
 {
 	-config pos priority			v_11-19_09-06-2022
-	-if path to db doesn't exist,	.
-	 non-explicit panic
-	-first record cmd tells you to	.
+	-first record cmd tells you to	v_09-16_10-06-2022
 	 complete record 0
-	-Makefile uninstall: remove		.
+	-Makefile uninstall: remove		v
 	 etc dir
-	-v								. -> 2.0.1
+	-assign commands to				v_09-25
+	 groups in help print
+	-add administrative command		v_11-50
+	 "merge-db"
+	-v								. -> 2.1.0
 }
 
 {
