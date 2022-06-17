@@ -134,7 +134,10 @@ fn database_open() -> sqlite::Connection {
 	
 		if args.len() > 0 {
 			temp = String::from(&args[0]);
-			temp.truncate(temp.rfind('/').unwrap());
+			let temppos = temp.rfind('/');
+			if temppos.is_some() {
+				temp.truncate(temppos.unwrap());
+			}
 			temp.push('/');
 			temp.push_str(LOCL_ETC_DB_PATH);
 	

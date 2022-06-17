@@ -1,6 +1,18 @@
 {
+	-add admin cmds
+		-"show-db-path"
+		-"show-cfg-path"
+}
+
+{
+	-db_connect panic when path		v_11-11_17-06-2022
+	 arg has no slashes
+	-v 								. -> 2.1.2
+}
+
+{
 	-db_connect panic when no args	v_10-38_17-06-2022
-	-v 								. -> 2.1.1
+	-v 								v_10-41 -> 2.1.1
 }
 
 --- done ---
