@@ -1,4 +1,9 @@
-{}
+{
+	-db_connect panic when no args	v_10-38_17-06-2022
+	-v 								. -> 2.1.1
+}
+
+--- done ---
 
 {
 	-config pos priority			v_11-19_09-06-2022
@@ -10,7 +15,7 @@
 	 groups in help print
 	-add administrative command		v_11-50
 	 "merge-db"
-	-v								. -> 2.1.0
+	-v								v_11-52 -> 2.1.0
 }
 
 {

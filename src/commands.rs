@@ -127,39 +127,54 @@ const LOCL_ETC_DB_PATH: &str = "db_path";
 fn database_open() -> sqlite::Connection {
 	use std::io::Read;
 
-	let args: Vec<String> = std::env::args().collect();
-	let mut temp = String::from(&args[0]);
-	temp.truncate(temp.rfind('/').unwrap());
-	temp.push('/');
-	temp.push_str(LOCL_ETC_DB_PATH);
-
-	// if config file is not next to binary
-	let mut f = std::fs::File::open(&temp);
-
-	if f.is_ok() == false {
+	fn get_cfg_file() -> std::fs::File {
+		// get current working dir
+		let mut temp: String;
+		let args: Vec<String> = std::env::args().collect();
+	
+		if args.len() > 0 {
+			temp = String::from(&args[0]);
+			temp.truncate(temp.rfind('/').unwrap());
+			temp.push('/');
+			temp.push_str(LOCL_ETC_DB_PATH);
+	
+			// if config file is next to binary, return
+			let f = std::fs::File::open(&temp);
+	
+			if f.is_ok() {
+				return f.unwrap();
+			}
+		}
+	
 		// if conf is not in user config dir
 		temp = env!("HOME").to_string();
 		temp.push_str(USER_ETC_DB_PATH);
 
-		f = std::fs::File::open(temp);
+		let f = std::fs::File::open(temp);
+
+		if f.is_ok() {
+			return f.unwrap();
+		}
+		
+		// if there is no global config
+		let f = std::fs::File::open(GLOB_ETC_DB_PATH);
 
 		if f.is_ok() == false {
-			// if there is no global config
-			f = std::fs::File::open(GLOB_ETC_DB_PATH);
-
-			if f.is_ok() == false {
-				// crash and burn
-				panic!("No config file could not be found or read.\n\
-					Create at least one on path \"{}\".", GLOB_ETC_DB_PATH);
-			}
+			// crash and burn
+			panic!("No config file could not be found or read.\n\
+				Create at least one on path \"{}\".", GLOB_ETC_DB_PATH);
+		}
+		else {
+			return f.unwrap();
 		}
 	}
 
 	// read db path config
+	let mut f = get_cfg_file();
 	let path: String;
 
 	let mut etc_raw = [0; 255];
-	let n = f.unwrap().read(&mut etc_raw[..]).unwrap();
+	let n = f.read(&mut etc_raw[..]).unwrap();
 	let temp = std::str::from_utf8(&etc_raw[..n]).unwrap();
 	path = String::from(String::from(temp).trim());
 
