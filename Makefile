@@ -31,7 +31,13 @@ mkconfig:
 	mkdir -p /etc/smng.d
 	echo "/home/"${USERNAME}"/.smng/worktimes.db" >> "/etc/smng.d/db_path"
 
-install: build mkconfig
+install-manpage:
+	mkdir -p /usr/local/man/man1
+	cp ${APP_NAME}.1 /usr/local/man/man1
+	gzip /usr/local/man/man1/${APP_NAME}.1
+	mandb
+
+install: build mkconfig install-manpage
 	mkdir -p ${INSTALL_BIN_DIR}
 	mv -f ./target/release/${APP_NAME} ${INSTALL_BIN_DIR}
 	chmod 755 ${INSTALL_BIN_DIR}/${APP_NAME}

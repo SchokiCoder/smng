@@ -5,17 +5,25 @@
 }
 
 {
+	-provide autocomplete for shells ?
+}
+
+{
+	-man page	.
+}
+
+--- done ---
+
+{
 	-db_connect panic when path		v_11-11_17-06-2022
 	 arg has no slashes
-	-v 								. -> 2.1.2
+	-v 								v_11-14 -> 2.1.2
 }
 
 {
 	-db_connect panic when no args	v_10-38_17-06-2022
 	-v 								v_10-41 -> 2.1.1
 }
-
---- done ---
 
 {
 	-config pos priority			v_11-19_09-06-2022
