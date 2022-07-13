@@ -1,18 +1,24 @@
 {
+	-provide autocomplete for shells ?
+
+	-cmds
+		-show-project-records
+		-swap-projects (with records)
+
 	-add admin cmds
 		-"show-db-path"
 		-"show-cfg-path"
 }
 
-{
-	-provide autocomplete for shells ?
-}
-
-{
-	-man page	.
-}
-
 --- done ---
+
+{
+	-better man page	v_09-33_13-07-2022
+}
+
+{
+	-man page	v_12-04_18-06-2022
+}
 
 {
 	-db_connect panic when path		v_11-11_17-06-2022

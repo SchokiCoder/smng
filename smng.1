@@ -3,111 +3,135 @@
 
 .SH NAME
 .PP
-smng - SchokiManager
+smng - SchokiManager for personal work time management
 
 .SH SYNOPSIS
 .PP
-\f[B]smng\f[R] {{help | h} | {about | abt} | {add-project | ap}
-\f[I]project_name\f[R] | {show-projects | sp} | {edit-project | ep}
-\f[I]project_id\f[R] \f[I]project_name\f[R] | delete-project
-\f[I]project_id\f[R] [\f[I]purge\f[R]] | {record | r}
-\f[I]project_id\f[R] | status | {stop | s} \f[I]description\f[R] |
-{add-record | ar} \f[I]project_id\f[R] \f[I]description\f[R]
-\f[I]year\f[R] \f[I]month\f[R] \f[I]day\f[R] \f[I]hour\f[R]
-\f[I]minute\f[R] \f[I]year\f[R] \f[I]month\f[R] \f[I]day\f[R]
-\f[I]hour\f[R] \f[I]minute\f[R] | {edit-record-project | erp}
-\f[I]record_id\f[R] \f[I]project_id\f[R] | {edit-record-begin | erb}
-\f[I]record_id\f[R] \f[I]year\f[R] \f[I]month\f[R] \f[I]day\f[R]
-\f[I]hour\f[R] \f[I]minute\f[R] | {edit-record-end | ere}
-\f[I]record_id\f[R] \f[I]year\f[R] \f[I]month\f[R] \f[I]day\f[R]
-\f[I]hour\f[R] \f[I]minute\f[R] | {edit-record-description | erd}
-\f[I]record_id\f[R] \f[I]description\f[R] | delete-record
-\f[I]record-id\f[R] | transfer-project-records
-\f[I]source_project_id\f[R] \f[I]destination_project_id\f[R] |
-{show-week | sw} [\f[I]year\f[R] \f[I]month\f[R] \f[I]day\f[R]] |
-{show-month | sm} [\f[I]year\f[R] \f[I]month\f[R]] | {merge-db | mdb}
-\f[I]source_database_path\f[R] \f[I]destination_database_path\f[R]}
+\f[B]smng\f[R] COMMAND [ARGUMENTS]
 
 .SH DESCRIPTION
 .PP
 Personal working time manager, to monitor the time you worked on each
 project.
 
-.SS help | h
+.SH COMMANDS
+.SS Info Commands (Information on the program and it's usage)
 .PP
+\f[B]help | h\f[R]
+.RS 4
 Prints all help messages.
 
-.SS about | abt
 .PP
+\f[B]about | abt\f[R]
+.RS 4
 Prints information about the application.
+.RE
 
-.SS add-project | ap
+.SS Project Commands (adding, editing, deleting)
 .PP
+\f[B]add-project | ap\f[R] \f[I]project_name\f[R]
+.RS 4
 Add a new project.
+.RE
 
-.SS show-projects | sp
 .PP
+\f[B]show-projects | sp\f[R]
+.RS 4
 Show all projects.
+.RE
 
-.SS edit-project | ep
 .PP
+\f[B]edit-project | ep\f[R] \f[I]project_id\f[R] \f[I]project_name\f[R]
+.RS 4
 Set project name of given project.
+.RE
 
-.SS delete-project
 .PP
+\f[B]delete-project\f[R] \f[I]project_id\f[R] [\f[I]purge\f[R]]
+.RS 4
 Delete given project and if "true" is given to argument \f[I]purge\f[R] delete all records from that project.
+.RE
 
-.SS record | r
+.SS Record Commands (adding, editing, deleting)
 .PP
+\f[B]record | r\f[R] \f[I]project_id\f[R]
+.RS 4
 Start recording work time on given project.
+.RE
 
-.SS status
 .PP
+\f[B]status\f[R]
+.RS 4
 Show current work status.
+.RE
 
-.SS stop | s
 .PP
+\f[B]stop | s\f[R] \f[I]description\f[R]
+.RS 4
 Stop recording work time with given description.
+.RE
 
-.SS add-record | ar
 .PP
+\f[B]add-record | ar\f[R] \f[I]project_id\f[R] \f[I]description\f[R] \f[I]begin_year\f[R] \f[I]begin_month\f[R] \f[I]begin_day\f[R] \f[I]begin_hour\f[R] \f[I]begin_minute\f[R] \f[I]end_year\f[R] \f[I]end_month\f[R] \f[I]end_day\f[R] \f[I]end_hour\f[R] \f[I]end_minute\f[R]
+.RS 4
 Add a new complete record.
+.RE
 
-.SS edit-record-project | erp
 .PP
+\f[B]edit-record-project | erp\f[R] \f[I]record_id\f[R] \f[I]project_id\f[R]
+.RS 4
 Set project of given record.
+.RE
 
-.SS edit-record-begin | erb
 .PP
+\f[B]edit-record-begin | erb\f[R] \f[I]record_id\f[R] \f[I]year\f[R] \f[I]month\f[R] \f[I]day\f[R] \f[I]hour\f[R] \f[I]minute\f[R]
+.RS 4
 Set begin of given record.
+.RE
 
-.SS edit-record-end | ere
 .PP
+\f[B]edit-record-end | ere\f[R] \f[I]record_id\f[R] \f[I]year\f[R] \f[I]month\f[R] \f[I]day\f[R] \f[I]hour\f[R] \f[I]minute\f[R]
+.RS 4
 Set end of given record.
+.RE
 
-.SS edit-record-description | erd
 .PP
+\f[B]edit-record-description | erd\f[R] \f[I]record_id\f[R] \f[I]description\f[R]
+.RS 4
 Set description of given record.
+.RE
 
-.SS delete-record
 .PP
+\f[B]delete-record\f[R] \f[I]record_id\f[R]
+.RS 4
 Delete given record.
+.RE
 
-.SS transfer-project-records
 .PP
+\f[B]transfer-project-records\f[R] \f[I]source_project_id\f[R] \f[I]destination_project_id\f[R]
+.RS 4
 Transfer all records from one project to another.
+.RE
 
-.SS show-week | sw
+.SS Report Commands (show records)
 .PP
+\f[B]show-week | sw\f[R] [\f[I]year\f[R] \f[I]month\f[R] \f[I]day\f[R]]
+.RS 4
 Show records of a given week or if none given current week.
+.RE
 
-.SS show-month | sm
 .PP
+\f[B]show-month | sm\f[R] [\f[I]year\f[R] \f[I]month\f[R]]
+.RS 4
 Show records of a given month or if none given current month.
+.RE
 
-.SS merge-db | mdb
+.SS Administration Commands (handling databases)
 .PP
+\f[B]merge-db | mdb\[R] \f[I]source_database_path\f[R] \f[I]destination_database_path\f[R]
+.RS 4
 Merge projects and records of two databases.
+.RE
 
 .SH FILES
 .PP
