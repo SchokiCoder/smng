@@ -1,12 +1,18 @@
 {
 	-formatting					v_12-46
 	
-	-provide autocomplete		v_14-08
+	-provide tabcomplete		v_14-08
 	 for bash only ¯\_(ツ)_/¯
 	-fix manpage formatting		v_14-24
 	 (info cmds)
 
 	-make stopped working		.
+
+	-list files in manpage		.
+	 (cfg, manpage, tabcomplete)
+	-remove files on uninstall	.
+	-remove need for manual		.
+	 configuration in makefile
 
 	-add admin cmds				.
 		-"show-db-path"				.
