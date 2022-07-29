@@ -1,13 +1,25 @@
 {
-	-provide autocomplete for shells ?
+	-formatting					v_12-46
+	
+	-provide autocomplete		v_14-08
+	 for bash only ¯\_(ツ)_/¯
+	-fix manpage formatting		v_14-24
+	 (info cmds)
 
-	-cmds
-		-show-project-records
-		-swap-projects (with records)
+	-make stopped working		.
 
-	-add admin cmds
-		-"show-db-path"
-		-"show-cfg-path"
+	-add admin cmds				.
+		-"show-db-path"				.
+		-"show-cfg-path"			.
+
+	-cmds						.
+		-show-project-records		.
+		-swap-projects				.
+		 (with records)
+
+	-v							. -> 2.2.0
+	-update manpage				.
+	 (including version)
 }
 
 --- done ---

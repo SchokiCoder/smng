@@ -18,13 +18,16 @@ APP_NAME = smng
 INSTALL_BIN_DIR = /usr/bin
 USERNAME = ""
 
+debug:
+	cargo rustc
+
 info:
 	@echo "1. Set username in Makefile.\n2. make install"
 
 clean:
-	rm -f ${APP_NAME} *.o
+	rm -f -r target
 
-build:
+release:
 	cargo rustc --release
 
 mkconfig:
@@ -33,11 +36,15 @@ mkconfig:
 
 install-manpage:
 	mkdir -p /usr/local/man/man1
-	cp ${APP_NAME}.1 /usr/local/man/man1
+	cp manpage.1 /usr/local/man/man1/${APP_NAME}.1
 	gzip /usr/local/man/man1/${APP_NAME}.1
 	mandb
 
-install: build mkconfig install-manpage
+install-completion:
+	cp completion.bash /usr/share/bash-completion/completions/${APP_NAME}
+	source /usr/share/bash-completion/completions/${APP_NAME}
+
+install: release mkconfig install-manpage install-completion
 	mkdir -p ${INSTALL_BIN_DIR}
 	mv -f ./target/release/${APP_NAME} ${INSTALL_BIN_DIR}
 	chmod 755 ${INSTALL_BIN_DIR}/${APP_NAME}

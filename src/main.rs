@@ -43,7 +43,7 @@ fn main() {
 
 	// if not args given, print usage help and end
 	if args.len() < 2 {
-		println!("Usage {} COMMAND [ARGUMENTS]:", env!("CARGO_PKG_NAME"));
+		println!("Usage: {} command [arguments]:", env!("CARGO_PKG_NAME"));
 		println!("Try '{} {}' for more information.",
 			env!("CARGO_PKG_NAME"),
 			commands::HELP_NAME);

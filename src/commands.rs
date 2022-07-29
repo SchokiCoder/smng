@@ -258,7 +258,7 @@ fn database_open() -> sqlite::Connection {
 
 pub fn help() {
 	println!("Usage:");
-	println!("{} [COMMAND] [ARGS]", env!("CARGO_PKG_NAME"));
+	println!("{} command [arguments]", env!("CARGO_PKG_NAME"));
 	println!("");
 
 	println!("-- Info --");
