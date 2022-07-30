@@ -6,13 +6,11 @@
 	-fix manpage formatting		v_14-24
 	 (info cmds)
 
-	-make stopped working		.
-
-	-list files in manpage		.
-	 (cfg, manpage, tabcomplete)
-	-remove files on uninstall	.
-	-remove need for manual		.
+	-remove need for manual		v_23-10_30-07-2022
 	 configuration in makefile
+	-list files in manpage		v_23-13
+	 (cfg, manpage, tabcomplete)
+	-remove files on uninstall	v_23-25
 
 	-add admin cmds				.
 		-"show-db-path"				.
