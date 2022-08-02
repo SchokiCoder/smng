@@ -20,9 +20,6 @@ INSTALL_BIN_DIR = /usr/bin
 debug:
 	cargo rustc
 
-clean:
-	rm -f -r target
-
 release:
 	cargo rustc --release
 

@@ -98,6 +98,26 @@ fn main() {
 
 			commands::edit_project(project_id, args[3].as_str());
 		},
+		
+		commands::SWAP_PROJECTS_NAME => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::SWAP_PROJECTS_INFO,
+					commands::SWAP_PROJECTS_NAME,
+					None,
+					Some(commands::SWAP_PROJECTS_ARGS));
+				return;
+			}
+			
+			if argcount_check(args.len(), 4, 4) {
+				return;
+			}
+			
+			let project_id_a = args[2].parse::<i64>().unwrap();
+			let project_id_b = args[3].parse::<i64>().unwrap();
+			
+			commands::swap_projects(project_id_a, project_id_b);
+		},
 
 		commands::DELETE_PROJECT_NAME => {
 			if args.len() == 2 {
@@ -201,7 +221,8 @@ fn main() {
 				e_year, e_month, e_day, e_hour, e_minute);
 		},
 
-		commands::EDIT_RECORD_PROJECT_NAME | commands::EDIT_RECORD_PROJECT_ABBR => {
+		commands::EDIT_RECORD_PROJECT_NAME |
+		commands::EDIT_RECORD_PROJECT_ABBR => {
 			if args.len() == 2 {
 				commands::print_cmd_help(
 					commands::EDIT_RECORD_PROJECT_INFO,
@@ -269,7 +290,8 @@ fn main() {
 			commands::edit_record_end(record_id, year, month, day, hour, minute);
 		},
 
-		commands::EDIT_RECORD_DESCRIPTION_NAME | commands::EDIT_RECORD_DESCRIPTION_ABBR => {
+		commands::EDIT_RECORD_DESCRIPTION_NAME |
+		commands::EDIT_RECORD_DESCRIPTION_ABBR => {
 			if args.len() == 2 {
 				commands::print_cmd_help(
 					commands::EDIT_RECORD_DESCRIPTION_INFO,
@@ -359,6 +381,26 @@ fn main() {
 				commands::show_month_cur();
 			}
 		},
+		
+		commands::SHOW_PROJECT_RECORDS_NAME |
+		commands::SHOW_PROJECT_RECORDS_ABBR => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::SHOW_PROJECT_RECORDS_INFO,
+					commands::SHOW_PROJECT_RECORDS_NAME,
+					Some(commands::SHOW_PROJECT_RECORDS_ABBR),
+					Some(commands::SHOW_PROJECT_RECORDS_ARGS));
+				return;
+			}
+			
+			if argcount_check(args.len(), 3, 3) {
+				return;
+			}
+			
+			let project_id = args[2].parse::<i64>().unwrap();
+			
+			commands::show_project_records(project_id);
+		},
 
 		commands::MERGE_DB_NAME | commands::MERGE_DB_ABBR => {
 			if args.len() == 2 {
@@ -376,6 +418,22 @@ fn main() {
 
 			commands::merge_db(&args[2], &args[3]);
 		},
+		
+		commands::SHOW_ETC_PATH_NAME | commands::SHOW_ETC_PATH_ABBR => {
+			if argcount_check(args.len(), 2, 2) {
+				return;
+			}
+			
+			commands::show_etc_path();
+		}
+		
+		commands::SHOW_DB_PATH_NAME | commands::SHOW_DB_PATH_ABBR => {
+			if argcount_check(args.len(), 2, 2) {
+				return;
+			}
+			
+			commands::show_db_path();
+		}
 		
 		_ => println!("Command not recognised."),
 	}

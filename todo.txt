@@ -12,18 +12,32 @@
 	 (cfg, manpage, tabcomplete)
 	-remove files on uninstall	v_23-25
 
-	-add admin cmds				.
-		-"show-db-path"				.
-		-"show-cfg-path"			.
+	-add admin cmds				v_13-19_02-08-2022
+		-"show-cfg-path"			v_13-10_02-08-2022
+		-"show-db-path"				v_13-19
+
+	-report summary:			v_14-05
+	 removed unnecessary
+	 conversion
+	-fixed trying to print		v_14-16
+	 records without end
+	-unnecessary conversion in	v_14-22
+	 show record
 
 	-cmds						.
-		-show-project-records		.
+		-show-project-records		v_14-24
 		-swap-projects				.
 		 (with records)
 
-	-v							. -> 2.2.0
+	-report						.
+		-day value in needs full	.
+		 date
+		-full line for new day		.
+
 	-update manpage				.
 	 (including version)
+	-update completions			.
+	-v							. -> 2.2.0
 }
 
 --- done ---

@@ -40,6 +40,10 @@ pub const EDIT_PROJECT_NAME: &str = "edit-project";
 pub const EDIT_PROJECT_ABBR: &str = "ep";
 pub const EDIT_PROJECT_ARGS: &str = "project_id project_name";
 
+pub const SWAP_PROJECTS_INFO: &str = "swap projects and the respective records";
+pub const SWAP_PROJECTS_NAME: &str = "swap-projects";
+pub const SWAP_PROJECTS_ARGS: &str = "project_id_a project_id_b";
+
 pub const DELETE_PROJECT_INFO: &str = "delete a project and if wished purge all records";
 pub const DELETE_PROJECT_NAME: &str = "delete-project";
 pub const DELETE_PROJECT_ARGS: &str = "project_id [purge]";
@@ -100,10 +104,23 @@ pub const SHOW_MONTH_NAME: &str = "show-month";
 pub const SHOW_MONTH_ABBR: &str = "sm";
 pub const SHOW_MONTH_ARGS: &str = "[year month]";
 
+pub const SHOW_PROJECT_RECORDS_INFO: &str = "show records of a certain project";
+pub const SHOW_PROJECT_RECORDS_NAME: &str = "show-project-records";
+pub const SHOW_PROJECT_RECORDS_ABBR: &str = "spr";
+pub const SHOW_PROJECT_RECORDS_ARGS: &str = "project_id";
+
 pub const MERGE_DB_INFO: &str = "merges projects and records of two databases";
 pub const MERGE_DB_NAME: &str = "merge-db";
 pub const MERGE_DB_ABBR: &str = "mdb";
 pub const MERGE_DB_ARGS: &str = "source_database_path destination_database_path";
+
+pub const SHOW_ETC_PATH_INFO: &str = "show path of currently used config";
+pub const SHOW_ETC_PATH_NAME: &str = "show-cfg-path";
+pub const SHOW_ETC_PATH_ABBR: &str = "scp";
+
+pub const SHOW_DB_PATH_INFO: &str = "show path of currently configured database";
+pub const SHOW_DB_PATH_NAME: &str = "show-db-path";
+pub const SHOW_DB_PATH_ABBR: &str = "sdbp";
 
 pub fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&str>) {
 	println!("  {}:", info);
@@ -124,62 +141,93 @@ const GLOB_ETC_DB_PATH: &str = "/etc/smng.d/db_path";
 const USER_ETC_DB_PATH: &str = "/.config/smng/db_path";
 const LOCL_ETC_DB_PATH: &str = "db_path";
 
-fn database_open() -> sqlite::Connection {
-	use std::io::Read;
+enum ConfigPos {
+	None,
+	Global (String),
+	User (String),
+	Local (String),
+}
 
-	fn get_cfg_file() -> std::fs::File {
-		// get current working dir
-		let mut temp: String;
-		let args: Vec<String> = std::env::args().collect();
-	
-		if args.len() > 0 {
-			temp = String::from(&args[0]);
-			let temppos = temp.rfind('/');
-			if temppos.is_some() {
-				temp.truncate(temppos.unwrap());
-			}
-			temp.push('/');
-			temp.push_str(LOCL_ETC_DB_PATH);
-	
-			// if config file is next to binary, return
-			let f = std::fs::File::open(&temp);
-	
-			if f.is_ok() {
-				return f.unwrap();
-			}
+fn find_cfg_file() -> ConfigPos {
+	// try current working dir (next to binary)
+	let mut temp: String;
+	let args: Vec<String> = std::env::args().collect();
+
+	if args.len() > 0 {
+		temp = String::from(&args[0]);
+		let temppos = temp.rfind('/');
+		if temppos.is_some() {
+			temp.truncate(temppos.unwrap());
 		}
-	
-		// if conf is not in user config dir
-		temp = env!("HOME").to_string();
-		temp.push_str(USER_ETC_DB_PATH);
+		temp.push('/');
+		temp.push_str(LOCL_ETC_DB_PATH);
 
-		let f = std::fs::File::open(temp);
-
-		if f.is_ok() {
-			return f.unwrap();
-		}
-		
-		// if there is no global config
-		let f = std::fs::File::open(GLOB_ETC_DB_PATH);
-
-		if f.is_ok() == false {
-			// crash and burn
-			panic!("No config file could not be found or read.\n\
-				Create at least one on path \"{}\".", GLOB_ETC_DB_PATH);
-		}
-		else {
-			return f.unwrap();
+		// if exists, return
+		if std::path::Path::new(&temp).exists() {
+			return ConfigPos::Local (temp);
 		}
 	}
 
-	// read db path config
+	// try user config dir
+	temp = env!("HOME").to_string();
+	temp.push_str(USER_ETC_DB_PATH);
+
+	if std::path::Path::new(&temp).exists() {
+		return ConfigPos::User (temp);
+	}
+	
+	// try global config
+	temp = GLOB_ETC_DB_PATH.to_string();
+	
+	if std::path::Path::new(GLOB_ETC_DB_PATH).exists() {
+		return ConfigPos::Global (temp);
+	}
+	else {
+		return ConfigPos::None;
+	}
+}
+
+fn get_cfg_file() -> std::fs::File {
+	let cfgpos = find_cfg_file();
+	
+	match cfgpos {
+		// if cfg exists, try open
+		ConfigPos::Local (path) |
+		ConfigPos::User (path) |
+		ConfigPos::Global (path) => {
+			let f = std::fs::File::open(&path);
+			
+			if !f.is_ok() {
+				panic!("Config file at \"{}\" could not be opened.", &path);
+			}
+			
+			return f.unwrap();
+		},
+		
+		// if not, crash and burn
+		ConfigPos::None => {
+			panic!("No config file could not be found or read.\n\
+			Create at least one on path \"{}\".", GLOB_ETC_DB_PATH);
+		},
+	}
+}
+
+fn read_etc_db() -> String {
+	use std::io::Read;
+	
 	let mut f = get_cfg_file();
 	let path: String;
-
 	let mut etc_raw = [0; 255];
 	let n = f.read(&mut etc_raw[..]).unwrap();
 	let temp = std::str::from_utf8(&etc_raw[..n]).unwrap();
 	path = String::from(String::from(temp).trim());
+	
+	return path;
+}
+
+fn database_open() -> sqlite::Connection {
+	// read db path config
+	let path = read_etc_db();
 
 	// if db doesn't exist, flag
 	let db_empty: bool;
@@ -358,6 +406,11 @@ pub fn help() {
 		SHOW_MONTH_NAME,
 		Some(SHOW_MONTH_ABBR),
 		Some(SHOW_MONTH_ARGS));
+	print_cmd_help(
+		SHOW_PROJECT_RECORDS_INFO,
+		SHOW_PROJECT_RECORDS_NAME,
+		Some(SHOW_PROJECT_RECORDS_ABBR),
+		Some(SHOW_PROJECT_RECORDS_ARGS));
 
 	println!("-- Administration --");
 	print_cmd_help(
@@ -365,6 +418,16 @@ pub fn help() {
 		MERGE_DB_NAME,
 		Some(MERGE_DB_ABBR),
 		Some(MERGE_DB_ARGS));
+	print_cmd_help(
+		SHOW_ETC_PATH_INFO,
+		SHOW_ETC_PATH_NAME,
+		Some(SHOW_ETC_PATH_ABBR),
+		None);
+	print_cmd_help(
+		SHOW_DB_PATH_INFO,
+		SHOW_DB_PATH_NAME,
+		Some(SHOW_DB_PATH_ABBR),
+		None);
 }
 
 pub fn about() {
@@ -426,6 +489,18 @@ pub fn edit_project(project_id: i64, project_name: &str) {
 	stmt.next().unwrap();
 
 	println!("Project ({}) name set to \"{}\".", project_id, project_name);
+}
+
+pub fn swap_projects(project_id_a: i64, project_id_b: i64) {
+	// if project id's are equal, educate user and stop
+	if project_id_a == project_id_b {
+		println!(
+			"ERROR: This command swaps the projects and records given.\n\
+			A swap needs two different projects.");
+		return;
+	}
+	
+	
 }
 
 pub fn delete_project(project_id: i64, purge: bool) {
@@ -708,25 +783,25 @@ pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 }
 
 fn show_record(stmt: &sqlite::Statement, win_width: usize) -> i64 {
-	// format seconds in worktime
 	let seconds = stmt.read::<i64>(5).unwrap();
 	let minutes: u32 = seconds as u32 / 60;
 	let hours: u32 = minutes / 60;
 
-	let worktime = Utc
-		.ymd(1970, 1, 1)
-		.and_hms(hours, minutes - hours * 60, 0)
-		.format("%H:%M")
-		.to_string();
-
-	// print record
-	print!(
-		"{:9} | {:8} | {:8} | {:5} | {:9} | ",
-		stmt.read::<i64>(0).unwrap(),
-		stmt.read::<String>(2).unwrap(),
-		stmt.read::<String>(4).unwrap(),
-		worktime,
-		stmt.read::<i64>(6).unwrap());
+	// if record has an end, print
+	let rec_end = stmt.read::<String>(4);
+	
+	if rec_end.is_ok() {
+		print!(
+			"{:9} | {:8} | {:8} | {:02}:{:02} | {:9} | ",
+			stmt.read::<i64>(0).unwrap(),
+			stmt.read::<String>(2).unwrap(),
+			rec_end.unwrap(),
+			hours, (minutes / 60),
+			stmt.read::<i64>(6).unwrap());
+	}
+	else {
+		return 0;
+	}
 
 	// print desc
 	let desc = stmt.read::<String>(7).unwrap();
@@ -735,8 +810,8 @@ fn show_record(stmt: &sqlite::Statement, win_width: usize) -> i64 {
 
 	while i < desc.len() {
 		if pos + 55 > win_width {
-			print!("\n{:9} | {:8} | {:8} | {:5} | {:9} | ",
-				"", "", "", "", "");
+			print!("\n{:9} | {:8} | {:8} | {:02} {:02} | {:9} | ",
+				"", "", "", "", "", "");
 			pos = 0;
 		}
 
@@ -751,14 +826,18 @@ fn show_record(stmt: &sqlite::Statement, win_width: usize) -> i64 {
 	return seconds;
 }
 
-fn show_records(ts_begin: i64, ts_end: i64) {
-	// get window width
+fn show_records(
+	ts_begin: Option<i64>,
+	ts_end: Option<i64>,
+	project_id: Option<i64>) {
+	
 	let win_width = term_size::dimensions_stdout().unwrap().0;
-
-	// execute sql
 	let db = database_open();
 
-	let mut stmt = db.prepare(
+	// build sql string, prepare, bind (depending on which params given)
+	let mut stmt: sqlite::Statement;
+	
+	let mut sql = String::from(
 		"SELECT work_record_id, \
 		 strftime('%d', begin, 'unixepoch') as begin_day, \
 		 strftime('%H:%M', begin, 'unixepoch') as begin_time, \
@@ -766,13 +845,50 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 		 strftime('%H:%M', end, 'unixepoch') as end_time, \
 		 end - begin AS worktime, \
 		 project_id, description\n \
-		 FROM tbl_work_records\n \
-		 WHERE begin > strftime('%s', ?, 'unixepoch', 'localtime') \
-		 AND end < strftime('%s', ?, 'unixepoch', 'localtime');")
-		.unwrap();
-
-	stmt.bind(1, ts_begin).unwrap();
-	stmt.bind(2, ts_end).unwrap();
+		 FROM tbl_work_records\n");
+	
+	// all params
+	if ts_begin.is_some() && ts_end.is_some() && project_id.is_some() {
+		sql.push_str(
+		"WHERE begin > strftime('%s', ?, 'unixepoch', 'localtime') \
+		 AND end < strftime('%s', ?, 'unixepoch', 'localtime') \
+		 AND project_id = ?;");
+		 
+		 stmt = db
+			.prepare(&sql)
+			.unwrap();
+		
+		stmt.bind(1, ts_begin).unwrap();
+		stmt.bind(2, ts_end).unwrap();
+		stmt.bind(3, project_id).unwrap();
+	}
+	// only begin and end
+	else if ts_begin.is_some() && ts_end.is_some() && !project_id.is_some() {
+		sql.push_str(
+		"WHERE begin > strftime('%s', ?, 'unixepoch', 'localtime') \
+		 AND end < strftime('%s', ?, 'unixepoch', 'localtime');");
+		 
+		 stmt = db
+			.prepare(&sql)
+			.unwrap();
+		
+		stmt.bind(1, ts_begin).unwrap();
+		stmt.bind(2, ts_end).unwrap();
+	}
+	// only project id
+	else if !ts_begin.is_some() && !ts_end.is_some() && project_id.is_some() {
+		sql.push_str(
+		"WHERE project_id = ?;");
+		
+		stmt = db
+			.prepare(&sql)
+			.unwrap();
+		
+		stmt.bind(1, project_id).unwrap();
+	}
+	else {
+		panic!("Unexpected combination of parameters.");
+	}
 
 	// print header
 	println!("{:9} | {:8} | {:8} | {:5} | {:9} | {}",
@@ -841,13 +957,8 @@ fn show_records(ts_begin: i64, ts_end: i64) {
 	// summarized worktime
 	let minutes: u32 = sum_seconds / 60;
 	let hours: u32 = minutes / 60;
-	let worktime = Utc
-			.ymd(1970, 1, 1)
-			.and_hms(hours, minutes - hours * 60, 0)
-			.format("%H:%M")
-			.to_string();
 			
-	println!("Summarized worktime: {}.", worktime);
+	println!("Summarized worktime: {:02}:{:02}.", hours, (minutes - hours * 60));
 }
 
 const DAY_SECONDS: u32 = 60 * 60 * 24;
@@ -873,13 +984,13 @@ impl WeekBeginAndEnd {
 pub fn show_week_cur() {
 	// print
 	let week = WeekBeginAndEnd::from_date(Local::today());
-	show_records(week.begin, week.end);
+	show_records(Some(week.begin), Some(week.end), None);
 }
 
 pub fn show_week(year: i32, month: u32, day: u32) {
 	// print
 	let week = WeekBeginAndEnd::from_date(Local.ymd(year, month, day));
-	show_records(week.begin, week.end);
+	show_records(Some(week.begin), Some(week.end), None);
 }
 
 struct MonthBeginAndEnd {
@@ -910,13 +1021,18 @@ impl MonthBeginAndEnd {
 pub fn show_month_cur() {
 	// print
 	let month = MonthBeginAndEnd::from_date(Local::today());
-	show_records(month.begin, month.end);
+	show_records(Some(month.begin), Some(month.end), None);
 }
 
 pub fn show_month(year: i32, month: u32) {
 	// print
 	let month = MonthBeginAndEnd::from_date(Local.ymd(year, month, 1));
-	show_records(month.begin, month.end);
+	show_records(Some(month.begin), Some(month.end), None);
+}
+
+pub fn show_project_records(project_id: i64) {
+	// print
+	show_records(None, None, Some(project_id));
 }
 
 pub fn merge_db(src_db_path: &str, dest_db_path: &str) {
@@ -1026,4 +1142,32 @@ pub fn merge_db(src_db_path: &str, dest_db_path: &str) {
 
 	println!("All projects and work-records successfully carried\nfrom: \"{}\"\nto  : \"{}\"",
 		src_db_path, dest_db_path);
+}
+
+pub fn show_etc_path() {
+	let cfgpos = find_cfg_file();
+	
+	match cfgpos {
+		ConfigPos::Local (path) => {
+			println!("Config at local space:\n\"{}\"", &path);
+		},
+		
+		ConfigPos::User (path) => {
+			println!("Config at user space:\n\"{}\"", &path);
+		},
+		
+		ConfigPos::Global (path) => {
+			println!("Config at global space:\n\"{}\"", &path);
+		},
+		
+		ConfigPos::None => {
+			println!("WARNING: Config not found.");
+		},
+	}
+}
+
+pub fn show_db_path() {
+	let path = read_etc_db();
+	
+	println!("Database path:\n\"{}\"", &path);
 }
