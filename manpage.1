@@ -1,4 +1,4 @@
-.TH "SMNG" "1" "29 July 2022" "smng 2.1.2" ""
+.TH "SMNG" "1" "04 August 2022" "smng 2.2.0" ""
 .hy
 
 .SH NAME
@@ -118,6 +118,12 @@ Delete given record.
 Transfer all records from one project to another.
 .RE
 
+.PP
+\f[B]swap-project-records\f[R] \f[I]project_id_a\f[R] \f[I]project_id_b\f[R]
+.RS 4
+Swap records of two projects.
+.RE
+
 .SS Report Commands (show records)
 
 .PP
@@ -132,12 +138,30 @@ Show records of a given week or if none given current week.
 Show records of a given month or if none given current month.
 .RE
 
-.SS Administration Commands (handling databases)
+.PP
+\f[B]show-project-records\f[R] \f[I]project_id\f[R]
+.RS 4
+Show records of a certain project.
+.RE
+
+.SS Administration Commands (handling configurations and databases)
 
 .PP
 \f[B]merge-db | mdb\[R] \f[I]source_database_path\f[R] \f[I]destination_database_path\f[R]
 .RS 4
 Merge projects and records of two databases.
+.RE
+
+.PP
+\f[B]show-cfg-path | scp\f[R]
+.RS 4
+Show path of currently used config.
+.RE
+
+.PP
+\f[B]show-db-path | sdbp\f[R]
+.RS 4
+Show path of currently configured database.
 .RE
 
 .SH FILES

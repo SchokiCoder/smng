@@ -1,3 +1,5 @@
+--- done ---
+
 {
 	-formatting					v_12-46
 	
@@ -24,23 +26,21 @@
 	-unnecessary conversion in	v_14-22
 	 show record
 
-	-cmds						.
+	-cmds						v_14-12_04-08-2022
 		-show-project-records		v_14-24
-		-swap-projects				.
-		 (with records)
+		-swap-project-record		v_14-12_04-08-2022
 
-	-report						.
-		-day value in needs full	.
-		 date
-		-full line for new day		.
+	-report						v_14-33
+		-day value needs full date	v_14-25
+		-full line for new day		v_14-29
+		-fix record minute same as	v_14-33
+		 hour
 
-	-update manpage				.
+	-update manpage				v_14-56
 	 (including version)
-	-update completions			.
-	-v							. -> 2.2.0
+	-update completions			v_14-57
+	-v							v_14-58 -> 2.2.0
 }
-
---- done ---
 
 {
 	-better man page	v_09-33_13-07-2022

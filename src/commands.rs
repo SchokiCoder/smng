@@ -40,10 +40,6 @@ pub const EDIT_PROJECT_NAME: &str = "edit-project";
 pub const EDIT_PROJECT_ABBR: &str = "ep";
 pub const EDIT_PROJECT_ARGS: &str = "project_id project_name";
 
-pub const SWAP_PROJECTS_INFO: &str = "swap projects and the respective records";
-pub const SWAP_PROJECTS_NAME: &str = "swap-projects";
-pub const SWAP_PROJECTS_ARGS: &str = "project_id_a project_id_b";
-
 pub const DELETE_PROJECT_INFO: &str = "delete a project and if wished purge all records";
 pub const DELETE_PROJECT_NAME: &str = "delete-project";
 pub const DELETE_PROJECT_ARGS: &str = "project_id [purge]";
@@ -93,6 +89,10 @@ pub const DELETE_RECORD_ARGS: &str = "record_id";
 pub const TRANSFER_PROJECT_RECORDS_INFO: &str = "transfer all records from one project to another";
 pub const TRANSFER_PROJECT_RECORDS_NAME: &str = "transfer-project-records";
 pub const TRANSFER_PROJECT_RECORDS_ARGS: &str = "source_project_id destination_project_id";
+
+pub const SWAP_PROJECT_RECORDS_INFO: &str = "swap records of two projects";
+pub const SWAP_PROJECT_RECORDS_NAME: &str = "swap-project-records";
+pub const SWAP_PROJECT_RECORDS_ARGS: &str = "project_id_a project_id_b";
 
 pub const SHOW_WEEK_INFO: &str = "show records of a certain week or current";
 pub const SHOW_WEEK_NAME: &str = "show-week";
@@ -394,6 +394,11 @@ pub fn help() {
 		TRANSFER_PROJECT_RECORDS_NAME,
 		None,
 		Some(TRANSFER_PROJECT_RECORDS_ARGS));
+	print_cmd_help(
+		SWAP_PROJECT_RECORDS_INFO,
+		SWAP_PROJECT_RECORDS_NAME,
+		None,
+		Some(SWAP_PROJECT_RECORDS_ARGS));
 
 	println!("-- Report --");
 	print_cmd_help(
@@ -489,18 +494,6 @@ pub fn edit_project(project_id: i64, project_name: &str) {
 	stmt.next().unwrap();
 
 	println!("Project ({}) name set to \"{}\".", project_id, project_name);
-}
-
-pub fn swap_projects(project_id_a: i64, project_id_b: i64) {
-	// if project id's are equal, educate user and stop
-	if project_id_a == project_id_b {
-		println!(
-			"ERROR: This command swaps the projects and records given.\n\
-			A swap needs two different projects.");
-		return;
-	}
-	
-	
 }
 
 pub fn delete_project(project_id: i64, purge: bool) {
@@ -782,6 +775,88 @@ pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 		src_project_id, dest_project_id);
 }
 
+pub fn swap_project_records(project_id_a: i64, project_id_b: i64) {
+	// if project id's are equal, educate user and stop
+	if project_id_a == project_id_b {
+		println!(
+			"ERROR: This command swaps the projects and records given.\n\
+			A swap needs two different projects.");
+		return;
+	}
+	
+	// create temp project, get temp project id
+	let db = database_open();
+
+	db
+		.execute(
+			"INSERT INTO tbl_projects(project_name)\n\
+			 VALUES('__swap');")
+		.unwrap();
+	
+	let mut stmt = db
+		.prepare(
+			"SELECT project_id\n\
+			 FROM tbl_projects\n\
+			 WHERE project_name = '__swap';")
+		.unwrap();
+	
+	stmt.next().unwrap();
+	
+	let tempid = stmt.read::<i64>(0).unwrap();
+
+	// move a to temp
+	let mut stmt = db
+		.prepare(
+			"UPDATE tbl_work_records\n\
+			 SET project_id = ?\n\
+			 WHERE project_id = ?;")
+		.unwrap();
+	
+	stmt.bind(1, tempid).unwrap();
+	stmt.bind(2, project_id_a).unwrap();
+	
+	while stmt.next().unwrap() != sqlite::State::Done {}
+	
+	// move b to a
+	let mut stmt = db
+		.prepare(
+			"UPDATE tbl_work_records\n\
+			 SET project_id = ?\n\
+			 WHERE project_id = ?;")
+		.unwrap();
+		
+	stmt.bind(1, project_id_a).unwrap();
+	stmt.bind(2, project_id_b).unwrap();
+	
+	while stmt.next().unwrap() != sqlite::State::Done {}
+	
+	// move temp to b
+	let mut stmt = db
+		.prepare(
+			"UPDATE tbl_work_records\n\
+			 SET project_id = ?\n\
+			 WHERE project_id = ?;")
+		.unwrap();
+	
+	stmt.bind(1, project_id_b).unwrap();
+	stmt.bind(2, tempid).unwrap();
+	
+	while stmt.next().unwrap() != sqlite::State::Done {}
+	
+	// delete temp project
+	let mut stmt = db
+		.prepare(
+			"DELETE FROM tbl_projects\n\
+			 WHERE project_id = ?;")
+		.unwrap();
+	
+	stmt.bind(1, tempid).unwrap();
+	stmt.next().unwrap();
+
+	println!("Records of project ({}) swapped with project ({}).",
+		project_id_a, project_id_b);
+}
+
 fn show_record(stmt: &sqlite::Statement, win_width: usize) -> i64 {
 	let seconds = stmt.read::<i64>(5).unwrap();
 	let minutes: u32 = seconds as u32 / 60;
@@ -796,7 +871,7 @@ fn show_record(stmt: &sqlite::Statement, win_width: usize) -> i64 {
 			stmt.read::<i64>(0).unwrap(),
 			stmt.read::<String>(2).unwrap(),
 			rec_end.unwrap(),
-			hours, (minutes / 60),
+			hours, (minutes % 60),
 			stmt.read::<i64>(6).unwrap());
 	}
 	else {
@@ -826,6 +901,12 @@ fn show_record(stmt: &sqlite::Statement, win_width: usize) -> i64 {
 	return seconds;
 }
 
+fn print_char(num: u32, c: char) {
+	for _ in 0..num {
+		print!("{}", c);
+	}
+}
+
 fn show_records(
 	ts_begin: Option<i64>,
 	ts_end: Option<i64>,
@@ -839,7 +920,7 @@ fn show_records(
 	
 	let mut sql = String::from(
 		"SELECT work_record_id, \
-		 strftime('%d', begin, 'unixepoch') as begin_day, \
+		 strftime('%Y.%m.%d', begin, 'unixepoch') as begin_day, \
 		 strftime('%H:%M', begin, 'unixepoch') as begin_time, \
 		 strftime('%d', end, 'unixepoch') as end_day, \
 		 strftime('%H:%M', end, 'unixepoch') as end_time, \
@@ -895,15 +976,15 @@ fn show_records(
 		"id", "begin", "end", "time", "project", "description");
 
 	let mut sum_seconds: u32 = 0;
-	let mut pre_day: i64;
-	let mut cur_day: i64 = 0;
+	let mut pre_day: String;
+	let mut cur_day = String::from("");
 	let mut day_seconds: u32 = 0;
 
 	// print first record
 	// (because the if (cur_day change) would needlessly print day_worktime)
 	if stmt.next().unwrap() == sqlite::State::Row {
-		cur_day = stmt.read::<i64>(1).unwrap();
-		println!("- day {:3} -", cur_day);
+		cur_day = stmt.read::<String>(1).unwrap();
+		println!("- {} -", cur_day);
 		
 		let seconds = show_record(&stmt, win_width);
 		
@@ -915,7 +996,7 @@ fn show_records(
 	while stmt.next().unwrap() == sqlite::State::Row {
 		// if current day changes
 		pre_day = cur_day;
-		cur_day = stmt.read::<i64>(1).unwrap();
+		cur_day = stmt.read::<String>(1).unwrap();
 
 		if cur_day != pre_day {
 			
@@ -929,8 +1010,11 @@ fn show_records(
 				.format("%H:%M")
 				.to_string();
 		
-			println!("{:32}- {:5} -", "", worktime);
-			println!("- day {:3} -", cur_day);
+			print_char(33, '-');
+			print!(" {:5} ", worktime);
+			print_char(25, '-');
+			println!("");
+			println!("- {} -", cur_day);
 
 			// reset day worktime
 			day_seconds = 0;
@@ -951,8 +1035,11 @@ fn show_records(
 		.and_hms(hours, minutes - hours * 60, 0)
 		.format("%H:%M")
 		.to_string();
-		
-	println!("{:32}- {:5} -", "", worktime);
+	
+	print_char(33, '-');
+	print!(" {:5} ", worktime);
+	print_char(25, '-');
+	println!("");
 
 	// summarized worktime
 	let minutes: u32 = sum_seconds / 60;

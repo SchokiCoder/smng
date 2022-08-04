@@ -98,26 +98,6 @@ fn main() {
 
 			commands::edit_project(project_id, args[3].as_str());
 		},
-		
-		commands::SWAP_PROJECTS_NAME => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::SWAP_PROJECTS_INFO,
-					commands::SWAP_PROJECTS_NAME,
-					None,
-					Some(commands::SWAP_PROJECTS_ARGS));
-				return;
-			}
-			
-			if argcount_check(args.len(), 4, 4) {
-				return;
-			}
-			
-			let project_id_a = args[2].parse::<i64>().unwrap();
-			let project_id_b = args[3].parse::<i64>().unwrap();
-			
-			commands::swap_projects(project_id_a, project_id_b);
-		},
 
 		commands::DELETE_PROJECT_NAME => {
 			if args.len() == 2 {
@@ -347,6 +327,26 @@ fn main() {
 			let dest_prj_id = args[3].parse::<i64>().unwrap();
 
 			commands::transfer_project_records(src_prj_id, dest_prj_id);
+		},
+
+		commands::SWAP_PROJECT_RECORDS_NAME => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::SWAP_PROJECT_RECORDS_INFO,
+					commands::SWAP_PROJECT_RECORDS_NAME,
+					None,
+					Some(commands::SWAP_PROJECT_RECORDS_ARGS));
+				return;
+			}
+			
+			if argcount_check(args.len(), 4, 4) {
+				return;
+			}
+			
+			let project_id_a = args[2].parse::<i64>().unwrap();
+			let project_id_b = args[3].parse::<i64>().unwrap();
+			
+			commands::swap_project_records(project_id_a, project_id_b);
 		},
 
 		commands::SHOW_WEEK_NAME | commands::SHOW_WEEK_ABBR => {
