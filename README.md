@@ -4,9 +4,9 @@ Personal working time manager, to monitor the time you worked on each project.
 
 ## Dependencies
 
-+ [sqlite](https://docs.rs/sqlite/)
-+ [chrono](https://docs.rs/chrono/)
-+ [term_size](https://docs.rs/term_size/)
++ [sqlite](https://github.com/stainless-steel/sqlite)
++ [chrono](https://github.com/chronotope/chrono)
++ [term_size](https://github.com/clap-rs/term_size-rs)
 
 ## Installation
 
