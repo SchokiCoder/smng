@@ -16,16 +16,16 @@
 	-v							. -> 2.3.0
 }
 
+--- done ---
+
 {
-	-show-month seems to only	v_10-18
+	-show-month seems to only	v_10-18_24-09-2022
 	 work with current month
 	 (wether implicit
 	  (no args)
 	  or explicit (arg))
-	-v							. -> 2.2.1
+	-v							v_10-19 -> 2.2.1
 }
-
---- done ---
 
 {
 	-README dependencies link to repo
