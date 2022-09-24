@@ -1087,16 +1087,25 @@ struct MonthBeginAndEnd {
 
 impl MonthBeginAndEnd {
 	pub fn from_date(date: Date<Local>) -> MonthBeginAndEnd {
+		// begin, from 28 on check the next 4 days for adding to ts_end
 		let ts_begin = Local.ymd(date.year(), date.month(), 1).and_hms(0, 0, 0).timestamp();
 		let ts_temp = Local.ymd(date.year(), date.month(), 28).and_hms(23, 59, 59).timestamp();
-		let mut ts_end: i64 = 0;
+		let mut ts_end: i64 = ts_temp;
 
 		for i in 1..4 {
-			if Local.timestamp(ts_temp + (i * DAY_SECONDS as i64), 0).month() !=
-		   		Local.timestamp(ts_temp, 0).month() {
-				ts_end = ts_temp + ((i - 1) * DAY_SECONDS as i64);
+			// if next day is in cur month, add one days seconds to ts_end
+			if Local.timestamp(ts_begin, 0).month() ==
+			   Local.timestamp(ts_end + (i * DAY_SECONDS as i64), 0).month()
+		   	{
+				ts_end += DAY_SECONDS as i64;
+			}
+			else {
+				break;
 			}
 		}
+
+		// add one more day to ts_end
+		ts_end += DAY_SECONDS as i64;
 
 		return MonthBeginAndEnd {
 			begin: ts_begin,

@@ -1,3 +1,29 @@
+{
+	-line in show record report	.
+	 for entire width of term
+	
+	-archive-project cmd		.
+	-archived projects are		.
+	 listed below other
+	 projects in
+	 show-projects
+	-archived projects can not	.
+	 be used for record,
+	 edit-record-project
+	
+	-undo cmd					.
+	
+	-v							. -> 2.3.0
+}
+
+{
+	-show-month seems to only	v_10-18
+	 work with current month
+	 (wether implicit
+	  (no args)
+	  or explicit (arg))
+	-v							. -> 2.2.1
+}
 
 --- done ---
 
