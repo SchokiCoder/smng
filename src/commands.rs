@@ -142,8 +142,8 @@ pub fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&
 }
 
 const GLOB_ETC_DB_PATH: &str = "/etc/smng.d/db_path";
-const USER_ETC_DB_PATH: &str = "/.config/smng/db_path";
-const LOCL_ETC_DB_PATH: &str = "db_path";
+const USER_ETC_DB_PATH: &str = "/.config/smng/db_path"; // (appendage)
+const LOCL_ETC_DB_PATH: &str = "db_path"; // (appendage)
 
 enum ConfigPos {
 	None,
@@ -202,7 +202,7 @@ fn get_cfg_file() -> std::fs::File {
 			let f = std::fs::File::open(&path);
 			
 			if !f.is_ok() {
-				panic!("Config file at \"{}\" could not be opened.", &path);
+				panic!("Config file at \"{}\" could not be opened", &path);
 			}
 			
 			return f.unwrap();
@@ -210,8 +210,8 @@ fn get_cfg_file() -> std::fs::File {
 		
 		// if not, crash and burn
 		ConfigPos::None => {
-			panic!("No config file could not be found or read.\n\
-			Create at least one on path \"{}\".", GLOB_ETC_DB_PATH);
+			panic!("No config file could not be found or read\n\
+			Create at least one on path \"{}\"", GLOB_ETC_DB_PATH);
 		},
 	}
 }
@@ -254,7 +254,7 @@ fn database_open() -> sqlite::Connection {
 
 		// else panic
 		else {
-			panic!("Connection to database \"{}\" failed.", path.as_str());
+			panic!("Connection to database \"{}\" failed", path.as_str());
 		}
 	};
 
@@ -507,8 +507,42 @@ pub fn show_projects() {
 	}
 }
 
+fn project_archived(db: &sqlite::Connection, project_id: i64) -> bool {
+	let mut stmt = db
+		.prepare(
+			"SELECT project_archived\n\
+			 FROM tbl_projects\n\
+			 WHERE project_id = ?;")
+		.unwrap();
+
+	stmt.bind(1, project_id).unwrap();
+	stmt.next().unwrap();
+	
+	return stmt.read::<i64>(0).unwrap() != 0;
+}
+
+fn record_archived(db: &sqlite::Connection, record_id: i64) -> bool {
+	let mut stmt = db
+		.prepare(
+			"SELECT project_id\n\
+			 FROM tbl_work_records\n\
+			 WHERE work_record_id = ?;")
+		.unwrap();
+
+	stmt.bind(1, record_id).unwrap();
+	stmt.next().unwrap();
+	
+	return project_archived(db, stmt.read::<i64>(0).unwrap());
+}
+
 pub fn edit_project(project_id: i64, project_name: &str) {
 	let db = database_open();
+	
+	// if project archived, print and stop
+	if project_archived(&db, project_id) {
+		println!("ERROR: Project ({}) is archived and can not be edited.", project_id);
+		return;
+	}
 
 	let mut stmt = db
 		.prepare(
@@ -527,18 +561,8 @@ pub fn edit_project(project_id: i64, project_name: &str) {
 pub fn archive_project(project_id: i64) {
 	let db = database_open();
 
-	// find out if targeted project is already archived
-	let mut stmt = db
-		.prepare(
-			"SELECT project_archived\n\
-			 FROM tbl_projects\n\
-			 WHERE project_id = ?;")
-		.unwrap();
-
-	stmt.bind(1, project_id).unwrap();
-	stmt.next().unwrap();
-	
-	let archived = stmt.read::<i64>(0).unwrap() != 0;
+	// find out if targeted project is already archived	
+	let archived = project_archived(&db, project_id);
 	let arch_num: i64;
 	let new_state_str: &str;
 	
@@ -605,16 +629,12 @@ struct RecordState {
 }
 
 impl RecordState {
-	pub fn last() -> RecordState {
-		let db = database_open();
-
-		let mut stmt = db
-			.prepare(
+	pub fn last(db: &sqlite::Connection) -> RecordState {
+		let mut stmt = db.prepare(
 				"SELECT work_record_id, \
 				 (CASE WHEN end IS NULL THEN 0 ELSE 1 END) as record_complete\n \
 				 FROM tbl_work_records\n \
-				 ORDER BY work_record_id DESC LIMIT 1;")
-			.unwrap();
+				 ORDER BY work_record_id DESC LIMIT 1;").unwrap();
 
 		stmt.next().unwrap();
 
@@ -626,8 +646,16 @@ impl RecordState {
 }
 
 pub fn record(project_id: i64) {
+	let db = database_open();
+	
+	// if used project is archived, stop
+	if project_archived(&db, project_id) {
+		println!("ERROR: Project ({}) is archived and can not be used.", project_id);
+		return;
+	}
+	
 	// if last record is not done, stop
-	let rec_state = RecordState::last();
+	let rec_state = RecordState::last(&db);
 
 	if rec_state.id != 0 {
 		if rec_state.state == 0 {
@@ -635,9 +663,6 @@ pub fn record(project_id: i64) {
 			return;
 		}
 	}
-
-	// exec
-	let db = database_open();
 
 	let mut stmt = db
 		.prepare(
@@ -652,7 +677,8 @@ pub fn record(project_id: i64) {
 }
 
 pub fn status() {
-	let rec_state = RecordState::last();
+	let db = database_open();
+	let rec_state = RecordState::last(&db);
 
 	let state_str: &str;
 
@@ -667,7 +693,8 @@ pub fn status() {
 }
 
 pub fn stop(description: &str) {
-	let rec_state = RecordState::last();
+	let db = database_open();
+	let rec_state = RecordState::last(&db);
 
 	// if last record is 0, stop
 	if rec_state.id == 0 {
@@ -682,8 +709,6 @@ pub fn stop(description: &str) {
 	}
 
 	//exec
-	let db = database_open();
-
 	let mut stmt = db
 		.prepare(
 			"UPDATE tbl_work_records\n\
@@ -699,10 +724,17 @@ pub fn stop(description: &str) {
 
 pub fn add_record(project_id: i64, description: &str,
 	b_year: i64, b_month: i64, b_day: i64, b_hour: i64, b_minute: i64,
-	e_year: i64, e_month: i64, e_day: i64, e_hour: i64, e_minute: i64) {
-
+	e_year: i64, e_month: i64, e_day: i64, e_hour: i64, e_minute: i64)
+{
 	let db = database_open();
+	
+	// if used project is archived, stop
+	if project_archived(&db, project_id) {
+		println!("ERROR: Project ({}) is archived and can not be used.", project_id);
+		return;
+	}
 
+	// exec
 	let mut stmt = db
 		.prepare(
 			"INSERT INTO tbl_work_records(project_id, description, begin, end)\n\
@@ -730,7 +762,20 @@ pub fn add_record(project_id: i64, description: &str,
 
 pub fn edit_record_project(record_id: i64, project_id: i64) {
 	let db = database_open();
+	
+	// if used project is archived, stop
+	if project_archived(&db, project_id) {
+		println!("ERROR: Project ({}) is archived and can not be used.", project_id);
+		return;
+	}
+	
+	// if record is assigned to archived project, stop
+	if record_archived(&db, record_id) {
+		println!("ERROR: Record ({}) is archived and can not be edited.", record_id);
+		return;
+	}
 
+	// exec
 	let mut stmt = db
 		.prepare(
 			"UPDATE tbl_work_records\n\
@@ -745,10 +790,21 @@ pub fn edit_record_project(record_id: i64, project_id: i64) {
 	println!("Record ({}) project set to ({}).", record_id, project_id);
 }
 
-fn edit_record_time(begin: bool, record_id: i64, year: i64, month: i64, day: i64,
-                    hour: i64, minute: i64) {
+fn edit_record_time(
+	begin: bool, record_id: i64,
+	year: i64, month: i64, day: i64,
+	hour: i64, minute: i64)
+	-> bool
+{
 	let db = database_open();
+	
+	// if record is assigned to archived project, stop
+	if record_archived(&db, record_id) {
+		println!("ERROR: Record ({}) is archived and can not be edited.", record_id);
+		return false;
+	}
 
+	// exec
 	let mut sql = String::from("UPDATE tbl_work_records\nSET ");
 
 	if begin == true {
@@ -772,31 +828,40 @@ fn edit_record_time(begin: bool, record_id: i64, year: i64, month: i64, day: i64
 	stmt.bind(5, minute).unwrap();
 	stmt.bind(6, record_id).unwrap();
 	stmt.next().unwrap();
+	
+	return true;
 }
 
 pub fn edit_record_begin(record_id: i64, year: i64, month: i64, day: i64,
                          hour: i64, minute: i64) {
-	edit_record_time(true, record_id, year, month, day, hour, minute);
-
-	println!("Record ({}) begin set to {:04}-{:02}-{:02} {:02}:{:02}.",
-		record_id,
-		year, month, day,
-		hour, minute);
+	if edit_record_time(true, record_id, year, month, day, hour, minute) {
+		println!("Record ({}) begin set to {:04}-{:02}-{:02} {:02}:{:02}.",
+			record_id,
+			year, month, day,
+			hour, minute);
+	}
 }
 
 pub fn edit_record_end(record_id: i64, year: i64, month: i64, day: i64,
                        hour: i64, minute: i64) {
-	edit_record_time(false, record_id, year, month, day, hour, minute);
-
-	println!("Record ({}) end set to {:04}-{:02}-{:02} {:02}:{:02}.",
-		record_id,
-		year, month, day,
-		hour, minute);
+	if edit_record_time(false, record_id, year, month, day, hour, minute) {
+		println!("Record ({}) end set to {:04}-{:02}-{:02} {:02}:{:02}.",
+			record_id,
+			year, month, day,
+			hour, minute);
+	}
 }
 
 pub fn edit_record_description(record_id: i64, description: &str) {
 	let db = database_open();
 
+	// if record is assigned to archived project, stop
+	if record_archived(&db, record_id) {
+		println!("ERROR: Record ({}) is archived and can not be edited.", record_id);
+		return;
+	}
+
+	// exec
 	let mut stmt = db
 		.prepare(
 			"UPDATE tbl_work_records\n \
@@ -813,7 +878,14 @@ pub fn edit_record_description(record_id: i64, description: &str) {
 
 pub fn delete_record(record_id: i64) {
 	let db = database_open();
+	
+	// if record is assigned to archived project, stop
+	if record_archived(&db, record_id) {
+		println!("ERROR: Record ({}) is archived and can not be deleted.", record_id);
+		return;
+	}
 
+	// exec
 	let mut stmt = db
 		.prepare(
 			"DELETE\n\
@@ -828,8 +900,31 @@ pub fn delete_record(record_id: i64) {
 }
 
 pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
+	// if project id's are equal, educate user and stop
+	if src_project_id == dest_project_id {
+		println!(
+			"ERROR: This command transfers the records of a project to another.\n\
+			A transfer needs two different projects.");
+		return;
+	}
+	
 	let db = database_open();
+	
+	// if src project is archived, stop
+	if project_archived(&db, src_project_id) {
+		println!("ERROR: Source project ({}) is archived and can not be edited.", src_project_id);
+		return;
+	}
+	
+	// if dest project is archived, stop
+	if project_archived(&db, dest_project_id) {
+		println!(
+			"ERROR: Destination project ({}) is archived and can not be edited.",
+			dest_project_id);
+		return;
+	}
 
+	// exec
 	let mut stmt = db
 		.prepare(
 			"UPDATE tbl_work_records\n \
@@ -846,7 +941,7 @@ pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 		src_project_id, dest_project_id);
 }
 
-pub fn swap_project_records(project_id_a: i64, project_id_b: i64) {
+pub fn swap_project_records(project_id_a: i64, project_id_b: i64) {	
 	// if project id's are equal, educate user and stop
 	if project_id_a == project_id_b {
 		println!(
@@ -855,9 +950,20 @@ pub fn swap_project_records(project_id_a: i64, project_id_b: i64) {
 		return;
 	}
 	
-	// create temp project, get temp project id
 	let db = database_open();
-
+	
+	// if one project is archived, stop
+	if project_archived(&db, project_id_a) {
+		println!("ERROR: Project ({}) is archived and can not be edited.", project_id_a);
+		return;
+	}
+	
+	if project_archived(&db, project_id_b) {
+		println!("ERROR: Project ({}) is archived and can not be edited.", project_id_b);
+		return;
+	}
+	
+	// create temp project, get temp project id
 	db
 		.execute(
 			"INSERT INTO tbl_projects(project_name)\n\

@@ -1,4 +1,16 @@
 {
+	-undo cmd				.
+		-command history		.
+		-data history			.
+	
+	-update manpage			.
+	
+	-v						.
+}
+
+--- done ---
+
+{
 	-line in show record report			v_11-10_24-09-2022
 	 for entire width of term
 	
@@ -11,24 +23,27 @@
 	 listed below other
 	 projects in
 	 show-projects
-	 
-	-archived projects can not			.
-	 be used for record
-	
-	-records under archived projects	.
-		-can not be edited					.
-		-can not be deleted					.
-		-can not be transferred				.
-		-can not be swapped					.
-	
-	-undo cmd							.
-	
-	-update manpage						.
-	
-	-v								. -> 2.3.0
-}
 
---- done ---
+	-archived projects can not be		v_13-14
+	 edited
+
+	-archived projects cant be used for	v_13-24
+		-record								v_13-22
+		-add-record							v_13-24
+	
+	-records under archived projects	v_13-51
+		-can not be edited					v_13-42
+		-can not be deleted					v_13-43
+		-can not be transferred				v_13-46
+		-can not be swapped					v_13-51
+	
+	-undo								x_14-50 (for next update)
+	
+	-update manpage						v_14-55
+	-tabcompletions						v_14-56
+	
+	-v									v_14-57 -> 2.3.0
+}
 
 {
 	-show-month seems to only	v_10-18_24-09-2022
