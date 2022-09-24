@@ -40,6 +40,10 @@ pub const EDIT_PROJECT_NAME: &str = "edit-project";
 pub const EDIT_PROJECT_ABBR: &str = "ep";
 pub const EDIT_PROJECT_ARGS: &str = "project_id project_name";
 
+pub const ARCHIVE_PROJECT_INFO: &str = "archive or unarchive a project";
+pub const ARCHIVE_PROJECT_NAME: &str = "archive-project";
+pub const ARCHIVE_PROJECT_ARGS: &str = "project_id";
+
 pub const DELETE_PROJECT_INFO: &str = "delete a project and if wished purge all records";
 pub const DELETE_PROJECT_NAME: &str = "delete-project";
 pub const DELETE_PROJECT_ARGS: &str = "project_id [purge]";
@@ -255,50 +259,40 @@ fn database_open() -> sqlite::Connection {
 	};
 
 	// activate foreign keys
-	db
-		.execute("PRAGMA foreign_keys = ON;")
+	db.execute("PRAGMA foreign_keys = ON;")
 		.unwrap();
 
 	// if flagged, create database
 	if db_empty {
-		println!("WARNING: Database does not exist and will be newly created at \"{}\".", path.as_str());
+		println!(
+			"WARNING: Database does not exist and will be newly created at \"{}\".",
+			path.as_str());
 		
-		db
-			.execute(
-				"CREATE TABLE tbl_projects( \
-				 project_id INTEGER PRIMARY KEY, \
-				 project_name VARCHAR(32) NOT NULL UNIQUE);")
-			.unwrap();
+		db.execute(
+			"CREATE TABLE tbl_projects( \
+			 project_id INTEGER PRIMARY KEY, \
+			 project_name VARCHAR(32) NOT NULL UNIQUE, \
+			 project_archived INTEGER);").unwrap();
 
-		db
-			.execute(
-				"CREATE TABLE tbl_work_records( \
-				 work_record_id INTEGER PRIMARY KEY, \
-				 project_id INTEGER NOT NULL REFERENCES tbl_projects(project_id), \
-				 begin INTEGER NOT NULL, \
-				 end INTEGER CHECK(end > begin), \
-				 description VARCHAR(50));")
-			.unwrap();
+		db.execute(
+			"CREATE TABLE tbl_work_records( \
+			 work_record_id INTEGER PRIMARY KEY, \
+			 project_id INTEGER NOT NULL REFERENCES tbl_projects(project_id), \
+			 begin INTEGER NOT NULL, \
+			 end INTEGER CHECK(end > begin), \
+			 description VARCHAR(50));").unwrap();
 
-		db
-			.execute(
-				"CREATE INDEX idx_work_record_id ON tbl_work_records(work_record_id);")
-			.unwrap();
+		db.execute(
+			"CREATE INDEX idx_work_record_id ON tbl_work_records(work_record_id);").unwrap();
 
-		db
-			.execute(
-				"CREATE INDEX idx_project_id ON tbl_projects(project_id);")
-			.unwrap();
+		db.execute(
+			"CREATE INDEX idx_project_id ON tbl_projects(project_id);").unwrap();
 
-		db
-			.execute(
-				"CREATE INDEX idx_begin ON tbl_work_records(begin);")
-			.unwrap();
+		db.execute(
+			"CREATE INDEX idx_begin ON tbl_work_records(begin);").unwrap();
 
-		db
-			.execute(
-				"CREATE INDEX idx_end ON tbl_work_records(end);")
-			.unwrap();
+		db.execute(
+			"CREATE INDEX idx_end ON tbl_work_records(end);").unwrap();
 	}
 
 	return db;
@@ -337,6 +331,11 @@ pub fn help() {
 		EDIT_PROJECT_NAME,
 		Some(EDIT_PROJECT_ABBR),
 		Some(EDIT_PROJECT_ARGS));
+	print_cmd_help(
+		ARCHIVE_PROJECT_INFO,
+		ARCHIVE_PROJECT_NAME,
+		None,
+		Some(ARCHIVE_PROJECT_ARGS));
 	print_cmd_help(
 		DELETE_PROJECT_INFO,
 		DELETE_PROJECT_NAME,
@@ -460,22 +459,51 @@ pub fn add_project(project_name: &str) {
 	println!("Project \"{}\" added.", project_name);
 }
 
+fn print_project_header() {
+	println!("{:9} | {}", "id", "project name");
+}
+
 pub fn show_projects() {
 	let db = database_open();
 
 	let mut stmt = db
 		.prepare(
-			"SELECT project_id, project_name\n\
+			"SELECT project_id, project_name, project_archived\n\
 			 FROM tbl_projects;")
 		.unwrap();
 
-	println!("{:9} | {}", "id", "project name");
+	println!("Projects:");
+	print_project_header();
 
+	// all projects
+	let mut archived_projects = Vec::<(String, String)>::new();
+	
 	while let sqlite::State::Row = stmt.next().unwrap() {
-		println!(
-			"{:9} | {}",
-			stmt.read::<String>(0).unwrap(),
-			stmt.read::<String>(1).unwrap());
+		// if project archived: buffer, else: print
+		if stmt.read::<i64>(2).unwrap() != 0 {
+			archived_projects.push(
+				(stmt.read::<String>(0).unwrap(),
+				stmt.read::<String>(1).unwrap()));
+		}
+		else {
+			println!(
+				"{:9} | {}",
+				stmt.read::<String>(0).unwrap(),
+				stmt.read::<String>(1).unwrap());
+		}
+	}
+	
+	// if no archived projects, end
+	if archived_projects.len() == 0 {
+		return;
+	}
+	
+	// print archived projects
+	println!("\nArchived projects:");
+	print_project_header();
+	
+	for (id, name) in archived_projects {
+		println!("{:9} | {}", id, name);
 	}
 }
 
@@ -494,6 +522,49 @@ pub fn edit_project(project_id: i64, project_name: &str) {
 	stmt.next().unwrap();
 
 	println!("Project ({}) name set to \"{}\".", project_id, project_name);
+}
+
+pub fn archive_project(project_id: i64) {
+	let db = database_open();
+
+	// find out if targeted project is already archived
+	let mut stmt = db
+		.prepare(
+			"SELECT project_archived\n\
+			 FROM tbl_projects\n\
+			 WHERE project_id = ?;")
+		.unwrap();
+
+	stmt.bind(1, project_id).unwrap();
+	stmt.next().unwrap();
+	
+	let archived = stmt.read::<i64>(0).unwrap() != 0;
+	let arch_num: i64;
+	let new_state_str: &str;
+	
+	// if archived, unarchive
+	if archived {
+		arch_num = 0;
+		new_state_str = "unarchived";
+	}
+	else {
+		arch_num = 1;
+		new_state_str = "archived";
+	}
+	
+	let mut stmt = db
+		.prepare(
+			"UPDATE tbl_projects\n\
+			 SET project_archived = ?\n\
+			 WHERE project_id = ?;")
+		.unwrap();
+
+	stmt.bind(1, arch_num).unwrap();
+	stmt.bind(2, project_id).unwrap();
+	stmt.next().unwrap();
+	
+	// end print
+	println!("Project ({}) has been {}.", project_id, new_state_str);
 }
 
 pub fn delete_project(project_id: i64, purge: bool) {
@@ -907,12 +978,27 @@ fn print_char(num: u32, c: char) {
 	}
 }
 
+fn print_day_summary(dash_len_first: u32, dash_len_second: u32, term_w: usize, worktime: &str) {
+	let row_len_min = dash_len_first + 7 + dash_len_second;
+	let row_filler: isize = term_w as isize - row_len_min as isize;
+	
+	print_char(dash_len_first, '-');
+	print!(" {:5} ", worktime);
+	print_char(dash_len_second, '-');
+	
+	if row_filler > 0 {
+		print_char(row_filler as u32, '-');
+	}
+	
+	println!("");
+}
+
 fn show_records(
 	ts_begin: Option<i64>,
 	ts_end: Option<i64>,
-	project_id: Option<i64>) {
-	
-	let win_width = term_size::dimensions_stdout().unwrap().0;
+	project_id: Option<i64>)
+{
+	let term_w = term_size::dimensions_stdout().unwrap().0;
 	let db = database_open();
 
 	// build sql string, prepare, bind (depending on which params given)
@@ -981,16 +1067,19 @@ fn show_records(
 	let mut day_seconds: u32 = 0;
 
 	// print first record
-	// (because the if (cur_day change) would needlessly print day_worktime)
+	// (because the if (cur day change) would needlessly print day worktime)
 	if stmt.next().unwrap() == sqlite::State::Row {
 		cur_day = stmt.read::<String>(1).unwrap();
 		println!("- {} -", cur_day);
 		
-		let seconds = show_record(&stmt, win_width);
+		let seconds = show_record(&stmt, term_w);
 		
 		sum_seconds += seconds as u32;
 		day_seconds += seconds as u32;
 	}
+
+	const DASH_LEN_FIRST: u32 = 33;
+	const DASH_LEN_SECOND: u32 = 25;
 
 	// other records
 	while stmt.next().unwrap() == sqlite::State::Row {
@@ -999,7 +1088,6 @@ fn show_records(
 		cur_day = stmt.read::<String>(1).unwrap();
 
 		if cur_day != pre_day {
-			
 			// print new day line
 			let minutes: u32 = day_seconds / 60;
 			let hours: u32 = minutes / 60;
@@ -1009,18 +1097,15 @@ fn show_records(
 				.and_hms(hours, minutes - hours * 60, 0)
 				.format("%H:%M")
 				.to_string();
-		
-			print_char(33, '-');
-			print!(" {:5} ", worktime);
-			print_char(25, '-');
-			println!("");
+			
+			print_day_summary(DASH_LEN_FIRST, DASH_LEN_SECOND, term_w, worktime.as_str());
 			println!("- {} -", cur_day);
 
 			// reset day worktime
 			day_seconds = 0;
 		}
 
-		let seconds = show_record(&stmt, win_width);
+		let seconds = show_record(&stmt, term_w);
 		
 		sum_seconds += seconds as u32;
 		day_seconds += seconds as u32;
@@ -1036,10 +1121,7 @@ fn show_records(
 		.format("%H:%M")
 		.to_string();
 	
-	print_char(33, '-');
-	print!(" {:5} ", worktime);
-	print_char(25, '-');
-	println!("");
+	print_day_summary(DASH_LEN_FIRST, DASH_LEN_SECOND, term_w, worktime.as_str());
 
 	// summarized worktime
 	let minutes: u32 = sum_seconds / 60;

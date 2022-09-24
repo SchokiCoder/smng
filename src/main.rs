@@ -98,6 +98,25 @@ fn main() {
 
 			commands::edit_project(project_id, args[3].as_str());
 		},
+		
+		commands::ARCHIVE_PROJECT_NAME => {
+			if args.len() == 2 {
+				commands::print_cmd_help(
+					commands::ARCHIVE_PROJECT_INFO,
+					commands::ARCHIVE_PROJECT_NAME,
+					None,
+					Some(commands::ARCHIVE_PROJECT_ARGS));
+				return;
+			}
+			
+			if argcount_check(args.len(), 3, 3) {
+				return;
+			}
+			
+			let project_id = args[2].parse::<i64>().unwrap();
+			
+			commands::archive_project(project_id);
+		},
 
 		commands::DELETE_PROJECT_NAME => {
 			if args.len() == 2 {

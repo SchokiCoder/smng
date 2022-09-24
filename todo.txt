@@ -1,19 +1,31 @@
 {
-	-line in show record report	.
+	-line in show record report			v_11-10_24-09-2022
 	 for entire width of term
 	
-	-archive-project cmd		.
-	-archived projects are		.
+	-archive-project cmd				v_11-46
+		-help								v_11-17
+		-database							v_11-30
+		-cmd								v_11-46
+
+	-archived projects are				v_11-57
 	 listed below other
 	 projects in
 	 show-projects
-	-archived projects can not	.
-	 be used for record,
-	 edit-record-project
+	 
+	-archived projects can not			.
+	 be used for record
 	
-	-undo cmd					.
+	-records under archived projects	.
+		-can not be edited					.
+		-can not be deleted					.
+		-can not be transferred				.
+		-can not be swapped					.
 	
-	-v							. -> 2.3.0
+	-undo cmd							.
+	
+	-update manpage						.
+	
+	-v								. -> 2.3.0
 }
 
 --- done ---
