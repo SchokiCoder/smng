@@ -8,8 +8,13 @@ release:
 	cargo rustc --release
 
 mkconfig:
+	echo "/home/"${USER}"/.smng/worktimes.db" >> "db_path"
+
+prepare: release mkconfig
+
+install-config:
 	mkdir -p /etc/smng.d
-	echo "/home/"${USER}"/.smng/worktimes.db" >> "/etc/smng.d/db_path"
+	cp "db_path" "/etc/${APP_NAME}.d/db_path"
 
 install-manpage:
 	mkdir -p /usr/local/man/man1
@@ -20,7 +25,7 @@ install-manpage:
 install-completion:
 	cp completion.bash /usr/share/bash-completion/completions/${APP_NAME}
 
-install-utils: mkconfig install-manpage install-completion
+install-utils: install-config install-manpage install-completion
 
 install: install-utils
 	mkdir -p ${INSTALL_BIN_DIR}

@@ -8,7 +8,33 @@
 	-v						.
 }
 
+{
+	-cfg					.
+		-toml					.
+		-add option for			.
+		 min and max worktime
+		 per day, week
+	
+	-mainloop for checking	.
+	 min/max worktime
+	
+	-update man				.
+	-v						.
+}
+
 --- done ---
+
+{
+	-main.rs arg count check function	v_20-46_28-09-2022
+	 advance
+	-fix completion						v_20-47
+	-Makefile							v_21-00
+	 (use correct username for cfg)
+
+	-update readme						v_21-01
+	-update man							v_21-02
+	-v									v_21-02 -> 2.3.1
+}
 
 {
 	-line in show record report			v_11-10_24-09-2022

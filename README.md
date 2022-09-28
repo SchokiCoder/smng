@@ -13,7 +13,7 @@ Personal working time manager, to monitor the time you worked on each project.
 ```
 git clone https://github.com/SchokiCoder/smng.git
 cd smng
-make release
+make prepare        # DO NOT USE SUDO HERE
 sudo make install
 ```
 

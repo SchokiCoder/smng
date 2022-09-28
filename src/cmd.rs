@@ -18,128 +18,318 @@
 
 use chrono::prelude::*;
 
-pub const HELP_INFO: &str = "prints all help messages";
-pub const HELP_NAME: &str = "help";
-pub const HELP_ABBR: &str = "h";
-
-pub const ABOUT_INFO: &str = "prints information about the application";
-pub const ABOUT_NAME: &str = "about";
-pub const ABOUT_ABBR: &str = "abt";
-
-pub const ADD_PROJECT_INFO: &str = "add a project";
-pub const ADD_PROJECT_NAME: &str = "add-project";
-pub const ADD_PROJECT_ABBR: &str = "ap";
-pub const ADD_PROJECT_ARGS: &str = "project_name";
-
-pub const SHOW_PROJECTS_INFO: &str = "show projects";
-pub const SHOW_PROJECTS_NAME: &str = "show-projects";
-pub const SHOW_PROJECTS_ABBR: &str = "sp";
-
-pub const EDIT_PROJECT_INFO: &str = "edit project name";
-pub const EDIT_PROJECT_NAME: &str = "edit-project";
-pub const EDIT_PROJECT_ABBR: &str = "ep";
-pub const EDIT_PROJECT_ARGS: &str = "project_id project_name";
-
-pub const ARCHIVE_PROJECT_INFO: &str = "archive or unarchive a project";
-pub const ARCHIVE_PROJECT_NAME: &str = "archive-project";
-pub const ARCHIVE_PROJECT_ARGS: &str = "project_id";
-
-pub const DELETE_PROJECT_INFO: &str = "delete a project and if wished purge all records";
-pub const DELETE_PROJECT_NAME: &str = "delete-project";
-pub const DELETE_PROJECT_ARGS: &str = "project_id [purge]";
-
-pub const RECORD_INFO: &str = "record work time on given project";
-pub const RECORD_NAME: &str = "record";
-pub const RECORD_ABBR: &str = "r";
-pub const RECORD_ARGS: &str = "project_id";
-
-pub const STATUS_INFO: &str = "show current work status";
-pub const STATUS_NAME: &str = "status";
-
-pub const STOP_INFO: &str = "stop recording work time";
-pub const STOP_NAME: &str = "stop";
-pub const STOP_ABBR: &str = "s";
-pub const STOP_ARGS: &str = "description";
-
-pub const ADD_RECORD_INFO: &str = "add a new complete record";
-pub const ADD_RECORD_NAME: &str = "add-record";
-pub const ADD_RECORD_ABBR: &str = "ar";
-pub const ADD_RECORD_ARGS: &str = "project_id description year month day hour minute year month day hour minute";
-
-pub const EDIT_RECORD_PROJECT_INFO: &str = "edit record's project";
-pub const EDIT_RECORD_PROJECT_NAME: &str = "edit-record-project";
-pub const EDIT_RECORD_PROJECT_ABBR: &str = "erp";
-pub const EDIT_RECORD_PROJECT_ARGS: &str = "record_id project_id";
-
-pub const EDIT_RECORD_BEGIN_INFO: &str = "edit record's begin";
-pub const EDIT_RECORD_BEGIN_NAME: &str = "edit-record-begin";
-pub const EDIT_RECORD_BEGIN_ABBR: &str = "erb";
-pub const EDIT_RECORD_BEGIN_ARGS: &str = "record_id year month day hour minute";
-
-pub const EDIT_RECORD_END_INFO: &str = "edit record's end";
-pub const EDIT_RECORD_END_NAME: &str = "edit-record-end";
-pub const EDIT_RECORD_END_ABBR: &str = "ere";
-pub const EDIT_RECORD_END_ARGS: &str = "record_id year month day hour minute";
-
-pub const EDIT_RECORD_DESCRIPTION_INFO: &str = "edit record's description";
-pub const EDIT_RECORD_DESCRIPTION_NAME: &str = "edit-record-description";
-pub const EDIT_RECORD_DESCRIPTION_ABBR: &str = "erd";
-pub const EDIT_RECORD_DESCRIPTION_ARGS: &str = "record_id description";
-
-pub const DELETE_RECORD_INFO: &str = "delete given record";
-pub const DELETE_RECORD_NAME: &str = "delete-record";
-pub const DELETE_RECORD_ARGS: &str = "record_id";
-
-pub const TRANSFER_PROJECT_RECORDS_INFO: &str = "transfer all records from one project to another";
-pub const TRANSFER_PROJECT_RECORDS_NAME: &str = "transfer-project-records";
-pub const TRANSFER_PROJECT_RECORDS_ARGS: &str = "source_project_id destination_project_id";
-
-pub const SWAP_PROJECT_RECORDS_INFO: &str = "swap records of two projects";
-pub const SWAP_PROJECT_RECORDS_NAME: &str = "swap-project-records";
-pub const SWAP_PROJECT_RECORDS_ARGS: &str = "project_id_a project_id_b";
-
-pub const SHOW_WEEK_INFO: &str = "show records of a certain week or current";
-pub const SHOW_WEEK_NAME: &str = "show-week";
-pub const SHOW_WEEK_ABBR: &str = "sw";
-pub const SHOW_WEEK_ARGS: &str = "[year month day]";
-
-pub const SHOW_MONTH_INFO: &str = "show records of a certain month or current";
-pub const SHOW_MONTH_NAME: &str = "show-month";
-pub const SHOW_MONTH_ABBR: &str = "sm";
-pub const SHOW_MONTH_ARGS: &str = "[year month]";
-
-pub const SHOW_PROJECT_RECORDS_INFO: &str = "show records of a certain project";
-pub const SHOW_PROJECT_RECORDS_NAME: &str = "show-project-records";
-pub const SHOW_PROJECT_RECORDS_ABBR: &str = "spr";
-pub const SHOW_PROJECT_RECORDS_ARGS: &str = "project_id";
-
-pub const MERGE_DB_INFO: &str = "merges projects and records of two databases";
-pub const MERGE_DB_NAME: &str = "merge-db";
-pub const MERGE_DB_ABBR: &str = "mdb";
-pub const MERGE_DB_ARGS: &str = "source_database_path destination_database_path";
-
-pub const SHOW_ETC_PATH_INFO: &str = "show path of currently used config";
-pub const SHOW_ETC_PATH_NAME: &str = "show-cfg-path";
-pub const SHOW_ETC_PATH_ABBR: &str = "scp";
-
-pub const SHOW_DB_PATH_INFO: &str = "show path of currently configured database";
-pub const SHOW_DB_PATH_NAME: &str = "show-db-path";
-pub const SHOW_DB_PATH_ABBR: &str = "sdbp";
-
-pub fn print_cmd_help(info: &str, name: &str, abbr: Option<&str>, args: Option<&str>) {
-	println!("  {}:", info);
-	print!("  {}", name);
-
-	if abbr.is_some() {
-		print!(", {}", abbr.unwrap());
-	}
-
-	if args.is_some() {
-		print!(" | {}", args.unwrap());
-	}
-
-	println!("\n");	
+pub struct Command<'a> {
+	pub info: &'a str,
+	pub name: &'a str,
+	pub abbr: Option<&'a str>,
+	pub args: Option<&'a str>,
+	pub min_args: usize,
+	pub max_args: usize,
+	pub args_all_or_none: bool,
 }
+
+impl Command<'_> {
+	pub fn print_help(&self) {
+		println!("  {}:", self.info);
+		print!("  {}", self.name);
+
+		if self.abbr.is_some() {
+			print!(", {}", self.abbr.unwrap());
+		}
+
+		if self.args.is_some() {
+			print!(" | {}", self.args.unwrap());
+		}
+
+		println!("\n");	
+	}
+	
+	pub fn arg_count_pass(&self, arg_count: usize) -> bool {
+		if arg_count > self.max_args {
+			println!("WARNING: Too many arguments were given.\n\
+					  Additional arguments will be ignored.");
+			return true;
+		}
+		else if arg_count < self.min_args {
+			if arg_count == 0 {
+				self.print_help();
+				return false;
+			}
+			else {
+				println!("ERROR: Not enough arguments given.");
+				return false;
+			}
+		}
+		else {
+			if self.args_all_or_none {
+				if arg_count != self.min_args && arg_count != self.max_args {
+					println!("ERROR: Arguments given but not enough.");
+					return false;
+				}
+			}
+			
+			return true;
+		}
+	}
+}
+
+impl PartialEq for Command<'_> {
+	fn eq(&self, other: &Self) -> bool {
+		if self.name == other.name {
+			return true;
+		}
+		
+		if self.abbr.is_some() & other.abbr.is_some() {
+			if self.abbr.unwrap() == other.abbr.unwrap() {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+}
+
+impl Eq for Command<'_> {}
+
+pub const HELP: Command = Command {
+	info: "prints all help messages",
+	name: "help",
+	abbr: Some("h"),
+	args: None,
+	min_args: 0,
+	max_args: 0,
+	args_all_or_none: false,
+};
+
+pub const ABOUT: Command = Command {
+	info: "prints information about the application",
+	name: "about",
+	abbr: Some("abt"),
+	args: None,
+	min_args: 0,
+	max_args: 0,
+	args_all_or_none: false,
+};
+
+pub const ADD_PROJECT: Command = Command {
+	info: "add a project",
+	name: "add-project",
+	abbr: Some("ap"),
+	args: Some("project_name"),
+	min_args: 1,
+	max_args: 1,
+	args_all_or_none: false,
+};
+
+pub const SHOW_PROJECTS: Command = Command {
+	info: "show projects",
+	name: "show-projects",
+	abbr: Some("sp"),
+	args: None,
+	min_args: 0,
+	max_args: 0,
+	args_all_or_none: false,
+};
+
+pub const EDIT_PROJECT: Command = Command {
+	info: "edit project name",
+	name: "edit-project",
+	abbr: Some("ep"),
+	args: Some("project_id project_name"),
+	min_args: 2,
+	max_args: 2,
+	args_all_or_none: false,
+};
+
+pub const ARCHIVE_PROJECT: Command = Command {
+	info: "archive or unarchive a project",
+	name: "archive-project",
+	abbr: None,
+	args: Some("project_id"),
+	min_args: 1,
+	max_args: 1,
+	args_all_or_none: false,
+};
+
+pub const DELETE_PROJECT: Command = Command {
+	info: "delete a project and if wished purge all records",
+	name: "delete-project",
+	abbr: None,
+	args: Some("project_id [purge]"),
+	min_args: 1,
+	max_args: 2,
+	args_all_or_none: false,
+};
+
+pub const RECORD: Command = Command {
+	info: "record work time on given project",
+	name: "record",
+	abbr: Some("r"),
+	args: Some("project_id"),
+	min_args: 1,
+	max_args: 1,
+	args_all_or_none: false,
+};
+
+pub const STATUS: Command = Command {
+	info: "show current work status",
+	name: "status",
+	abbr: None,
+	args: None,
+	min_args: 0,
+	max_args: 0,
+	args_all_or_none: false,
+};
+
+pub const STOP: Command = Command {
+	info: "stop recording work time",
+	name: "stop",
+	abbr: Some("s"),
+	args: Some("description"),
+	min_args: 1,
+	max_args: 1,
+	args_all_or_none: false,
+};
+
+pub const ADD_RECORD: Command = Command {
+	info: "add a new complete record",
+	name: "add-record",
+	abbr: Some("ar"),
+	args: Some("project_id description year month day hour minute year month day hour minute"),
+	min_args: 12,
+	max_args: 12,
+	args_all_or_none: false,
+};
+
+pub const EDIT_RECORD_PROJECT: Command = Command {
+	info: "edit record's project",
+	name: "edit-record-project",
+	abbr: Some("erp"),
+	args: Some("record_id project_id"),
+	min_args: 2,
+	max_args: 2,
+	args_all_or_none: false,
+};
+
+pub const EDIT_RECORD_BEGIN: Command = Command {
+	info: "edit record's begin",
+	name: "edit-record-begin",
+	abbr: Some("erb"),
+	args: Some("record_id year month day hour minute"),
+	min_args: 6,
+	max_args: 6,
+	args_all_or_none: false,
+};
+
+pub const EDIT_RECORD_END: Command = Command {
+	info: "edit record's end",
+	name: "edit-record-end",
+	abbr: Some("ere"),
+	args: Some("record_id year month day hour minute"),
+	min_args: 6,
+	max_args: 6,
+	args_all_or_none: false,
+};
+
+pub const EDIT_RECORD_DESCRIPTION: Command = Command {
+	info: "edit record's description",
+	name: "edit-record-description",
+	abbr: Some("erd"),
+	args: Some("record_id description"),
+	min_args: 2,
+	max_args: 2,
+	args_all_or_none: false,
+};
+
+pub const DELETE_RECORD: Command = Command {
+	info: "delete given record",
+	name: "delete-record",
+	abbr: None,
+	args: Some("record_id"),
+	min_args: 1,
+	max_args: 1,
+	args_all_or_none: false,
+};
+
+pub const TRANSFER_PROJECT_RECORDS: Command = Command {
+	info: "transfer all records from one project to another",
+	name: "transfer-project-records",
+	abbr: None,
+	args: Some("source_project_id destination_project_id"),
+	min_args: 2,
+	max_args: 2,
+	args_all_or_none: false,
+};
+
+pub const SWAP_PROJECT_RECORDS: Command = Command {
+	info: "swap records of two projects",
+	name: "swap-project-records",
+	abbr: None,
+	args: Some("project_id_a project_id_b"),
+	min_args: 2,
+	max_args: 2,
+	args_all_or_none: false,
+};
+
+pub const SHOW_WEEK: Command = Command {
+	info: "show records of a certain week or current",
+	name: "show-week",
+	abbr: Some("sw"),
+	args: Some("[year month day]"),
+	min_args: 0,
+	max_args: 3,
+	args_all_or_none: true,
+};
+
+pub const SHOW_MONTH: Command = Command {
+	info: "show records of a certain month or current",
+	name: "show-month",
+	abbr: Some("sm"),
+	args: Some("[year month]"),
+	min_args: 0,
+	max_args: 2,
+	args_all_or_none: true,
+};
+
+pub const SHOW_PROJECT_RECORDS: Command = Command {
+	info: "show records of a certain project",
+	name: "show-project-records",
+	abbr: Some("spr"),
+	args: Some("project_id"),
+	min_args: 1,
+	max_args: 1,
+	args_all_or_none: false,
+};
+
+pub const MERGE_DB: Command = Command {
+	info: "merges projects and records of two databases",
+	name: "merge-db",
+	abbr: Some("mdb"),
+	args: Some("source_database_path destination_database_path"),
+	min_args: 2,
+	max_args: 2,
+	args_all_or_none: false,
+};
+
+pub const SHOW_ETC_PATH: Command = Command {
+	info: "show path of currently used config",
+	name: "show-cfg-path",
+	abbr: Some("scp"),
+	args: None,
+	min_args: 0,
+	max_args: 0,
+	args_all_or_none: false,
+};
+
+pub const SHOW_DB_PATH: Command = Command {
+	info: "show path of currently configured database",
+	name: "show-db-path",
+	abbr: Some("sdbp"),
+	args: None,
+	min_args: 0,
+	max_args: 0,
+	args_all_or_none: false,
+};
 
 const GLOB_ETC_DB_PATH: &str = "/etc/smng.d/db_path";
 const USER_ETC_DB_PATH: &str = "/.config/smng/db_path"; // (appendage)
@@ -304,134 +494,38 @@ pub fn help() {
 	println!("");
 
 	println!("-- Info --");
-	print_cmd_help(
-		HELP_INFO,
-		HELP_NAME,
-		Some(HELP_ABBR),
-		None);
-	print_cmd_help(
-		ABOUT_INFO,
-		ABOUT_NAME,
-		Some(ABOUT_ABBR),
-		None);
+	HELP.print_help();
+	ABOUT.print_help();
 
 	println!("-- Projects --");
-	print_cmd_help(
-		ADD_PROJECT_INFO,
-		ADD_PROJECT_NAME,
-		Some(ADD_PROJECT_ABBR),
-		Some(ADD_PROJECT_ARGS));
-	print_cmd_help(
-		SHOW_PROJECTS_INFO,
-		SHOW_PROJECTS_NAME,
-		Some(SHOW_PROJECTS_ABBR),
-		None);
-	print_cmd_help(
-		EDIT_PROJECT_INFO,
-		EDIT_PROJECT_NAME,
-		Some(EDIT_PROJECT_ABBR),
-		Some(EDIT_PROJECT_ARGS));
-	print_cmd_help(
-		ARCHIVE_PROJECT_INFO,
-		ARCHIVE_PROJECT_NAME,
-		None,
-		Some(ARCHIVE_PROJECT_ARGS));
-	print_cmd_help(
-		DELETE_PROJECT_INFO,
-		DELETE_PROJECT_NAME,
-		None,
-		Some(DELETE_PROJECT_ARGS));
+	ADD_PROJECT.print_help();
+	SHOW_PROJECTS.print_help();
+	EDIT_PROJECT.print_help();
+	ARCHIVE_PROJECT.print_help();
+	DELETE_PROJECT.print_help();
 
 	println!("-- Records --");
-	print_cmd_help(
-		RECORD_INFO,
-		RECORD_NAME,
-		Some(RECORD_ABBR),
-		Some(RECORD_ARGS));
-	print_cmd_help(
-		STATUS_INFO,
-		STATUS_NAME,
-		None,
-		None);
-	print_cmd_help(
-		STOP_INFO,
-		STOP_NAME,
-		Some(STOP_ABBR),
-		Some(STOP_ARGS));
-	print_cmd_help(
-		ADD_RECORD_INFO,
-		ADD_RECORD_NAME,
-		Some(ADD_RECORD_ABBR),
-		Some(ADD_RECORD_ARGS));
-	print_cmd_help(
-		EDIT_RECORD_PROJECT_INFO,
-		EDIT_RECORD_PROJECT_NAME,
-		Some(EDIT_RECORD_PROJECT_ABBR),
-		Some(EDIT_RECORD_PROJECT_ARGS));
-	print_cmd_help(
-		EDIT_RECORD_BEGIN_INFO,
-		EDIT_RECORD_BEGIN_NAME,
-		Some(EDIT_RECORD_BEGIN_ABBR),
-		Some(EDIT_RECORD_BEGIN_ARGS));
-	print_cmd_help(
-		EDIT_RECORD_END_INFO,
-		EDIT_RECORD_END_NAME,
-		Some(EDIT_RECORD_END_ABBR),
-		Some(EDIT_RECORD_END_ARGS));
-	print_cmd_help(
-		EDIT_RECORD_DESCRIPTION_INFO,
-		EDIT_RECORD_DESCRIPTION_NAME,
-		Some(EDIT_RECORD_DESCRIPTION_ABBR),
-		Some(EDIT_RECORD_DESCRIPTION_ARGS));
-	print_cmd_help(
-		DELETE_RECORD_INFO,
-		DELETE_RECORD_NAME,
-		None,
-		Some(DELETE_RECORD_ARGS));
-	print_cmd_help(
-		TRANSFER_PROJECT_RECORDS_INFO,
-		TRANSFER_PROJECT_RECORDS_NAME,
-		None,
-		Some(TRANSFER_PROJECT_RECORDS_ARGS));
-	print_cmd_help(
-		SWAP_PROJECT_RECORDS_INFO,
-		SWAP_PROJECT_RECORDS_NAME,
-		None,
-		Some(SWAP_PROJECT_RECORDS_ARGS));
+	RECORD.print_help();
+	STATUS.print_help();
+	STOP.print_help();
+	ADD_RECORD.print_help();
+	EDIT_RECORD_PROJECT.print_help();
+	EDIT_RECORD_BEGIN.print_help();
+	EDIT_RECORD_END.print_help();
+	EDIT_RECORD_DESCRIPTION.print_help();
+	DELETE_RECORD.print_help();
+	TRANSFER_PROJECT_RECORDS.print_help();
+	SWAP_PROJECT_RECORDS.print_help();
 
 	println!("-- Report --");
-	print_cmd_help(
-		SHOW_WEEK_INFO,
-		SHOW_WEEK_NAME,
-		Some(SHOW_WEEK_ABBR),
-		Some(SHOW_WEEK_ARGS));
-	print_cmd_help(
-		SHOW_MONTH_INFO,
-		SHOW_MONTH_NAME,
-		Some(SHOW_MONTH_ABBR),
-		Some(SHOW_MONTH_ARGS));
-	print_cmd_help(
-		SHOW_PROJECT_RECORDS_INFO,
-		SHOW_PROJECT_RECORDS_NAME,
-		Some(SHOW_PROJECT_RECORDS_ABBR),
-		Some(SHOW_PROJECT_RECORDS_ARGS));
+	SHOW_WEEK.print_help();
+	SHOW_MONTH.print_help();
+	SHOW_PROJECT_RECORDS.print_help();
 
 	println!("-- Administration --");
-	print_cmd_help(
-		MERGE_DB_INFO,
-		MERGE_DB_NAME,
-		Some(MERGE_DB_ABBR),
-		Some(MERGE_DB_ARGS));
-	print_cmd_help(
-		SHOW_ETC_PATH_INFO,
-		SHOW_ETC_PATH_NAME,
-		Some(SHOW_ETC_PATH_ABBR),
-		None);
-	print_cmd_help(
-		SHOW_DB_PATH_INFO,
-		SHOW_DB_PATH_NAME,
-		Some(SHOW_DB_PATH_ABBR),
-		None);
+	MERGE_DB.print_help();
+	SHOW_ETC_PATH.print_help();
+	SHOW_DB_PATH.print_help();
 }
 
 pub fn about() {

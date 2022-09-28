@@ -16,27 +16,8 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-pub mod commands;
+pub mod cmd;
 use std::env;
-
-pub const MSG_ERR_LOW_ARGUMENTS: &str = "ERROR: Not enough arguments given.";
-pub const MSG_WARN_HIGH_ARGUMENTS: &str = "WARNING: Too many arguments were given.\n\
-										   Additional arguments will be ignored.";
-fn argcount_check(argcount: usize, args_min: usize, args_max: usize) -> bool {
-	if argcount < args_min {
-		println!("{}", MSG_ERR_LOW_ARGUMENTS);
-		return true;
-	}
-
-	else if argcount > args_max {
-		println!("{}", MSG_WARN_HIGH_ARGUMENTS);
-		return false;
-	}
-
-	else {
-		return false;
-	}
-}
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
@@ -46,414 +27,314 @@ fn main() {
 		println!("Usage: {} command [arguments]:", env!("CARGO_PKG_NAME"));
 		println!("Try '{} {}' for more information.",
 			env!("CARGO_PKG_NAME"),
-			commands::HELP_NAME);
+			cmd::HELP.name);
 		return;
 	}
 	
-	match args[1].as_str() {
-		commands::HELP_NAME | commands::HELP_ABBR => commands::help(),
+	let cur_cmd = cmd::Command{
+		info: "",
+		name: args[1].as_str(),
+		abbr: Some(args[1].as_str()),
+		args: None,
+		min_args: 0,
+		max_args: 0,
+		args_all_or_none: false,
+	};
+	let cur_args = &args[2..];
+	
+	if cur_cmd == cmd::HELP {
+		if cmd::HELP.arg_count_pass(cur_args.len()) {
+			cmd::help();
+		}
+		else {
+			return;
+		}
+	}
+	
+	else if cur_cmd == cmd::ABOUT {
+		if cmd::ABOUT.arg_count_pass(cur_args.len()) {
+			cmd::about();
+		}
+		else {
+			return;
+		}
+	}
 
-		commands::ABOUT_NAME | commands::ABOUT_ABBR => commands::about(),
+	else if cur_cmd == cmd::ADD_PROJECT {
+		if cmd::ADD_PROJECT.arg_count_pass(cur_args.len()) {
+			cmd::add_project(cur_args[0].as_str());
+		}
+		else {
+			return;
+		}
+	}
 
-		commands::ADD_PROJECT_NAME | commands::ADD_PROJECT_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::ADD_PROJECT_INFO,
-					commands::ADD_PROJECT_NAME,
-					Some(commands::ADD_PROJECT_ABBR),
-					Some(commands::ADD_PROJECT_ARGS));
-				return;
-			}
-			
-			if argcount_check(args.len(), 3, 3) {
-				return;
-			}
+	else if cur_cmd == cmd::SHOW_PROJECTS {
+		if cmd::SHOW_PROJECTS.arg_count_pass(cur_args.len()) {
+			cmd::show_projects();
+		}
+		else {
+			return
+		}
+	}
 
-			commands::add_project(args[2].as_str());
-		},
+	else if cur_cmd == cmd::EDIT_PROJECT {
+		if cmd::EDIT_PROJECT.arg_count_pass(cur_args.len()) {
+			let project_id = cur_args[0].parse::<i64>().unwrap();
 
-		commands::SHOW_PROJECTS_NAME | commands::SHOW_PROJECTS_ABBR => {
-			if argcount_check(args.len(), 2, 2) {
-				return;
-			}
-
-			commands::show_projects();
-		},
-
-		commands::EDIT_PROJECT_NAME | commands::EDIT_PROJECT_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::EDIT_PROJECT_INFO,
-					commands::EDIT_PROJECT_NAME,
-					Some(commands::EDIT_PROJECT_ABBR),
-					Some(commands::EDIT_PROJECT_ARGS));
-				return;
-			}
-			
-			if argcount_check(args.len(), 4, 4) {
-				return;
-			}
-
-			let project_id = args[2].parse::<i64>().unwrap();
-
-			commands::edit_project(project_id, args[3].as_str());
-		},
+			cmd::edit_project(project_id, cur_args[1].as_str());
+		}
+		else {
+			return;
+		}
+	}
 		
-		commands::ARCHIVE_PROJECT_NAME => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::ARCHIVE_PROJECT_INFO,
-					commands::ARCHIVE_PROJECT_NAME,
-					None,
-					Some(commands::ARCHIVE_PROJECT_ARGS));
-				return;
-			}
+	else if cur_cmd == cmd::ARCHIVE_PROJECT {
+		if cmd::ARCHIVE_PROJECT.arg_count_pass(cur_args.len()) {
+			let project_id = cur_args[0].parse::<i64>().unwrap();
 			
-			if argcount_check(args.len(), 3, 3) {
-				return;
-			}
-			
-			let project_id = args[2].parse::<i64>().unwrap();
-			
-			commands::archive_project(project_id);
-		},
+			cmd::archive_project(project_id);
+		}
+		else {
+			return;
+		}
+	}
 
-		commands::DELETE_PROJECT_NAME => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::DELETE_PROJECT_INFO,
-					commands::DELETE_PROJECT_NAME,
-					None,
-					Some(commands::DELETE_PROJECT_ARGS));
-				return;
-			}
-			
-			if argcount_check(args.len(), 3, 4) {
-				return;
-			}
-
-			let project_id = args[2].parse::<i64>().unwrap();
+	else if cur_cmd == cmd::DELETE_PROJECT {
+		if cmd::DELETE_PROJECT.arg_count_pass(cur_args.len()) {
+			let project_id = cur_args[0].parse::<i64>().unwrap();
 			let mut purge: bool = false;
 
-			if args.len() > 3 {
-				if args[3].to_lowercase() == "true" {
+			if cur_args.len() > 1 {
+				if cur_args[1].to_lowercase() == "true" {
 					purge = true;
 				}
 			}
 
-			commands::delete_project(project_id, purge);
-		},
+			cmd::delete_project(project_id, purge);
+		}
+		else {
+			return;
+		}
+	}
 
-		commands::RECORD_NAME | commands::RECORD_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::RECORD_INFO,
-					commands::RECORD_NAME,
-					Some(commands::RECORD_ABBR),
-					Some(commands::RECORD_ARGS));
-				return;
-			}
-			
-			if argcount_check(args.len(), 3, 3) {
-				return;
-			}
+	else if cur_cmd == cmd::RECORD {
+		if cmd::RECORD.arg_count_pass(cur_args.len()) {
+			let project_id = cur_args[0].parse::<i64>().unwrap();
 
-			let project_id = args[2].parse::<i64>().unwrap();
+			cmd::record(project_id);
+		}
+		else {
+			return;
+		}
+	}
 
-			commands::record(project_id);
-		},
+	else if cur_cmd == cmd::STATUS {
+		if cmd::STATUS.arg_count_pass(cur_args.len()) {
+			cmd::status();
+		}
+		else {
+			return;
+		}
+	}
 
-		commands::STATUS_NAME => {
-			if argcount_check(args.len(), 2, 2) {
-				return;
-			}
+	else if cur_cmd == cmd::STOP {
+		if cmd::STOP.arg_count_pass(cur_args.len()) {
+			cmd::stop(cur_args[0].as_str());
+		}
+		else {
+			return;
+		}
+	}
 
-			commands::status();
-		},
+	else if cur_cmd == cmd::ADD_RECORD {
+		if cmd::ADD_RECORD.arg_count_pass(cur_args.len()) {
+			let project_id = cur_args[0].parse::<i64>().unwrap();
+			let b_year = cur_args[2].parse::<i64>().unwrap();
+			let b_month = cur_args[3].parse::<i64>().unwrap();
+			let b_day = cur_args[4].parse::<i64>().unwrap();
+			let b_hour = cur_args[5].parse::<i64>().unwrap();
+			let b_minute = cur_args[6].parse::<i64>().unwrap();
+			let e_year = cur_args[7].parse::<i64>().unwrap();
+			let e_month = cur_args[8].parse::<i64>().unwrap();
+			let e_day = cur_args[9].parse::<i64>().unwrap();
+			let e_hour = cur_args[10].parse::<i64>().unwrap();
+			let e_minute = cur_args[11].parse::<i64>().unwrap();
 
-		commands::STOP_NAME | commands::STOP_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::STOP_INFO,
-					commands::STOP_NAME,
-					Some(commands::STOP_ABBR),
-					Some(commands::STOP_ARGS));
-				return;
-			}
-
-			if argcount_check(args.len(), 3, 3) {
-				return;
-			}
-
-			commands::stop(args[2].as_str());
-		},
-
-		commands::ADD_RECORD_NAME | commands::ADD_RECORD_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::ADD_RECORD_INFO,
-					commands::ADD_RECORD_NAME,
-					Some(commands::ADD_RECORD_ABBR),
-					Some(commands::ADD_RECORD_ARGS));
-				return;
-			}
-
-			if argcount_check(args.len(), 14, 14) {
-				return;
-			}
-
-			let project_id = args[2].parse::<i64>().unwrap();
-			let b_year = args[4].parse::<i64>().unwrap();
-			let b_month = args[5].parse::<i64>().unwrap();
-			let b_day = args[6].parse::<i64>().unwrap();
-			let b_hour = args[7].parse::<i64>().unwrap();
-			let b_minute = args[8].parse::<i64>().unwrap();
-			let e_year = args[9].parse::<i64>().unwrap();
-			let e_month = args[10].parse::<i64>().unwrap();
-			let e_day = args[11].parse::<i64>().unwrap();
-			let e_hour = args[12].parse::<i64>().unwrap();
-			let e_minute = args[13].parse::<i64>().unwrap();
-
-			commands::add_record(
-				project_id, args[3].as_str(),
+			cmd::add_record(
+				project_id, cur_args[1].as_str(),
 				b_year, b_month, b_day, b_hour, b_minute,
 				e_year, e_month, e_day, e_hour, e_minute);
-		},
-
-		commands::EDIT_RECORD_PROJECT_NAME |
-		commands::EDIT_RECORD_PROJECT_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::EDIT_RECORD_PROJECT_INFO,
-					commands::EDIT_RECORD_PROJECT_NAME,
-					Some(commands::EDIT_RECORD_PROJECT_ABBR),
-					Some(commands::EDIT_RECORD_PROJECT_ARGS));
-				return;
-			}
-
-			if argcount_check(args.len(), 4, 4) {
-				return;
-			}
-
-			let record_id = args[2].parse::<i64>().unwrap();
-			let project_id = args[3].parse::<i64>().unwrap();
-
-			commands::edit_record_project(record_id, project_id);
-		},
-
-		commands::EDIT_RECORD_BEGIN_NAME | commands::EDIT_RECORD_BEGIN_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::EDIT_RECORD_BEGIN_INFO,
-					commands::EDIT_RECORD_BEGIN_NAME,
-					Some(commands::EDIT_RECORD_BEGIN_ABBR),
-					Some(commands::EDIT_RECORD_BEGIN_ARGS));
-				return;
-			}
-
-			if argcount_check(args.len(), 8, 8) {
-				return;
-			}
-
-			let record_id = args[2].parse::<i64>().unwrap();
-			let year = args[3].parse::<i64>().unwrap();
-			let month = args[4].parse::<i64>().unwrap();
-			let day = args[5].parse::<i64>().unwrap();
-			let hour = args[6].parse::<i64>().unwrap();
-			let minute = args[7].parse::<i64>().unwrap();
-
-			commands::edit_record_begin(record_id, year, month, day, hour, minute);
-		},
-
-		commands::EDIT_RECORD_END_NAME | commands::EDIT_RECORD_END_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::EDIT_RECORD_END_INFO,
-					commands::EDIT_RECORD_END_NAME,
-					Some(commands::EDIT_RECORD_END_ABBR),
-					Some(commands::EDIT_RECORD_END_ARGS));
-				return;
-			}
-
-			if argcount_check(args.len(), 8, 8) {
-				return;
-			}
-
-			let record_id = args[2].parse::<i64>().unwrap();
-			let year = args[3].parse::<i64>().unwrap();
-			let month = args[4].parse::<i64>().unwrap();
-			let day = args[5].parse::<i64>().unwrap();
-			let hour = args[6].parse::<i64>().unwrap();
-			let minute = args[7].parse::<i64>().unwrap();
-
-			commands::edit_record_end(record_id, year, month, day, hour, minute);
-		},
-
-		commands::EDIT_RECORD_DESCRIPTION_NAME |
-		commands::EDIT_RECORD_DESCRIPTION_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::EDIT_RECORD_DESCRIPTION_INFO,
-					commands::EDIT_RECORD_DESCRIPTION_NAME,
-					Some(commands::EDIT_RECORD_DESCRIPTION_ABBR),
-					Some(commands::EDIT_RECORD_DESCRIPTION_ARGS));
-				return;
-			}
-
-			if argcount_check(args.len(), 4, 4) {
-				return;
-			}
-
-			let record_id = args[2].parse::<i64>().unwrap();
-
-			commands::edit_record_description(record_id, args[3].as_str());
-		},
-
-		commands::DELETE_RECORD_NAME => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::DELETE_RECORD_INFO,
-					commands::DELETE_RECORD_NAME,
-					None,
-					Some(commands::DELETE_RECORD_ARGS));
-				return;
-			}
-
-			if argcount_check(args.len(), 3, 3) {
-				return;
-			}
-
-			let record_id = args[2].parse::<i64>().unwrap();
-
-			commands::delete_record(record_id);
 		}
+		else {
+			return;
+		}
+	}
 
-		commands::TRANSFER_PROJECT_RECORDS_NAME => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::TRANSFER_PROJECT_RECORDS_INFO,
-					commands::TRANSFER_PROJECT_RECORDS_NAME,
-					None,
-					Some(commands::TRANSFER_PROJECT_RECORDS_ARGS));
-				return;
-			}
+	else if cur_cmd == cmd::EDIT_RECORD_PROJECT {
+		if cmd::EDIT_RECORD_PROJECT.arg_count_pass(cur_args.len()) {
+			let record_id = cur_args[0].parse::<i64>().unwrap();
+			let project_id = cur_args[1].parse::<i64>().unwrap();
 
-			if argcount_check(args.len(), 4, 4) {
-				return;
-			}
+			cmd::edit_record_project(record_id, project_id);
+		}
+		else {
+			return;
+		}
+	}
 
-			let src_prj_id = args[2].parse::<i64>().unwrap();
-			let dest_prj_id = args[3].parse::<i64>().unwrap();
+	else if cur_cmd == cmd::EDIT_RECORD_BEGIN {
+		if cmd::EDIT_RECORD_BEGIN.arg_count_pass(cur_args.len()) {
+			let record_id = cur_args[0].parse::<i64>().unwrap();
+			let year = cur_args[1].parse::<i64>().unwrap();
+			let month = cur_args[2].parse::<i64>().unwrap();
+			let day = cur_args[3].parse::<i64>().unwrap();
+			let hour = cur_args[4].parse::<i64>().unwrap();
+			let minute = cur_args[5].parse::<i64>().unwrap();
 
-			commands::transfer_project_records(src_prj_id, dest_prj_id);
-		},
+			cmd::edit_record_begin(record_id, year, month, day, hour, minute);
+		}
+		else {
+			return;
+		}
+	}
 
-		commands::SWAP_PROJECT_RECORDS_NAME => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::SWAP_PROJECT_RECORDS_INFO,
-					commands::SWAP_PROJECT_RECORDS_NAME,
-					None,
-					Some(commands::SWAP_PROJECT_RECORDS_ARGS));
-				return;
-			}
+	else if cur_cmd == cmd::EDIT_RECORD_END {
+		if cmd::EDIT_RECORD_END.arg_count_pass(cur_args.len()) {
+			let record_id = cur_args[0].parse::<i64>().unwrap();
+			let year = cur_args[1].parse::<i64>().unwrap();
+			let month = cur_args[2].parse::<i64>().unwrap();
+			let day = cur_args[3].parse::<i64>().unwrap();
+			let hour = cur_args[4].parse::<i64>().unwrap();
+			let minute = cur_args[5].parse::<i64>().unwrap();
+
+			cmd::edit_record_end(record_id, year, month, day, hour, minute);
+		}
+		else {
+			return;
+		}
+	}
+
+	else if cur_cmd == cmd::EDIT_RECORD_DESCRIPTION {
+		if cmd::EDIT_RECORD_DESCRIPTION.arg_count_pass(cur_args.len()) {
+			let record_id = cur_args[0].parse::<i64>().unwrap();
+
+			cmd::edit_record_description(record_id, cur_args[1].as_str());
+		}
+		else {
+			return;
+		}
+	}
+
+	else if cur_cmd == cmd::DELETE_RECORD {
+		if cmd::DELETE_RECORD.arg_count_pass(cur_args.len()) {
+			let record_id = cur_args[0].parse::<i64>().unwrap();
+
+			cmd::delete_record(record_id);
+		}
+		else {
+			return;
+		}
+	}
+
+	else if cur_cmd == cmd::TRANSFER_PROJECT_RECORDS {
+		if cmd::TRANSFER_PROJECT_RECORDS.arg_count_pass(cur_args.len()) {
+			let src_prj_id = cur_args[0].parse::<i64>().unwrap();
+			let dest_prj_id = cur_args[1].parse::<i64>().unwrap();
+
+			cmd::transfer_project_records(src_prj_id, dest_prj_id);
+		}
+		else {
+			return;
+		}
+	}
+
+	else if cur_cmd == cmd::SWAP_PROJECT_RECORDS {
+		if cmd::SWAP_PROJECT_RECORDS.arg_count_pass(cur_args.len()) {
+			let project_id_a = cur_args[0].parse::<i64>().unwrap();
+			let project_id_b = cur_args[1].parse::<i64>().unwrap();
 			
-			if argcount_check(args.len(), 4, 4) {
-				return;
-			}
-			
-			let project_id_a = args[2].parse::<i64>().unwrap();
-			let project_id_b = args[3].parse::<i64>().unwrap();
-			
-			commands::swap_project_records(project_id_a, project_id_b);
-		},
+			cmd::swap_project_records(project_id_a, project_id_b);
+		}
+		else {
+			return;
+		}
+	}
 
-		commands::SHOW_WEEK_NAME | commands::SHOW_WEEK_ABBR => {
-			if argcount_check(args.len(), 2, 5) {
-				return;
-			}
-
+	else if cur_cmd == cmd::SHOW_WEEK {
+		if cmd::SHOW_WEEK.arg_count_pass(cur_args.len()) {
 			if args.len() > 2 {
-				let year = args[2].parse::<i32>().unwrap();
-				let month = args[3].parse::<u32>().unwrap();
-				let day = args[4].parse::<u32>().unwrap();
+				let year = cur_args[0].parse::<i32>().unwrap();
+				let month = cur_args[1].parse::<u32>().unwrap();
+				let day = cur_args[2].parse::<u32>().unwrap();
 
-				commands::show_week(year, month, day);
+				cmd::show_week(year, month, day);
 			}
 			else {
-				commands::show_week_cur();
+				cmd::show_week_cur();
 			}
-		},
+		}
+		else {
+			return;
+		}
+	}
 
-		commands::SHOW_MONTH_NAME | commands::SHOW_MONTH_ABBR => {
-			if argcount_check(args.len(), 2, 4) {
-				return;
-			}
-
+	else if cur_cmd == cmd::SHOW_MONTH {
+		if cmd::SHOW_MONTH.arg_count_pass(cur_args.len()) {
 			if args.len() > 2 {
-				let year = args[2].parse::<i32>().unwrap();
-				let month = args[3].parse::<u32>().unwrap();
+				let year = cur_args[0].parse::<i32>().unwrap();
+				let month = cur_args[1].parse::<u32>().unwrap();
 
-				commands::show_month(year, month);
+				cmd::show_month(year, month);
 			}
 			else {
-				commands::show_month_cur();
+				cmd::show_month_cur();
 			}
-		},
-		
-		commands::SHOW_PROJECT_RECORDS_NAME |
-		commands::SHOW_PROJECT_RECORDS_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::SHOW_PROJECT_RECORDS_INFO,
-					commands::SHOW_PROJECT_RECORDS_NAME,
-					Some(commands::SHOW_PROJECT_RECORDS_ABBR),
-					Some(commands::SHOW_PROJECT_RECORDS_ARGS));
-				return;
-			}
-			
-			if argcount_check(args.len(), 3, 3) {
-				return;
-			}
-			
-			let project_id = args[2].parse::<i64>().unwrap();
-			
-			commands::show_project_records(project_id);
-		},
-
-		commands::MERGE_DB_NAME | commands::MERGE_DB_ABBR => {
-			if args.len() == 2 {
-				commands::print_cmd_help(
-					commands::MERGE_DB_INFO,
-					commands::MERGE_DB_NAME,
-					Some(commands::MERGE_DB_ABBR),
-					Some(commands::MERGE_DB_ARGS));
-				return;
-			}
-
-			if argcount_check(args.len(), 4, 4) {
-				return;
-			}
-
-			commands::merge_db(&args[2], &args[3]);
-		},
-		
-		commands::SHOW_ETC_PATH_NAME | commands::SHOW_ETC_PATH_ABBR => {
-			if argcount_check(args.len(), 2, 2) {
-				return;
-			}
-			
-			commands::show_etc_path();
 		}
-		
-		commands::SHOW_DB_PATH_NAME | commands::SHOW_DB_PATH_ABBR => {
-			if argcount_check(args.len(), 2, 2) {
-				return;
-			}
-			
-			commands::show_db_path();
+		else {
+			return;
 		}
+	}
 		
-		_ => println!("Command not recognised."),
+	else if cur_cmd == cmd::SHOW_PROJECT_RECORDS {
+		if cmd::SHOW_PROJECT_RECORDS.arg_count_pass(cur_args.len()) {
+			let project_id = cur_args[0].parse::<i64>().unwrap();
+			
+			cmd::show_project_records(project_id);
+		}
+		else {
+			return;
+		}
+	}
+
+	else if cur_cmd == cmd::MERGE_DB {
+		if cmd::MERGE_DB.arg_count_pass(cur_args.len()) {
+			cmd::merge_db(&cur_args[0], &cur_args[1]);
+		}
+		else {
+			return;
+		}
+	}
+		
+	else if cur_cmd == cmd::SHOW_ETC_PATH {
+		if cmd::SHOW_ETC_PATH.arg_count_pass(cur_args.len()) {
+			cmd::show_etc_path();
+		}
+		else {
+			return;
+		}
+	}
+		
+	else if cur_cmd == cmd::SHOW_DB_PATH {
+		if cmd::SHOW_DB_PATH.arg_count_pass(cur_args.len()) {
+			cmd::show_db_path();
+		}
+		else {
+			return;
+		}
+	}
+	
+	else {
+		println!("Command not recognised.");
 	}
 }
