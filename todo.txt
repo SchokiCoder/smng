@@ -9,6 +9,12 @@
 }
 
 {
+	-localization			.
+		-env $LANG				v_10-19_01-10-2022
+		-outsource strings		. progress: pub fn status
+		 (english)
+		-add german				.
+		
 	-cfg					.
 		-toml					.
 		-add option for			.

@@ -46,8 +46,7 @@ impl Command<'_> {
 	
 	pub fn arg_count_pass(&self, arg_count: usize) -> bool {
 		if arg_count > self.max_args {
-			println!("WARNING: Too many arguments were given.\n\
-					  Additional arguments will be ignored.");
+			println!("{}", lcl_str.too_many_args);
 			return true;
 		}
 		else if arg_count < self.min_args {
@@ -56,14 +55,14 @@ impl Command<'_> {
 				return false;
 			}
 			else {
-				println!("ERROR: Not enough arguments given.");
+				println!("{}", lcl_str.too_little_args);
 				return false;
 			}
 		}
 		else {
 			if self.args_all_or_none {
 				if arg_count != self.min_args && arg_count != self.max_args {
-					println!("ERROR: Arguments given but not enough.");
+					println!("{}", lcl_str.not_enough_args);
 					return false;
 				}
 			}
@@ -381,7 +380,7 @@ fn find_cfg_file() -> ConfigPos {
 	}
 }
 
-fn get_cfg_file() -> std::fs::File {
+fn get_cfg_file() -> Result<std::fs::File, String> {
 	let cfgpos = find_cfg_file();
 	
 	match cfgpos {
@@ -392,16 +391,15 @@ fn get_cfg_file() -> std::fs::File {
 			let f = std::fs::File::open(&path);
 			
 			if !f.is_ok() {
-				panic!("Config file at \"{}\" could not be opened", &path);
+				return Err(format("{} ({})", lcl_str.cfg_not_open, &path));
 			}
 			
-			return f.unwrap();
+			return Ok(f.unwrap());
 		},
 		
-		// if not, crash and burn
+		// if not, err
 		ConfigPos::None => {
-			panic!("No config file could not be found or read\n\
-			Create at least one on path \"{}\"", GLOB_ETC_DB_PATH);
+			return Err(format!("{} ({})", lcl_str.cfg_not_found, GLOB_ETC_DB_PATH));
 		},
 	}
 }
@@ -419,7 +417,7 @@ fn read_etc_db() -> String {
 	return path;
 }
 
-fn database_open() -> sqlite::Connection {
+fn database_open() -> Result<sqlite::Connection, String> {
 	// read db path config
 	let path = read_etc_db();
 
@@ -444,7 +442,7 @@ fn database_open() -> sqlite::Connection {
 
 		// else panic
 		else {
-			panic!("Connection to database \"{}\" failed", path.as_str());
+			return Err(format!("{} ({})", lcl_str.db_conn_fail, path.as_str()));
 		}
 	};
 
@@ -454,9 +452,7 @@ fn database_open() -> sqlite::Connection {
 
 	// if flagged, create database
 	if db_empty {
-		println!(
-			"WARNING: Database does not exist and will be newly created at \"{}\".",
-			path.as_str());
+		println!("{} ({})", lcl_str.db_create, path.as_str());
 		
 		db.execute(
 			"CREATE TABLE tbl_projects( \
@@ -489,22 +485,20 @@ fn database_open() -> sqlite::Connection {
 }
 
 pub fn help() {
-	println!("Usage:");
-	println!("{} command [arguments]", env!("CARGO_PKG_NAME"));
-	println!("");
+	println!(lcl_str.app_usage);
 
-	println!("-- Info --");
+	println!("-- {} --", lcl_str.info);
 	HELP.print_help();
 	ABOUT.print_help();
 
-	println!("-- Projects --");
+	println!("-- {} --", lcl_str.projects);
 	ADD_PROJECT.print_help();
 	SHOW_PROJECTS.print_help();
 	EDIT_PROJECT.print_help();
 	ARCHIVE_PROJECT.print_help();
 	DELETE_PROJECT.print_help();
 
-	println!("-- Records --");
+	println!("-- {} --", lcl_str.records);
 	RECORD.print_help();
 	STATUS.print_help();
 	STOP.print_help();
@@ -517,25 +511,19 @@ pub fn help() {
 	TRANSFER_PROJECT_RECORDS.print_help();
 	SWAP_PROJECT_RECORDS.print_help();
 
-	println!("-- Report --");
+	println!("-- {} --", lcl_str.report);
 	SHOW_WEEK.print_help();
 	SHOW_MONTH.print_help();
 	SHOW_PROJECT_RECORDS.print_help();
 
-	println!("-- Administration --");
+	println!("-- {} --", lcl_str.administration);
 	MERGE_DB.print_help();
 	SHOW_ETC_PATH.print_help();
 	SHOW_DB_PATH.print_help();
 }
 
 pub fn about() {
-	println!("{} {} is licensed under the {}.",
-		env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"), env!("CARGO_PKG_LICENSE"));
-	println!("You should have received a copy of the license along with this program.");
-	println!("If not see <{}>\n",
-		"https://www.gnu.org/licenses/");
-	println!("The source code of this program is available at:\n{}\n",
-		env!("CARGO_PKG_REPOSITORY"));
+	println!("{}", lcl_str.app_about);
 }
 
 pub fn add_project(project_name: &str) {
@@ -550,11 +538,11 @@ pub fn add_project(project_name: &str) {
 	stmt.bind(1, project_name).unwrap();
 	stmt.next().unwrap();
 
-	println!("Project \"{}\" added.", project_name);
+	println!("{} ({})", lcl_str.project_added, project_name);
 }
 
 fn print_project_header() {
-	println!("{:9} | {}", "id", "project name");
+	println!(lcl_str.project_tbl_head);
 }
 
 pub fn show_projects() {
@@ -566,7 +554,7 @@ pub fn show_projects() {
 			 FROM tbl_projects;")
 		.unwrap();
 
-	println!("Projects:");
+	println!("{}:", lcl_str.projects);
 	print_project_header();
 
 	// all projects
@@ -593,7 +581,7 @@ pub fn show_projects() {
 	}
 	
 	// print archived projects
-	println!("\nArchived projects:");
+	println!("\n{}:", lcl_str.archived_projects);
 	print_project_header();
 	
 	for (id, name) in archived_projects {
@@ -634,7 +622,7 @@ pub fn edit_project(project_id: i64, project_name: &str) {
 	
 	// if project archived, print and stop
 	if project_archived(&db, project_id) {
-		println!("ERROR: Project ({}) is archived and can not be edited.", project_id);
+		println!("{} ({})." lcl_str.project_archived_noedit, project_id);
 		return;
 	}
 
@@ -649,7 +637,7 @@ pub fn edit_project(project_id: i64, project_name: &str) {
 	stmt.bind(2, project_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("Project ({}) name set to \"{}\".", project_id, project_name);
+	println!("{} ({}) -> ({}).", lcl_str.project_name_set, project_id, project_name);
 }
 
 pub fn archive_project(project_id: i64) {
@@ -658,16 +646,16 @@ pub fn archive_project(project_id: i64) {
 	// find out if targeted project is already archived	
 	let archived = project_archived(&db, project_id);
 	let arch_num: i64;
-	let new_state_str: &str;
+	let result_str: &str;
 	
 	// if archived, unarchive
 	if archived {
 		arch_num = 0;
-		new_state_str = "unarchived";
+		result_str = lcl_str.project_unarchived;
 	}
 	else {
 		arch_num = 1;
-		new_state_str = "archived";
+		result_str = lcl_str.project_archived;
 	}
 	
 	let mut stmt = db
@@ -682,7 +670,7 @@ pub fn archive_project(project_id: i64) {
 	stmt.next().unwrap();
 	
 	// end print
-	println!("Project ({}) has been {}.", project_id, new_state_str);
+	println!("{} ({})}.", result_str, project_id);
 }
 
 pub fn delete_project(project_id: i64, purge: bool) {
@@ -710,10 +698,10 @@ pub fn delete_project(project_id: i64, purge: bool) {
 	stmt.next().unwrap();
 
 	if purge {
-		println!("Project ({}) and its records deleted.", project_id);
+		println!("{} ({}).", lcl_str.project_purged, project_id);
 	}
 	else {
-		println!("Project ({}) deleted.", project_id);
+		println!("{} ({}).", lcl_str.project_deleted, project_id);
 	}
 }
 
@@ -744,7 +732,7 @@ pub fn record(project_id: i64) {
 	
 	// if used project is archived, stop
 	if project_archived(&db, project_id) {
-		println!("ERROR: Project ({}) is archived and can not be used.", project_id);
+		println!("{} ({}).", lcl_str.project_archived_nouse, project_id);
 		return;
 	}
 	
@@ -753,7 +741,7 @@ pub fn record(project_id: i64) {
 
 	if rec_state.id != 0 {
 		if rec_state.state == 0 {
-			println!("ERROR: Last record ({}) is not yet done.", rec_state.id);
+			println!("{} ({}).", lcl_str.record_last_not_done, rec_state.id);
 			return;
 		}
 	}
@@ -767,7 +755,7 @@ pub fn record(project_id: i64) {
 	stmt.bind(1, project_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("Record for project ({}) started.", project_id);
+	println!("{} ({}).", lcl_str.record_started, project_id);
 }
 
 pub fn status() {

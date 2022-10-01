@@ -16,18 +16,38 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+pub mod lang;
 pub mod cmd;
 use std::env;
+use lang::LocalStrings;
 
 fn main() {
+	// get user language
+	let lcl_str: LocalStrings;
+	let lang = env!("LANG").split('.').next();
+	
+	// if lang env var could be read, get strings
+	if lang.is_some() {
+		match lang.unwrap() {
+			"de_DE" => {
+				lcl_str = LocalStrings::new_german();
+			}
+			
+			_ => {
+				lcl_str = LocalStrings::new_english();
+			}
+		}
+	}
+	else {
+		lcl_str = LocalStrings::new_english();
+	}
+	
+	// get args
 	let args: Vec<String> = env::args().collect();
 
 	// if not args given, print usage help and end
 	if args.len() < 2 {
-		println!("Usage: {} command [arguments]:", env!("CARGO_PKG_NAME"));
-		println!("Try '{} {}' for more information.",
-			env!("CARGO_PKG_NAME"),
-			cmd::HELP.name);
+		println!("{}", lcl_str.app_usage);
 		return;
 	}
 	
@@ -335,6 +355,6 @@ fn main() {
 	}
 	
 	else {
-		println!("Command not recognised.");
+		println!("{}", lcl_str.cmd_unknown);
 	}
 }
