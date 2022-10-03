@@ -56,13 +56,6 @@ pub struct LocalStrings {
 	
 	pub db_conn_fail: String,
 	pub db_create: String,
-	
-	pub info: String,
-	pub projects: String,
-	pub archived_projects: String,
-	pub records: String,
-	pub report: String,
-	pub administration: String,
 
 	pub project_added: String,
 	pub project_tbl_head: String,
@@ -76,13 +69,36 @@ pub struct LocalStrings {
 	
 	pub record_last_not_done: String,
 	pub record_started: String,
-	pub record_: String,
+	pub record_last_done: String,
+	pub record_none_available: String,
+	pub record_stopped: String,
+	pub record_added: String,
+	pub record_archived_noedit: String,
+	pub record_archived_nodelete: String,
+	pub record_project_set: String,
+	pub record_begin_set: String,
+	pub record_end_set: String,
+	pub record_description_set: String,
+	pub record_deleted: String,
+	
+	pub transfer_different_projects: String,
+	pub transfer: String,
+
+	pub swap_different_projects: String,
+	pub swap: String,
+	
+	pub sum_worktime: String,
 	pub : String,
-	pub : String,
-	pub : String,
-	pub : String,
-	pub : String,
-	pub : String,
+	
+	
+	pub error: String,
+	pub warning: String,
+	pub info: String,
+	pub projects: String,
+	pub archived_projects: String,
+	pub records: String,
+	pub report: String,
+	pub administration: String,
 }
 
 impl LocalStrings {
@@ -127,13 +143,6 @@ impl LocalStrings {
 			db_conn_fail: "Connection to database failed".to_string,
 			db_create: format!("{} Database does not exist and will be newly created", warn_str),
 			
-			info: "Info".to_string(),
-			projects: "Projects".to_string(),
-			archived_projects: "Archived projects".to_string(),
-			records: "Records".to_string(),
-			report: "Report".to_string(),
-			administration: "Administration".to_string(),
-			
 			project_added: "Project added".to_string(),
 			project_tbl_head: format!("{:9} | {}", "id", "project name"),
 			project_archived_noedit: format!("{} Project is archived and can not be edited",
@@ -145,8 +154,41 @@ impl LocalStrings {
 			project_deleted: "Project deleted".to_string(),
 			project_purged: "Project and its records deleted".to_string(),
 			
-			record_last_not_done: format!("{} Last record is not yet done", err_str),
+			record_tbl_head: format!("{:9} | {:8} | {:8} | {:5} | {:9} | {}",
+				"id", "begin", "end", "time", "project", "description"),
+			record_last_done: "Last record is done".to_string(),
+			record_last_not_done: "Last record is not yet done".to_string(),
 			record_started: "Record for given project started".to_string(),
+			record_none_available: format!("{} There are no records yet", err_str),
+			record_stopped: "Record stopped".to_string(),
+			record_added: "Record added to project".to_string(),
+			record_archived_noedit: format!("{} Record is archived and can not be edited", err_str),
+			record_archived_nodelete: format!("{} Record is archived and can not be deleted",
+				err_str),
+			record_project_set: "Record project set".to_string(),
+			record_begin_set: "Record begin set".to_string(),
+			record_end_set: "Record end set".to_string(),
+			record_description_set: "Record description set".to_string(),
+			record_deleted: "Record deleted".to_string(),
+			
+			transfer_different_projects: format!("{} This command transfers the records of a project to another.\n\
+												A transfer needs two different projects.", err_str),
+			transfer: "Records moved to other project".to_string(),
+			
+			swap_different_projects: "{} This command swaps the records of a project to another.\n\
+									A transfer needs two different projects.".to_string(),
+			swap: "Records of both project swapped".to_string(),
+			
+			sum_worktime: "Summarized worktime".to_string(),
+			
+			error: err_str,
+			warning: warn_str,
+			info: "Info".to_string(),
+			projects: "Projects".to_string(),
+			archived_projects: "Archived projects".to_string(),
+			records: "Records".to_string(),
+			report: "Report".to_string(),
+			administration: "Administration".to_string(),
 		};
 	}
 	

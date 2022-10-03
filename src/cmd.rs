@@ -741,7 +741,7 @@ pub fn record(project_id: i64) {
 
 	if rec_state.id != 0 {
 		if rec_state.state == 0 {
-			println!("{} ({}).", lcl_str.record_last_not_done, rec_state.id);
+			println!("{} {} ({}).", lcl_str.error, lcl_str.record_last_not_done, rec_state.id);
 			return;
 		}
 	}
@@ -762,16 +762,16 @@ pub fn status() {
 	let db = database_open();
 	let rec_state = RecordState::last(&db);
 
-	let state_str: &str;
+	let result_str: &str;
 
 	if rec_state.state == 1 {
-		state_str = "";
+		result_str = lcl_str.record_last_done;
 	}
 	else {
-		state_str = "NOT ";
+		result_str = lcl_str.record_last_not_done;
 	}
 
-	println!("Last record ({}) is {}done.", rec_state.id, state_str);
+	println!("{} ({}).", result_str, rec_state.id);
 }
 
 pub fn stop(description: &str) {
@@ -780,13 +780,13 @@ pub fn stop(description: &str) {
 
 	// if last record is 0, stop
 	if rec_state.id == 0 {
-		println!("ERROR: There are no records yet.");
+		println!(lcl_str.record_none_available);
 		return;
 	}
 	
 	// if last record is done, stop
 	if rec_state.state == 1 {
-		println!("ERROR: Last record ({}) is already done.", rec_state.id);
+		println!("{} {} ({}).", lcl_str.error, lcl_str.record_last_done, rec_state.id);
 		return;
 	}
 
@@ -801,7 +801,7 @@ pub fn stop(description: &str) {
 	stmt.bind(1, description).unwrap();
 	stmt.next().unwrap();
 
-	println!("Record stopped with description \"{}\".", description);
+	println!("{} ({}).", lcl_str.record_stopped, description);
 }
 
 pub fn add_record(project_id: i64, description: &str,
@@ -812,7 +812,7 @@ pub fn add_record(project_id: i64, description: &str,
 	
 	// if used project is archived, stop
 	if project_archived(&db, project_id) {
-		println!("ERROR: Project ({}) is archived and can not be used.", project_id);
+		println!("{} ({}).", lcl_str.project_archived_nouse, project_id);
 		return;
 	}
 
@@ -839,7 +839,7 @@ pub fn add_record(project_id: i64, description: &str,
 	stmt.bind(12, e_minute).unwrap();
 	stmt.next().unwrap();
 
-	println!("Record added to project ({}).", project_id);
+	println!("{} ({}).", lcl_str.record_added, project_id);
 }
 
 pub fn edit_record_project(record_id: i64, project_id: i64) {
@@ -847,13 +847,13 @@ pub fn edit_record_project(record_id: i64, project_id: i64) {
 	
 	// if used project is archived, stop
 	if project_archived(&db, project_id) {
-		println!("ERROR: Project ({}) is archived and can not be used.", project_id);
+		println!("{} ({}).", lcl_str.project_archived_nouse, project_id);
 		return;
 	}
 	
 	// if record is assigned to archived project, stop
 	if record_archived(&db, record_id) {
-		println!("ERROR: Record ({}) is archived and can not be edited.", record_id);
+		println!("{} ({}).", lcl_str.record_archived_noedit, record_id);
 		return;
 	}
 
@@ -869,7 +869,7 @@ pub fn edit_record_project(record_id: i64, project_id: i64) {
 	stmt.bind(2, record_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("Record ({}) project set to ({}).", record_id, project_id);
+	println!("{} ({}) = ({}).", record_project_set, record_id, project_id);
 }
 
 fn edit_record_time(
@@ -882,7 +882,7 @@ fn edit_record_time(
 	
 	// if record is assigned to archived project, stop
 	if record_archived(&db, record_id) {
-		println!("ERROR: Record ({}) is archived and can not be edited.", record_id);
+		println!("{} ({}).", lcl_str.record_archived_noedit, record_id);
 		return false;
 	}
 
@@ -917,8 +917,8 @@ fn edit_record_time(
 pub fn edit_record_begin(record_id: i64, year: i64, month: i64, day: i64,
                          hour: i64, minute: i64) {
 	if edit_record_time(true, record_id, year, month, day, hour, minute) {
-		println!("Record ({}) begin set to {:04}-{:02}-{:02} {:02}:{:02}.",
-			record_id,
+		println!("{} ({}) = {:04}-{:02}-{:02} {:02}:{:02}.",
+			lcl_str.record_begin_set, record_id,
 			year, month, day,
 			hour, minute);
 	}
@@ -927,8 +927,8 @@ pub fn edit_record_begin(record_id: i64, year: i64, month: i64, day: i64,
 pub fn edit_record_end(record_id: i64, year: i64, month: i64, day: i64,
                        hour: i64, minute: i64) {
 	if edit_record_time(false, record_id, year, month, day, hour, minute) {
-		println!("Record ({}) end set to {:04}-{:02}-{:02} {:02}:{:02}.",
-			record_id,
+		println!("{} ({}) = {:04}-{:02}-{:02} {:02}:{:02}.",
+			record_end_set, record_id,
 			year, month, day,
 			hour, minute);
 	}
@@ -939,7 +939,7 @@ pub fn edit_record_description(record_id: i64, description: &str) {
 
 	// if record is assigned to archived project, stop
 	if record_archived(&db, record_id) {
-		println!("ERROR: Record ({}) is archived and can not be edited.", record_id);
+		println!("{} ({}).", lcl_str.record_archived_noedit, record_id);
 		return;
 	}
 
@@ -955,7 +955,7 @@ pub fn edit_record_description(record_id: i64, description: &str) {
 	stmt.bind(2, record_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("Record ({}) description set to \"{}\".", record_id, description);
+	println!("{} ({}) = ({}).", lcl_str.record_description_set, record_id, description);
 }
 
 pub fn delete_record(record_id: i64) {
@@ -963,7 +963,7 @@ pub fn delete_record(record_id: i64) {
 	
 	// if record is assigned to archived project, stop
 	if record_archived(&db, record_id) {
-		println!("ERROR: Record ({}) is archived and can not be deleted.", record_id);
+		println!("{} ({}).", lcl_str.record_archived_nodelete, record_id);
 		return;
 	}
 
@@ -978,15 +978,13 @@ pub fn delete_record(record_id: i64) {
 	stmt.bind(1, record_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("Record ({}) deleted.", record_id);
+	println!("{} ({}).", lcl_str.record_deleted, record_id);
 }
 
 pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 	// if project id's are equal, educate user and stop
 	if src_project_id == dest_project_id {
-		println!(
-			"ERROR: This command transfers the records of a project to another.\n\
-			A transfer needs two different projects.");
+		println!("{}", lcl_str.transfer_different_projects);
 		return;
 	}
 	
@@ -994,15 +992,13 @@ pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 	
 	// if src project is archived, stop
 	if project_archived(&db, src_project_id) {
-		println!("ERROR: Source project ({}) is archived and can not be edited.", src_project_id);
+		println!("{} ({}).", lcl_str.project_archived_noedit, src_project_id);
 		return;
 	}
 	
 	// if dest project is archived, stop
 	if project_archived(&db, dest_project_id) {
-		println!(
-			"ERROR: Destination project ({}) is archived and can not be edited.",
-			dest_project_id);
+		println!("{} ({}).", lcl_str.project_archived_noedit, dest_project_id);
 		return;
 	}
 
@@ -1019,16 +1015,13 @@ pub fn transfer_project_records(src_project_id: i64, dest_project_id: i64) {
 
 	while sqlite::State::Row == stmt.next().unwrap() {}
 
-	println!("Records of project ({}) moved to project ({}).",
-		src_project_id, dest_project_id);
+	println!("{} ({}) -> ({}).", transfer, src_project_id, dest_project_id);
 }
 
 pub fn swap_project_records(project_id_a: i64, project_id_b: i64) {	
 	// if project id's are equal, educate user and stop
 	if project_id_a == project_id_b {
-		println!(
-			"ERROR: This command swaps the projects and records given.\n\
-			A swap needs two different projects.");
+		println!("{}", lcl_str.swap_different_projects);
 		return;
 	}
 	
@@ -1036,12 +1029,12 @@ pub fn swap_project_records(project_id_a: i64, project_id_b: i64) {
 	
 	// if one project is archived, stop
 	if project_archived(&db, project_id_a) {
-		println!("ERROR: Project ({}) is archived and can not be edited.", project_id_a);
+		println!("{} ({}).", lcl_str.project_archived_noedit, project_id_a);
 		return;
 	}
 	
 	if project_archived(&db, project_id_b) {
-		println!("ERROR: Project ({}) is archived and can not be edited.", project_id_b);
+		println!("{} ({}).", lcl_str.project_archived_noedit, project_id_b);
 		return;
 	}
 	
@@ -1112,8 +1105,7 @@ pub fn swap_project_records(project_id_a: i64, project_id_b: i64) {
 	stmt.bind(1, tempid).unwrap();
 	stmt.next().unwrap();
 
-	println!("Records of project ({}) swapped with project ({}).",
-		project_id_a, project_id_b);
+	println!("{} ({}) <--> ({}).", lcl_str.swap, project_id_a, project_id_b);
 }
 
 fn show_record(stmt: &sqlite::Statement, win_width: usize) -> i64 {
@@ -1246,8 +1238,7 @@ fn show_records(
 	}
 
 	// print header
-	println!("{:9} | {:8} | {:8} | {:5} | {:9} | {}",
-		"id", "begin", "end", "time", "project", "description");
+	println!("{}", lcl_str.record_tbl_head);
 
 	let mut sum_seconds: u32 = 0;
 	let mut pre_day: String;
@@ -1315,7 +1306,7 @@ fn show_records(
 	let minutes: u32 = sum_seconds / 60;
 	let hours: u32 = minutes / 60;
 			
-	println!("Summarized worktime: {:02}:{:02}.", hours, (minutes - hours * 60));
+	println!("{}: {:02}:{:02}.", lcl_str.sum_worktime, hours, (minutes - hours * 60));
 }
 
 const DAY_SECONDS: u32 = 60 * 60 * 24;
