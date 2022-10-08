@@ -16,51 +16,14 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-pub mod cmd;
-use std::env;
+//pub mod cmd;
+//use std::env;
 
-const GNU_WEBSITE: &str = "https://www.gnu.org/licenses/";
 
-pub struct EnvStrings {
-	pub cargo_pkg_name: String,
-	pub cargo_pkg_version: String,
-	pub cargo_pkg_license: String,
-	pub cargo_pkg_repository: String
-}
-
-impl EnvStrings {
-	pub fn new() -> EnvStrings {
-		return EnvStrings {
-			cargo_pkg_name: env!("CARGO_PKG_NAME").to_string(),
-			cargo_pkg_version: env!("CARGO_PKG_VERSION").to_string(),
-			cargo_pkg_license: env!("CARGO_PKG_LICENSE").to_string(),
-			cargo_pkg_repository: env!("CARGO_PKG_REPOSITORY").to_string()
-		};
-	}
-}
-
-i18n_codegen::i18n!("lang");
 
 fn main() {
-	// get user language
-	let lcl: Locale;
-	let lang = env!("LANG").split('.').next();
-	
-	// if lang env var could be read, get strings
-	if lang.is_some() {
-		match lang.unwrap() {
-			"de_DE" => {
-				lcl = Locale::De;
-			}
-			
-			_ => {
-				lcl = Locale::En;
-			}
-		}
-	}
-	else {
-		lcl = Locale::En;
-	}
+	println!();
+/*
 	
 	// get args
 	let args: Vec<String> = env::args().collect();
@@ -381,4 +344,5 @@ fn main() {
 	else {
 		println!("{}", lcl.cmd_unknown());
 	}
+*/
 }

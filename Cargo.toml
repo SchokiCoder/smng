@@ -7,6 +7,10 @@ edition = "2018"
 license = "GPLv3"
 publish = false
 
+[[bin]]
+name = "smng-record"
+path = "src/record.rs"
+
 [dependencies]
 sqlite = "0.26.*"
 chrono = "0.4.*"

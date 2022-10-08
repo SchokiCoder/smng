@@ -18,14 +18,31 @@
 	
 	-the great divide			.
 		-split smng into a bin for	.
-		 each cmd
-		 eg: "smng-record"
-		-make: install symlinks to	.
+		 each cmd eg: "smng-record"
+		 except for: help, about
+		
+		-help, about as options		?
+		 for binaries
+		
+		-quiet options				.
+		-add return integers		.
+		 
+		-make: install symlinks to	?
 		 cmds in a way to have
 		 shortcuts
 		 eg: "smng-r"
+		 
 		-change bash completions	.
 		-manpage is handled later	i
+	
+	-orphan strings, which also		.
+	 need a prepend:
+	 db_conn_fail
+	 cfg_not_open
+	 cfg_not_found
+	
+	-update copyright year	.
+	 2021 - 2022
 	
 	-localization part 2	.
 		-cmd help text			.
@@ -42,7 +59,7 @@
 	 min/max worktime
 	
 	-update man				.
-	-v						.
+	-v						. -> 3.0.0
 }
 
 --- done ---
