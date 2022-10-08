@@ -20,9 +20,34 @@
 		-split smng into a bin for	.
 		 each cmd eg: "smng-record"
 		 except for: help, about
+			-record						v_14-53
+			-stop						v_15-03
+			-status						v_15-08
+			-erp						v_15-29
+			-erb						.
+			-ere						.
+			-erd						.
+			-ar							.
+			-del rec					.
+			-transfer rec				.
+			-swap rec					.
+			
+			-ap							.
+			-sp							.
+			-ep							.
+			-archive p					.
+			-del p						.
+			
+			-sw							.
+			-sm							.
+			-spr						.
+			
+			-merge db					.
+			-show cfg path				.
+			-show db path				.
 		
-		-help, about as options		?
-		 for binaries
+		-help and about as options	?
+		 for all binaries
 		
 		-quiet options				.
 		-add return integers		.

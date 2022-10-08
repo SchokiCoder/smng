@@ -118,35 +118,9 @@ pub const DELETE_PROJECT: Command = Command {
 	args_all_or_none: false,
 };
 
-pub const RECORD: Command = Command {
-	info: "record work time on given project",
-	name: "record",
-	abbr: Some("r"),
-	args: Some("project_id"),
-	min_args: 1,
-	max_args: 1,
-	args_all_or_none: false,
-};
 
-pub const STATUS: Command = Command {
-	info: "show current work status",
-	name: "status",
-	abbr: None,
-	args: None,
-	min_args: 0,
-	max_args: 0,
-	args_all_or_none: false,
-};
 
-pub const STOP: Command = Command {
-	info: "stop recording work time",
-	name: "stop",
-	abbr: Some("s"),
-	args: Some("description"),
-	min_args: 1,
-	max_args: 1,
-	args_all_or_none: false,
-};
+
 
 pub const ADD_RECORD: Command = Command {
 	info: "add a new complete record",
@@ -158,25 +132,9 @@ pub const ADD_RECORD: Command = Command {
 	args_all_or_none: false,
 };
 
-pub const EDIT_RECORD_PROJECT: Command = Command {
-	info: "edit record's project",
-	name: "edit-record-project",
-	abbr: Some("erp"),
-	args: Some("record_id project_id"),
-	min_args: 2,
-	max_args: 2,
-	args_all_or_none: false,
-};
 
-pub const EDIT_RECORD_BEGIN: Command = Command {
-	info: "edit record's begin",
-	name: "edit-record-begin",
-	abbr: Some("erb"),
-	args: Some("record_id year month day hour minute"),
-	min_args: 6,
-	max_args: 6,
-	args_all_or_none: false,
-};
+
+
 
 pub const EDIT_RECORD_END: Command = Command {
 	info: "edit record's end",
@@ -530,125 +488,12 @@ pub fn delete_project(lcl: &Locale, project_id: i64, purge: bool) {
 	}
 }
 
-struct RecordState {
-	id: i64,
-	state: i64,
-}
 
-impl RecordState {
-	pub fn last(db: &sqlite::Connection) -> RecordState {
-		let mut stmt = db.prepare(
-				"SELECT work_record_id, \
-				 (CASE WHEN end IS NULL THEN 0 ELSE 1 END) as record_complete\n \
-				 FROM tbl_work_records\n \
-				 ORDER BY work_record_id DESC LIMIT 1;").unwrap();
 
-		stmt.next().unwrap();
 
-		return RecordState {
-			id: stmt.read::<i64>(0).unwrap(),
-			state: stmt.read::<i64>(1).unwrap(),
-		};
-	}
-}
 
-pub fn record(lcl: &Locale, project_id: i64) {
-	let db = database_open(&lcl);
-	
-	if db.is_ok() == false {
-		println!("{}", db.err().unwrap());
-		return;
-	}
-	
-	let db = db.unwrap();
-	
-	// if used project is archived, stop
-	if project_archived(&db, project_id) {
-		println!("{} ({}).", lcl.project_archived_nouse(Error(&lcl.error())), project_id);
-		return;
-	}
-	
-	// if last record is not done, stop
-	let rec_state = RecordState::last(&db);
 
-	if rec_state.id != 0 {
-		if rec_state.state == 0 {
-			println!("{} {} ({}).", lcl.error(), lcl.record_last_not_done(), rec_state.id);
-			return;
-		}
-	}
 
-	let mut stmt = db
-		.prepare(
-			"INSERT INTO tbl_work_records(project_id, begin)\n \
-	 		 VALUES(?, strftime('%s', 'now', 'localtime'));")
-	 	.unwrap();
-
-	stmt.bind(1, project_id).unwrap();
-	stmt.next().unwrap();
-
-	println!("{} ({}).", lcl.record_started(), project_id);
-}
-
-pub fn status(lcl: &Locale) {
-	let db = database_open(&lcl);
-	
-	if db.is_ok() == false {
-		println!("{}", db.err().unwrap());
-		return;
-	}
-	
-	let db = db.unwrap();
-	let rec_state = RecordState::last(&db);
-
-	let result_str: String;
-
-	if rec_state.state == 1 {
-		result_str = lcl.record_last_done();
-	}
-	else {
-		result_str = lcl.record_last_not_done();
-	}
-
-	println!("{} ({}).", result_str, rec_state.id);
-}
-
-pub fn stop(lcl: &Locale, description: &str) {
-	let db = database_open(&lcl);
-	
-	if db.is_ok() == false {
-		println!("{}", db.err().unwrap());
-		return;
-	}
-	
-	let db = db.unwrap();
-	let rec_state = RecordState::last(&db);
-
-	// if last record is 0, stop
-	if rec_state.id == 0 {
-		println!("{}", lcl.record_none_available(Error(&lcl.error())));
-		return;
-	}
-	
-	// if last record is done, stop
-	if rec_state.state == 1 {
-		println!("{} {} ({}).", lcl.error(), lcl.record_last_done(), rec_state.id);
-		return;
-	}
-
-	//exec
-	let mut stmt = db
-		.prepare(
-			"UPDATE tbl_work_records\n\
-		 	 SET end = strftime('%s', 'now', 'localtime'), description = ?\n\
-		 	 WHERE work_record_id = (SELECT MAX(work_record_id) FROM tbl_work_records);")
-		.unwrap();
-
-	stmt.bind(1, description).unwrap();
-	stmt.next().unwrap();
-
-	println!("{} ({}).", lcl.record_stopped(), description);
-}
 
 pub fn add_record(lcl: &Locale, project_id: i64, description: &str,
 	b_year: i64, b_month: i64, b_day: i64, b_hour: i64, b_minute: i64,
@@ -695,42 +540,7 @@ pub fn add_record(lcl: &Locale, project_id: i64, description: &str,
 	println!("{} ({}).", lcl.record_added(), project_id);
 }
 
-pub fn edit_record_project(lcl: &Locale, record_id: i64, project_id: i64) {
-	let db = database_open(&lcl);
-	
-	if db.is_ok() == false {
-		println!("{}", db.err().unwrap());
-		return;
-	}
-	
-	let db = db.unwrap();
-	
-	// if used project is archived, stop
-	if project_archived(&db, project_id) {
-		println!("{} ({}).", lcl.project_archived_nouse(Error(&lcl.error())), project_id);
-		return;
-	}
-	
-	// if record is assigned to archived project, stop
-	if record_archived(&db, record_id) {
-		println!("{} ({}).", lcl.record_archived_noedit(Error(&lcl.error())), record_id);
-		return;
-	}
 
-	// exec
-	let mut stmt = db
-		.prepare(
-			"UPDATE tbl_work_records\n\
-			 SET project_id = ?\n\
-			 WHERE work_record_id = ?;")
-		.unwrap();
-
-	stmt.bind(1, project_id).unwrap();
-	stmt.bind(2, record_id).unwrap();
-	stmt.next().unwrap();
-
-	println!("{} ({}) = ({}).", lcl.record_project_set(), record_id, project_id);
-}
 
 fn edit_record_time(
 	lcl: &Locale,

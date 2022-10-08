@@ -11,6 +11,34 @@ publish = false
 name = "smng-record"
 path = "src/record.rs"
 
+[[bin]]
+name = "smng-stop"
+path = "src/stop.rs"
+
+[[bin]]
+name = "smng-status"
+path = "src/status.rs"
+
+[[bin]]
+name = "smng-edit-record-project"
+path = "src/edit-record-project.rs"
+
+#[[bin]]
+#name = "smng-edit-record-begin"
+#path = "src/edit-record-begin.rs"
+
+#[[bin]]
+#name = "smng-edit-record-end"
+#path = "src/edit-record-end.rs"
+
+#[[bin]]
+#name = "smng-edit-record-description"
+#path = "src/edit-record-description.rs"
+
+#[[bin]]
+#name = "smng-"
+#path = "src/.rs"
+
 [dependencies]
 sqlite = "0.26.*"
 chrono = "0.4.*"

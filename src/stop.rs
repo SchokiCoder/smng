@@ -36,9 +36,9 @@ fn main() {
 	(lcl, db, args) = base.unwrap();
 	
 	let cmd_data = cmd::Command::new(
-		"record work time on given project",
-		"record",
-		Some("project_id"),
+		"stop recording work time",
+		"stop",
+		Some("description"),
 		1, 1, false);
 	
 	// check arg count
@@ -47,33 +47,32 @@ fn main() {
 	}
 	
 	// parse
-	let project_id = args[0].parse::<i64>().unwrap();
+	let description = args[0].as_str();
 	
-	// if used project is archived, stop
-	if data::projects::project_archived(&db, project_id) {
-		println!("{} ({}).", lcl.project_archived_nouse(Error(&lcl.error())), project_id);
+	// if last record is 0, stop
+	let rec_state = RecordState::last(&db);
+
+	if rec_state.id == 0 {
+		println!("{}", lcl.record_none_available(Error(&lcl.error())));
 		return;
 	}
 	
-	// if last record is not done, stop
-	let rec_state = RecordState::last(&db);
-
-	if rec_state.id != 0 {
-		if rec_state.state == 0 {
-			println!("{} {} ({}).", lcl.error(), lcl.record_last_not_done(), rec_state.id);
-			return;
-		}
+	// if last record is done, stop
+	if rec_state.state == 1 {
+		println!("{}: {} ({}).", lcl.error(), lcl.record_last_done(), rec_state.id);
+		return;
 	}
 
+	//exec
 	let mut stmt = db
 		.prepare(
-			"INSERT INTO tbl_work_records(project_id, begin)\n \
-	 		 VALUES(?, strftime('%s', 'now', 'localtime'));")
-	 	.unwrap();
+			"UPDATE tbl_work_records\n\
+		 	 SET end = strftime('%s', 'now', 'localtime'), description = ?\n\
+		 	 WHERE work_record_id = (SELECT MAX(work_record_id) FROM tbl_work_records);")
+		.unwrap();
 
-	stmt.bind(1, project_id).unwrap();
+	stmt.bind(1, description).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}).", lcl.record_started(), project_id);
+	println!("{}: ({}).", lcl.record_stopped(), description);
 }
-
