@@ -1,0 +1,71 @@
+{
+	"error": "ERROR",
+	"warning": "WARNING",
+	"info": "Info",
+	"id": "id",
+	"begin": "begin",
+	"end": "end",
+	"time": "time",
+	"project": "project",
+	"description": "description",
+	"projects": "Projects",
+	"project_name": "project name",
+	"archived_projects": "Archived projects",
+	"records": "Records",
+	"report": "Report",
+	"administration": "Administration",
+	
+	"app_usage": "Usage:\n{pkg_name} command [arguments]\nTry '{pkg_name} {cmd_help_name}' for more information.",
+	"app_about": "{pkg_name} {pkg_version} is licensed under the {pkg_license}.\nYou should have received a copy of the license along with this program.\nIf not see <{gnu_website}>\n\nThe source code of this program is available at:\n{pkg_repository}",
+			
+	"cmd_unknown": "Command not recognised.",
+			
+	"too_many_args": "{warning}: Too many arguments were given.\nAdditional arguments will be ignored.",
+	"too_little_args": "{error}: Not enough arguments given.",
+	"not_enough_args": "{error}: Arguments given but not enough.",
+	
+	"cfg_not_open": "Config file could not be opened",
+	"cfg_not_found": "No config file could be found or read.",
+	"cfg_create_appeal": "At least one config is needed.",
+	"cfg_at_local": "Config found in local space",
+	"cfg_at_user": "Config found in user space",
+	"cfg_at_global": "Config found in global space",
+	
+	"db_conn_fail": "Connection to database failed",
+	"db_create": "{warning}: Database does not exist and will be newly created",
+	"db_merged": "All projects and work-records successfully moved",
+	
+	"project_added": "Project added",
+	"project_archived_noedit": "{error}: Project is archived and can not be edited",
+	"project_archived_nouse": "{error}: Project is archived and can not be used",
+	"project_name_set": "Project name set",
+	"project_archived": "Project has been archived",
+	"project_unarchived": "Project has been unarchived",
+	"project_deleted": "Project deleted",
+	"project_purged": "Project and its records deleted",
+	
+	"record_last_done": "Last record is done",
+	"record_last_not_done": "Last record is not yet done",
+	"record_started": "Record for given project started",
+	"record_none_available": "{error}: There are no records yet",
+	"record_stopped": "Record stopped",
+	"record_added": "Record added to project",
+	"record_archived_noedit": "{error}: Record is archived and can not be edited",
+	"record_archived_nodelete": "{error}: Record is archived and can not be deleted",
+	"record_project_set": "Record project set",
+	"record_begin_set": "Record begin set",
+	"record_end_set": "Record end set",
+	"record_description_set": "Record description set",
+	"record_deleted": "Record deleted",
+	
+	"transfer_different_projects": "{error}: This command transfers the records of a project to another.\nA transfer needs two different projects.",
+	"transfer": "Records moved to other project",
+	
+	"swap_different_projects": "{error}: This command swaps the records of a project to another.\nA transfer needs two different projects.",
+	"swap": "Records of both projects swapped",
+	
+	"sum_worktime": "Summarized worktime",
+	"unexpected_parameters": "Unexpected combination of parameters.",
+	"database_path": "Database path"
+}
+

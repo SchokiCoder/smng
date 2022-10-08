@@ -1,0 +1,71 @@
+{
+	"error": "FEHLER",
+	"warning": "WARNUNG",
+	"info": "Info",
+	"id": "Id",
+	"begin": "Beginn",
+	"end": "Ende",
+	"time": "Zeit",
+	"project": "Projekt",
+	"description": "Beschreibung",
+	"projects": "Projekte",
+	"project_name": "Projekt-Name",
+	"archived_projects": "Archivierte Projekte",
+	"records": "Arbeitszeiten",
+	"report": "Bericht",
+	"administration": "Administration",
+	
+	"app_usage": "Nutzung:\n{pkg_name} Kommando [Argumente]\nVersuche '{pkg_name} {cmd_help_name}' für mehr Informationen.",
+	"app_about": "{pkg_name} {pkg_version} ist lizensiert unter der {pkg_license}.\nSie sollten eine Kopie der Lizenz mit diesem Programm erhalten haben.\nFalls nicht, besuchen sie <{gnu_website}>\n\nDer Quellcode dieses Programmes ist verfügbar unter:\n{pkg_repository}",
+			
+	"cmd_unknown": "Kommando nicht bekannt.",
+			
+	"too_many_args": "{warning}: Zu viele Argumente erhalten.\nZusätzliche Argumente werden ignoriert.",
+	"too_little_args": "{error}: Nicht genug Argumente erhalten.",
+	"not_enough_args": "{error}: Argumente erhalten aber nicht genug.",
+	
+	"cfg_not_open": "Config Datei konnte nicht geöffnet werden",
+	"cfg_not_found": "Keine Config Datei konnte gefunden oder gelesen werden.",
+	"cfg_create_appeal": "Es wird mindestens eine Config benötigt.",
+	"cfg_at_local": "Config gefunden im lokalem Bereich",
+	"cfg_at_user": "Config gefunden im Nutzer-Bereich",
+	"cfg_at_global": "Config gefunden im globalen Bereich",
+	
+	"db_conn_fail": "Verbindung zur Datenbank gescheitert",
+	"db_create": "{warning}: Datenbank existiert nicht und wird neu erstellt",
+	"db_merged": "Alle Projekte und Arbeitszeiten erfolgreich verschoben",
+	
+	"project_added": "Projekt hinzugefügt",
+	"project_archived_noedit": "{error}: Projekt ist archiviert und kann nicht bearbeitet werden",
+	"project_archived_nouse": "{error}: Projekt ist archiviert und kann nicht genutzt werden",
+	"project_name_set": "Projekt-Name gesetzt",
+	"project_archived": "Projekt wurde archiviert",
+	"project_unarchived": "Projekt wurde entarchiviert",
+	"project_deleted": "Projekt gelöscht",
+	"project_purged": "Projekt und Arbeitszeiten gelöscht",
+	
+	"record_last_done": "Letzte Arbeitszeit abgeschlossen",
+	"record_last_not_done": "Letzte Arbeitszeit noch nicht abgeschlossen",
+	"record_started": "Arbeitszeit für gegebenes Projekt gestartet",
+	"record_none_available": "{error}: Es gibt noch keine Arbeitszeiten",
+	"record_stopped": "Arbeitszeit gestoppt",
+	"record_added": "Arbeitszeit zum Projekt hinzugefügt",
+	"record_archived_noedit": "{error}: Arbeitszeit ist archiviert und kann nicht bearbeitet werden",
+	"record_archived_nodelete": "{error}: Arbeitszeit ist archiviert und kann nicht gelöscht werden",
+	"record_project_set": "Arbeitszeit-Projekt gesetzt",
+	"record_begin_set": "Arbeitszeit-Beginn gesetzt",
+	"record_end_set": "Arbeitszeit-Ende gesetzt",
+	"record_description_set": "Arbeitszeit-Beschreibung gesetzt",
+	"record_deleted": "Arbeitszeit gelöscht",
+	
+	"transfer_different_projects": "{error}: Dieser Befehl verschiebt Arbeitszeiten von einem Projekt zu einem anderen.\nEin Transfer benötigt zwei verschiedene Projekte.",
+	"transfer": "Arbeitszeiten wurden zu anderem Project verschoben",
+	
+	"swap_different_projects": "{error}: Dieser Befehl tauscht Arbeitszeiten von einem Projekt mit einem anderen.\nEin Tausch benötigt zwei verschiedene Projekte.",
+	"swap": "Arbeitszeiten von beiden Projekten getauscht",
+	
+	"sum_worktime": "Arbeitszeit insgesamt",
+	"unexpected_parameters": "Unerwartete Kombination von Parametern.",
+	"database_path": "Datenbank-Pfad"
+}
+

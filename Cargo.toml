@@ -11,3 +11,4 @@ publish = false
 sqlite = "0.26.*"
 chrono = "0.4.*"
 term_size = "0.3.*"
+i18n_codegen = "0.1.*"

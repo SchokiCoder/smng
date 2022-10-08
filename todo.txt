@@ -9,12 +9,28 @@
 }
 
 {
-	-localization			.
+	-localization			v_10-49_08-10-2022
 		-env $LANG				v_10-19_01-10-2022
 		-outsource strings		v_14-48_03-10-2022
 		 (english)
 		-add german				v_15-15
+		-move to i18n_codegen	v_10-49_08-10-2022
+	
+	-the great divide			.
+		-split smng into a bin for	.
+		 each cmd
+		 eg: "smng-record"
+		-make: install symlinks to	.
+		 cmds in a way to have
+		 shortcuts
+		 eg: "smng-r"
+		-change bash completions	.
+		-manpage is handled later	i
+	
+	-localization part 2	.
 		-cmd help text			.
+		-gen manpage from lang	.
+		 files
 		
 	-cfg					.
 		-toml					.

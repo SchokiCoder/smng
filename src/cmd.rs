@@ -17,7 +17,7 @@
 */
 
 use chrono::prelude::*;
-use crate::lang::LocalStrings;
+use crate::*;
 
 pub struct Command<'a> {
 	pub info: &'a str,
@@ -45,9 +45,9 @@ impl Command<'_> {
 		println!("\n");	
 	}
 	
-	pub fn arg_count_pass(&self, lcl_str: &LocalStrings, arg_count: usize) -> bool {
+	pub fn arg_count_pass(&self, lcl: &Locale, arg_count: usize) -> bool {
 		if arg_count > self.max_args {
-			println!("{}", lcl_str.too_many_args);
+			println!("{}", lcl.too_many_args(Warning(&lcl.warning())));
 			return true;
 		}
 		else if arg_count < self.min_args {
@@ -56,14 +56,14 @@ impl Command<'_> {
 				return false;
 			}
 			else {
-				println!("{}", lcl_str.too_little_args);
+				println!("{}", lcl.too_little_args(Error(&lcl.error())));
 				return false;
 			}
 		}
 		else {
 			if self.args_all_or_none {
 				if arg_count != self.min_args && arg_count != self.max_args {
-					println!("{}", lcl_str.not_enough_args);
+					println!("{}", lcl.not_enough_args(Error(&lcl.error())));
 					return false;
 				}
 			}
@@ -381,7 +381,7 @@ fn find_cfg_file() -> ConfigPos {
 	}
 }
 
-fn get_cfg_file(lcl_str: &LocalStrings) -> Result<std::fs::File, String> {
+fn get_cfg_file(lcl: &Locale) -> Result<std::fs::File, String> {
 	let cfgpos = find_cfg_file();
 	
 	match cfgpos {
@@ -392,7 +392,7 @@ fn get_cfg_file(lcl_str: &LocalStrings) -> Result<std::fs::File, String> {
 			let f = std::fs::File::open(&path);
 			
 			if !f.is_ok() {
-				return Err(format!("{} ({})", lcl_str.cfg_not_open, &path));
+				return Err(format!("{} ({})", lcl.cfg_not_open(), &path));
 			}
 			
 			return Ok(f.unwrap());
@@ -400,15 +400,15 @@ fn get_cfg_file(lcl_str: &LocalStrings) -> Result<std::fs::File, String> {
 		
 		// if not, err
 		ConfigPos::None => {
-			return Err(format!("{} ({})", lcl_str.cfg_not_found, GLOB_ETC_DB_PATH));
+			return Err(format!("{} ({})", lcl.cfg_not_found(), GLOB_ETC_DB_PATH));
 		},
 	}
 }
 
-fn read_etc_db(lcl_str: &LocalStrings) -> Result<String, String> {
+fn read_etc_db(lcl: &Locale) -> Result<String, String> {
 	use std::io::Read;
 	
-	let cfg_result = get_cfg_file(&lcl_str);
+	let cfg_result = get_cfg_file(&lcl);
 	
 	if cfg_result.is_ok() == false {
 		return Err(cfg_result.err().unwrap());
@@ -426,9 +426,9 @@ fn read_etc_db(lcl_str: &LocalStrings) -> Result<String, String> {
 	return Ok(path);
 }
 
-fn database_open(lcl_str: &LocalStrings) -> Result<sqlite::Connection, String> {
+fn database_open(lcl: &Locale) -> Result<sqlite::Connection, String> {
 	// read db path config
-	let path_result = read_etc_db(&lcl_str);
+	let path_result = read_etc_db(&lcl);
 	
 	if path_result.is_ok() == false {
 		return Err(path_result.err().unwrap());
@@ -457,7 +457,7 @@ fn database_open(lcl_str: &LocalStrings) -> Result<sqlite::Connection, String> {
 
 		// else panic
 		else {
-			return Err(format!("{} ({})", lcl_str.db_conn_fail, path.as_str()));
+			return Err(format!("{} ({})", lcl.db_conn_fail(), path.as_str()));
 		}
 	};
 
@@ -467,7 +467,7 @@ fn database_open(lcl_str: &LocalStrings) -> Result<sqlite::Connection, String> {
 
 	// if flagged, create database
 	if db_empty {
-		println!("{} ({})", lcl_str.db_create, path.as_str());
+		println!("{} ({})", lcl.db_create(Warning(&lcl.warning())), path.as_str());
 		
 		db.execute(
 			"CREATE TABLE tbl_projects( \
@@ -499,21 +499,24 @@ fn database_open(lcl_str: &LocalStrings) -> Result<sqlite::Connection, String> {
 	return Ok(db);
 }
 
-pub fn help(lcl_str: &LocalStrings) {
-	println!("{}", lcl_str.app_usage);
+pub fn help(lcl: &Locale) {
+	println!("{}\n", lcl.app_usage(
+		CmdHelpName(&HELP.name),
+		PkgName(env!("CARGO_PKG_NAME")),
+	));
 
-	println!("-- {} --", lcl_str.info);
+	println!("-- {} --", lcl.info());
 	HELP.print_help();
 	ABOUT.print_help();
 
-	println!("-- {} --", lcl_str.projects);
+	println!("-- {} --", lcl.projects());
 	ADD_PROJECT.print_help();
 	SHOW_PROJECTS.print_help();
 	EDIT_PROJECT.print_help();
 	ARCHIVE_PROJECT.print_help();
 	DELETE_PROJECT.print_help();
 
-	println!("-- {} --", lcl_str.records);
+	println!("-- {} --", lcl.records());
 	RECORD.print_help();
 	STATUS.print_help();
 	STOP.print_help();
@@ -526,23 +529,29 @@ pub fn help(lcl_str: &LocalStrings) {
 	TRANSFER_PROJECT_RECORDS.print_help();
 	SWAP_PROJECT_RECORDS.print_help();
 
-	println!("-- {} --", lcl_str.report);
+	println!("-- {} --", lcl.report());
 	SHOW_WEEK.print_help();
 	SHOW_MONTH.print_help();
 	SHOW_PROJECT_RECORDS.print_help();
 
-	println!("-- {} --", lcl_str.administration);
+	println!("-- {} --", lcl.administration());
 	MERGE_DB.print_help();
 	SHOW_ETC_PATH.print_help();
 	SHOW_DB_PATH.print_help();
 }
 
-pub fn about(lcl_str: &LocalStrings) {
-	println!("{}", lcl_str.app_about);
+pub fn about(lcl: &Locale) {
+	println!("{}", lcl.app_about(
+		GnuWebsite(GNU_WEBSITE),
+		PkgLicense(env!("CARGO_PKG_LICENSE")),
+		PkgName(env!("CARGO_PKG_NAME")),
+		PkgRepository(env!("CARGO_PKG_REPOSITORY")),
+		PkgVersion(env!("CARGO_PKG_VERSION")),
+	));
 }
 
-pub fn add_project(lcl_str: &LocalStrings, project_name: &str) {
-	let db = database_open(&lcl_str);
+pub fn add_project(lcl: &Locale, project_name: &str) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -560,15 +569,15 @@ pub fn add_project(lcl_str: &LocalStrings, project_name: &str) {
 	stmt.bind(1, project_name).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({})", lcl_str.project_added, project_name);
+	println!("{} ({})", lcl.project_added(), project_name);
 }
 
-fn print_project_header(lcl_str: &LocalStrings) {
-	println!("{}", lcl_str.project_tbl_head);
+fn print_project_header(lcl: &Locale) {
+	println!("{:9} | {}", lcl.id(), lcl.project_name());
 }
 
-pub fn show_projects(lcl_str: &LocalStrings) {
-	let db = database_open(&lcl_str);
+pub fn show_projects(lcl: &Locale) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -583,8 +592,8 @@ pub fn show_projects(lcl_str: &LocalStrings) {
 			 FROM tbl_projects;")
 		.unwrap();
 
-	println!("{}:", lcl_str.projects);
-	print_project_header(&lcl_str);
+	println!("{}:", lcl.projects());
+	print_project_header(&lcl);
 
 	// all projects
 	let mut archived_projects = Vec::<(String, String)>::new();
@@ -610,8 +619,8 @@ pub fn show_projects(lcl_str: &LocalStrings) {
 	}
 	
 	// print archived projects
-	println!("\n{}:", lcl_str.archived_projects);
-	print_project_header(&lcl_str);
+	println!("\n{}:", lcl.archived_projects());
+	print_project_header(&lcl);
 	
 	for (id, name) in archived_projects {
 		println!("{:9} | {}", id, name);
@@ -646,8 +655,8 @@ fn record_archived(db: &sqlite::Connection, record_id: i64) -> bool {
 	return project_archived(db, stmt.read::<i64>(0).unwrap());
 }
 
-pub fn edit_project(lcl_str: &LocalStrings, project_id: i64, project_name: &str) {
-	let db = database_open(&lcl_str);
+pub fn edit_project(lcl: &Locale, project_id: i64, project_name: &str) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -658,7 +667,7 @@ pub fn edit_project(lcl_str: &LocalStrings, project_id: i64, project_name: &str)
 	
 	// if project archived, print and stop
 	if project_archived(&db, project_id) {
-		println!("{} ({}).", lcl_str.project_archived_noedit, project_id);
+		println!("{} ({}).", lcl.project_archived_noedit(Error(&lcl.error())), project_id);
 		return;
 	}
 
@@ -673,11 +682,11 @@ pub fn edit_project(lcl_str: &LocalStrings, project_id: i64, project_name: &str)
 	stmt.bind(2, project_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}) -> ({}).", lcl_str.project_name_set, project_id, project_name);
+	println!("{} ({}) -> ({}).", lcl.project_name_set(), project_id, project_name);
 }
 
-pub fn archive_project(lcl_str: &LocalStrings, project_id: i64) {
-	let db = database_open(&lcl_str);
+pub fn archive_project(lcl: &Locale, project_id: i64) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -689,16 +698,16 @@ pub fn archive_project(lcl_str: &LocalStrings, project_id: i64) {
 	// find out if targeted project is already archived	
 	let archived = project_archived(&db, project_id);
 	let arch_num: i64;
-	let result_str: &String;
+	let result_str: String;
 	
 	// if archived, unarchive
 	if archived {
 		arch_num = 0;
-		result_str = &lcl_str.project_unarchived;
+		result_str = lcl.project_unarchived();
 	}
 	else {
 		arch_num = 1;
-		result_str = &lcl_str.project_archived;
+		result_str = lcl.project_archived();
 	}
 	
 	let mut stmt = db
@@ -716,8 +725,8 @@ pub fn archive_project(lcl_str: &LocalStrings, project_id: i64) {
 	println!("{} ({}).", result_str, project_id);
 }
 
-pub fn delete_project(lcl_str: &LocalStrings, project_id: i64, purge: bool) {
-	let db = database_open(&lcl_str);
+pub fn delete_project(lcl: &Locale, project_id: i64, purge: bool) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -748,10 +757,10 @@ pub fn delete_project(lcl_str: &LocalStrings, project_id: i64, purge: bool) {
 	stmt.next().unwrap();
 
 	if purge {
-		println!("{} ({}).", lcl_str.project_purged, project_id);
+		println!("{} ({}).", lcl.project_purged(), project_id);
 	}
 	else {
-		println!("{} ({}).", lcl_str.project_deleted, project_id);
+		println!("{} ({}).", lcl.project_deleted(), project_id);
 	}
 }
 
@@ -777,8 +786,8 @@ impl RecordState {
 	}
 }
 
-pub fn record(lcl_str: &LocalStrings, project_id: i64) {
-	let db = database_open(&lcl_str);
+pub fn record(lcl: &Locale, project_id: i64) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -789,7 +798,7 @@ pub fn record(lcl_str: &LocalStrings, project_id: i64) {
 	
 	// if used project is archived, stop
 	if project_archived(&db, project_id) {
-		println!("{} ({}).", lcl_str.project_archived_nouse, project_id);
+		println!("{} ({}).", lcl.project_archived_nouse(Error(&lcl.error())), project_id);
 		return;
 	}
 	
@@ -798,7 +807,7 @@ pub fn record(lcl_str: &LocalStrings, project_id: i64) {
 
 	if rec_state.id != 0 {
 		if rec_state.state == 0 {
-			println!("{} {} ({}).", lcl_str.error, lcl_str.record_last_not_done, rec_state.id);
+			println!("{} {} ({}).", lcl.error(), lcl.record_last_not_done(), rec_state.id);
 			return;
 		}
 	}
@@ -812,11 +821,11 @@ pub fn record(lcl_str: &LocalStrings, project_id: i64) {
 	stmt.bind(1, project_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}).", lcl_str.record_started, project_id);
+	println!("{} ({}).", lcl.record_started(), project_id);
 }
 
-pub fn status(lcl_str: &LocalStrings) {
-	let db = database_open(&lcl_str);
+pub fn status(lcl: &Locale) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -826,20 +835,20 @@ pub fn status(lcl_str: &LocalStrings) {
 	let db = db.unwrap();
 	let rec_state = RecordState::last(&db);
 
-	let result_str: &String;
+	let result_str: String;
 
 	if rec_state.state == 1 {
-		result_str = &lcl_str.record_last_done;
+		result_str = lcl.record_last_done();
 	}
 	else {
-		result_str = &lcl_str.record_last_not_done;
+		result_str = lcl.record_last_not_done();
 	}
 
 	println!("{} ({}).", result_str, rec_state.id);
 }
 
-pub fn stop(lcl_str: &LocalStrings, description: &str) {
-	let db = database_open(&lcl_str);
+pub fn stop(lcl: &Locale, description: &str) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -851,13 +860,13 @@ pub fn stop(lcl_str: &LocalStrings, description: &str) {
 
 	// if last record is 0, stop
 	if rec_state.id == 0 {
-		println!("{}", lcl_str.record_none_available);
+		println!("{}", lcl.record_none_available(Error(&lcl.error())));
 		return;
 	}
 	
 	// if last record is done, stop
 	if rec_state.state == 1 {
-		println!("{} {} ({}).", lcl_str.error, lcl_str.record_last_done, rec_state.id);
+		println!("{} {} ({}).", lcl.error(), lcl.record_last_done(), rec_state.id);
 		return;
 	}
 
@@ -872,14 +881,14 @@ pub fn stop(lcl_str: &LocalStrings, description: &str) {
 	stmt.bind(1, description).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}).", lcl_str.record_stopped, description);
+	println!("{} ({}).", lcl.record_stopped(), description);
 }
 
-pub fn add_record(lcl_str: &LocalStrings, project_id: i64, description: &str,
+pub fn add_record(lcl: &Locale, project_id: i64, description: &str,
 	b_year: i64, b_month: i64, b_day: i64, b_hour: i64, b_minute: i64,
 	e_year: i64, e_month: i64, e_day: i64, e_hour: i64, e_minute: i64)
 {
-	let db = database_open(&lcl_str);
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -890,7 +899,7 @@ pub fn add_record(lcl_str: &LocalStrings, project_id: i64, description: &str,
 	
 	// if used project is archived, stop
 	if project_archived(&db, project_id) {
-		println!("{} ({}).", lcl_str.project_archived_nouse, project_id);
+		println!("{} ({}).", lcl.project_archived_nouse(Error(&lcl.error())), project_id);
 		return;
 	}
 
@@ -917,11 +926,11 @@ pub fn add_record(lcl_str: &LocalStrings, project_id: i64, description: &str,
 	stmt.bind(12, e_minute).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}).", lcl_str.record_added, project_id);
+	println!("{} ({}).", lcl.record_added(), project_id);
 }
 
-pub fn edit_record_project(lcl_str: &LocalStrings, record_id: i64, project_id: i64) {
-	let db = database_open(&lcl_str);
+pub fn edit_record_project(lcl: &Locale, record_id: i64, project_id: i64) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -932,13 +941,13 @@ pub fn edit_record_project(lcl_str: &LocalStrings, record_id: i64, project_id: i
 	
 	// if used project is archived, stop
 	if project_archived(&db, project_id) {
-		println!("{} ({}).", lcl_str.project_archived_nouse, project_id);
+		println!("{} ({}).", lcl.project_archived_nouse(Error(&lcl.error())), project_id);
 		return;
 	}
 	
 	// if record is assigned to archived project, stop
 	if record_archived(&db, record_id) {
-		println!("{} ({}).", lcl_str.record_archived_noedit, record_id);
+		println!("{} ({}).", lcl.record_archived_noedit(Error(&lcl.error())), record_id);
 		return;
 	}
 
@@ -954,17 +963,17 @@ pub fn edit_record_project(lcl_str: &LocalStrings, record_id: i64, project_id: i
 	stmt.bind(2, record_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}) = ({}).", lcl_str.record_project_set, record_id, project_id);
+	println!("{} ({}) = ({}).", lcl.record_project_set(), record_id, project_id);
 }
 
 fn edit_record_time(
-	lcl_str: &LocalStrings,
+	lcl: &Locale,
 	begin: bool, record_id: i64,
 	year: i64, month: i64, day: i64,
 	hour: i64, minute: i64)
 	-> bool
 {
-	let db = database_open(&lcl_str);
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -975,7 +984,7 @@ fn edit_record_time(
 	
 	// if record is assigned to archived project, stop
 	if record_archived(&db, record_id) {
-		println!("{} ({}).", lcl_str.record_archived_noedit, record_id);
+		println!("{} ({}).", lcl.record_archived_noedit(Error(&lcl.error())), record_id);
 		return false;
 	}
 
@@ -1007,28 +1016,28 @@ fn edit_record_time(
 	return true;
 }
 
-pub fn edit_record_begin(lcl_str: &LocalStrings, record_id: i64, year: i64, month: i64, day: i64,
+pub fn edit_record_begin(lcl: &Locale, record_id: i64, year: i64, month: i64, day: i64,
                          hour: i64, minute: i64) {
-	if edit_record_time(&lcl_str, true, record_id, year, month, day, hour, minute) {
+	if edit_record_time(&lcl, true, record_id, year, month, day, hour, minute) {
 		println!("{} ({}) = {:04}-{:02}-{:02} {:02}:{:02}.",
-			lcl_str.record_begin_set, record_id,
+			lcl.record_begin_set(), record_id,
 			year, month, day,
 			hour, minute);
 	}
 }
 
-pub fn edit_record_end(lcl_str: &LocalStrings, record_id: i64, year: i64, month: i64, day: i64,
+pub fn edit_record_end(lcl: &Locale, record_id: i64, year: i64, month: i64, day: i64,
                        hour: i64, minute: i64) {
-	if edit_record_time(&lcl_str, false, record_id, year, month, day, hour, minute) {
+	if edit_record_time(&lcl, false, record_id, year, month, day, hour, minute) {
 		println!("{} ({}) = {:04}-{:02}-{:02} {:02}:{:02}.",
-			lcl_str.record_end_set, record_id,
+			lcl.record_end_set(), record_id,
 			year, month, day,
 			hour, minute);
 	}
 }
 
-pub fn edit_record_description(lcl_str: &LocalStrings, record_id: i64, description: &str) {
-	let db = database_open(&lcl_str);
+pub fn edit_record_description(lcl: &Locale, record_id: i64, description: &str) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -1039,7 +1048,7 @@ pub fn edit_record_description(lcl_str: &LocalStrings, record_id: i64, descripti
 
 	// if record is assigned to archived project, stop
 	if record_archived(&db, record_id) {
-		println!("{} ({}).", lcl_str.record_archived_noedit, record_id);
+		println!("{} ({}).", lcl.record_archived_noedit(Error(&lcl.error())), record_id);
 		return;
 	}
 
@@ -1055,11 +1064,11 @@ pub fn edit_record_description(lcl_str: &LocalStrings, record_id: i64, descripti
 	stmt.bind(2, record_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}) = ({}).", lcl_str.record_description_set, record_id, description);
+	println!("{} ({}) = ({}).", lcl.record_description_set(), record_id, description);
 }
 
-pub fn delete_record(lcl_str: &LocalStrings, record_id: i64) {
-	let db = database_open(&lcl_str);
+pub fn delete_record(lcl: &Locale, record_id: i64) {
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -1070,7 +1079,7 @@ pub fn delete_record(lcl_str: &LocalStrings, record_id: i64) {
 	
 	// if record is assigned to archived project, stop
 	if record_archived(&db, record_id) {
-		println!("{} ({}).", lcl_str.record_archived_nodelete, record_id);
+		println!("{} ({}).", lcl.record_archived_nodelete(Error(&lcl.error())), record_id);
 		return;
 	}
 
@@ -1085,17 +1094,17 @@ pub fn delete_record(lcl_str: &LocalStrings, record_id: i64) {
 	stmt.bind(1, record_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}).", lcl_str.record_deleted, record_id);
+	println!("{} ({}).", lcl.record_deleted(), record_id);
 }
 
-pub fn transfer_project_records(lcl_str: &LocalStrings, src_project_id: i64, dest_project_id: i64) {
+pub fn transfer_project_records(lcl: &Locale, src_project_id: i64, dest_project_id: i64) {
 	// if project id's are equal, educate user and stop
 	if src_project_id == dest_project_id {
-		println!("{}", lcl_str.transfer_different_projects);
+		println!("{}", lcl.transfer_different_projects(Error(&lcl.error())));
 		return;
 	}
 	
-	let db = database_open(&lcl_str);
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -1106,13 +1115,13 @@ pub fn transfer_project_records(lcl_str: &LocalStrings, src_project_id: i64, des
 	
 	// if src project is archived, stop
 	if project_archived(&db, src_project_id) {
-		println!("{} ({}).", lcl_str.project_archived_noedit, src_project_id);
+		println!("{} ({}).", lcl.project_archived_noedit(Error(&lcl.error())), src_project_id);
 		return;
 	}
 	
 	// if dest project is archived, stop
 	if project_archived(&db, dest_project_id) {
-		println!("{} ({}).", lcl_str.project_archived_noedit, dest_project_id);
+		println!("{} ({}).", lcl.project_archived_noedit(Error(&lcl.error())), dest_project_id);
 		return;
 	}
 
@@ -1129,17 +1138,17 @@ pub fn transfer_project_records(lcl_str: &LocalStrings, src_project_id: i64, des
 
 	while sqlite::State::Row == stmt.next().unwrap() {}
 
-	println!("{} ({}) -> ({}).", lcl_str.transfer, src_project_id, dest_project_id);
+	println!("{} ({}) -> ({}).", lcl.transfer(), src_project_id, dest_project_id);
 }
 
-pub fn swap_project_records(lcl_str: &LocalStrings, project_id_a: i64, project_id_b: i64) {	
+pub fn swap_project_records(lcl: &Locale, project_id_a: i64, project_id_b: i64) {	
 	// if project id's are equal, educate user and stop
 	if project_id_a == project_id_b {
-		println!("{}", lcl_str.swap_different_projects);
+		println!("{}", lcl.swap_different_projects(Error(&lcl.error())));
 		return;
 	}
 	
-	let db = database_open(&lcl_str);
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -1150,12 +1159,12 @@ pub fn swap_project_records(lcl_str: &LocalStrings, project_id_a: i64, project_i
 	
 	// if one project is archived, stop
 	if project_archived(&db, project_id_a) {
-		println!("{} ({}).", lcl_str.project_archived_noedit, project_id_a);
+		println!("{} ({}).", lcl.project_archived_noedit(Error(&lcl.error())), project_id_a);
 		return;
 	}
 	
 	if project_archived(&db, project_id_b) {
-		println!("{} ({}).", lcl_str.project_archived_noedit, project_id_b);
+		println!("{} ({}).", lcl.project_archived_noedit(Error(&lcl.error())), project_id_b);
 		return;
 	}
 	
@@ -1226,7 +1235,7 @@ pub fn swap_project_records(lcl_str: &LocalStrings, project_id_a: i64, project_i
 	stmt.bind(1, tempid).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}) <--> ({}).", lcl_str.swap, project_id_a, project_id_b);
+	println!("{} ({}) <--> ({}).", lcl.swap(), project_id_a, project_id_b);
 }
 
 fn show_record(stmt: &sqlite::Statement, win_width: usize) -> i64 {
@@ -1295,13 +1304,13 @@ fn print_day_summary(dash_len_first: u32, dash_len_second: u32, term_w: usize, w
 }
 
 fn show_records(
-	lcl_str: &LocalStrings,
+	lcl: &Locale,
 	ts_begin: Option<i64>,
 	ts_end: Option<i64>,
 	project_id: Option<i64>)
 {
 	let term_w = term_size::dimensions_stdout().unwrap().0;
-	let db = database_open(&lcl_str);
+	let db = database_open(&lcl);
 	
 	if db.is_ok() == false {
 		println!("{}", db.err().unwrap());
@@ -1363,12 +1372,13 @@ fn show_records(
 		stmt.bind(1, project_id).unwrap();
 	}
 	else {
-		println!("{}", lcl_str.unexpected_parameters);
+		println!("{}", lcl.unexpected_parameters());
 		return;
 	}
 
 	// print header
-	println!("{}", lcl_str.record_tbl_head);
+	println!("{:9} | {:8} | {:8} | {:5} | {:9} | {}",
+		lcl.id(), lcl.begin(), lcl.end(), lcl.time(), lcl.project(), lcl.description());
 
 	let mut sum_seconds: u32 = 0;
 	let mut pre_day: String;
@@ -1436,7 +1446,7 @@ fn show_records(
 	let minutes: u32 = sum_seconds / 60;
 	let hours: u32 = minutes / 60;
 			
-	println!("{}: {:02}:{:02}.", lcl_str.sum_worktime, hours, (minutes - hours * 60));
+	println!("{}: {:02}:{:02}.", lcl.sum_worktime(), hours, (minutes - hours * 60));
 }
 
 const DAY_SECONDS: u32 = 60 * 60 * 24;
@@ -1459,16 +1469,16 @@ impl WeekBeginAndEnd {
 	}
 }
 
-pub fn show_week_cur(lcl_str: &LocalStrings) {
+pub fn show_week_cur(lcl: &Locale) {
 	// print
 	let week = WeekBeginAndEnd::from_date(Local::today());
-	show_records(&lcl_str, Some(week.begin), Some(week.end), None);
+	show_records(&lcl, Some(week.begin), Some(week.end), None);
 }
 
-pub fn show_week(lcl_str: &LocalStrings, year: i32, month: u32, day: u32) {
+pub fn show_week(lcl: &Locale, year: i32, month: u32, day: u32) {
 	// print
 	let week = WeekBeginAndEnd::from_date(Local.ymd(year, month, day));
-	show_records(&lcl_str, Some(week.begin), Some(week.end), None);
+	show_records(&lcl, Some(week.begin), Some(week.end), None);
 }
 
 struct MonthBeginAndEnd {
@@ -1505,31 +1515,31 @@ impl MonthBeginAndEnd {
 	}
 }
 
-pub fn show_month_cur(lcl_str: &LocalStrings) {
+pub fn show_month_cur(lcl: &Locale) {
 	// print
 	let month = MonthBeginAndEnd::from_date(Local::today());
-	show_records(&lcl_str, Some(month.begin), Some(month.end), None);
+	show_records(&lcl, Some(month.begin), Some(month.end), None);
 }
 
-pub fn show_month(lcl_str: &LocalStrings, year: i32, month: u32) {
+pub fn show_month(lcl: &Locale, year: i32, month: u32) {
 	// print
 	let month = MonthBeginAndEnd::from_date(Local.ymd(year, month, 1));
-	show_records(&lcl_str, Some(month.begin), Some(month.end), None);
+	show_records(&lcl, Some(month.begin), Some(month.end), None);
 }
 
-pub fn show_project_records(lcl_str: &LocalStrings, project_id: i64) {
+pub fn show_project_records(lcl: &Locale, project_id: i64) {
 	// print
-	show_records(&lcl_str, None, None, Some(project_id));
+	show_records(&lcl, None, None, Some(project_id));
 }
 
-pub fn merge_db(lcl_str: &LocalStrings, src_db_path: &str, dest_db_path: &str) {
+pub fn merge_db(lcl: &Locale, src_db_path: &str, dest_db_path: &str) {
 	use std::collections::HashMap;
 
 	// try connecting to src db
 	let src_db = sqlite::open(src_db_path);
 
 	if src_db.is_ok() == false {
-		println!("{} {} ({}).", lcl_str.error, lcl_str.db_conn_fail, src_db_path);
+		println!("{} {} ({}).", lcl.error(), lcl.db_conn_fail(), src_db_path);
 		return;
 	}
 
@@ -1539,7 +1549,7 @@ pub fn merge_db(lcl_str: &LocalStrings, src_db_path: &str, dest_db_path: &str) {
 	let dest_db = sqlite::open(dest_db_path);
 
 	if dest_db.is_ok() == false {
-		println!("{} {} ({}).", lcl_str.error, lcl_str.db_conn_fail, dest_db_path);
+		println!("{} {} ({}).", lcl.error(), lcl.db_conn_fail(), dest_db_path);
 		return;
 	}
 
@@ -1629,38 +1639,38 @@ pub fn merge_db(lcl_str: &LocalStrings, src_db_path: &str, dest_db_path: &str) {
 		write_stmt.next().unwrap();
 	}
 
-	println!("{} ({}) -> ({}).", lcl_str.db_merged, src_db_path, dest_db_path);
+	println!("{} ({}) -> ({}).", lcl.db_merged(), src_db_path, dest_db_path);
 }
 
-pub fn show_etc_path(lcl_str: &LocalStrings) {
+pub fn show_etc_path(lcl: &Locale) {
 	let cfgpos = find_cfg_file();
 	
 	match cfgpos {
 		ConfigPos::Local (path) => {
-			println!("{} ({}).", lcl_str.cfg_at_local, &path);
+			println!("{} ({}).", lcl.cfg_at_local(), &path);
 		},
 		
 		ConfigPos::User (path) => {
-			println!("{} ({}).", lcl_str.cfg_at_user, &path);
+			println!("{} ({}).", lcl.cfg_at_user(), &path);
 		},
 		
 		ConfigPos::Global (path) => {
-			println!("{} ({}).", lcl_str.cfg_at_global, &path);
+			println!("{} ({}).", lcl.cfg_at_global(), &path);
 		},
 		
 		ConfigPos::None => {
-			println!("{} {}", lcl_str.warning, lcl_str.cfg_not_found);
+			println!("{} {}", lcl.warning(), lcl.cfg_not_found());
 		},
 	}
 }
 
-pub fn show_db_path(lcl_str: &LocalStrings) {
-	let path = read_etc_db(&lcl_str);
+pub fn show_db_path(lcl: &Locale) {
+	let path = read_etc_db(&lcl);
 	
 	if path.is_ok() == false {
 		println!("{}", path.err().unwrap());
 		return;
 	}
 	
-	println!("{} ({}).", lcl_str.database_path, path.unwrap());
+	println!("{} ({}).", lcl.database_path(), path.unwrap());
 }
