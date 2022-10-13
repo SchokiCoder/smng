@@ -22,7 +22,7 @@ mod lang;
 mod db;
 mod cfg;
 use lang::*;
-use data::records::RecordState;
+use data::RecordState;
 
 fn main() {
 	// get basic data (language, db, args, cmd data)
@@ -58,6 +58,6 @@ fn main() {
 		result_str = lcl.record_last_not_done();
 	}
 
-	println!("{} ({}).", result_str, rec_state.id);
+	println!("{} ({})", result_str, rec_state.id);
 }
 

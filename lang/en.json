@@ -15,18 +15,18 @@
 	"report": "Report",
 	"administration": "Administration",
 	
-	"app_usage": "Usage:\n{pkg_name} command [arguments]\nTry '{pkg_name} {cmd_help_name}' for more information.",
-	"app_about": "{pkg_name} {pkg_version} is licensed under the {pkg_license}.\nYou should have received a copy of the license along with this program.\nIf not see <{gnu_website}>\n\nThe source code of this program is available at:\n{pkg_repository}",
+	"app_usage": "Usage:\n{pkg_name} command [arguments]\nTry '{pkg_name} {cmd_help_name}' for more information",
+	"app_about": "{pkg_name} {pkg_version} is licensed under the {pkg_license}\nYou should have received a copy of the license along with this program\nIf not see <{gnu_website}>\n\nThe source code of this program is available at:\n{pkg_repository}",
 			
-	"cmd_unknown": "Command not recognised.",
+	"cmd_unknown": "Command not recognised",
 			
-	"too_many_args": "{warning}: Too many arguments were given.\nAdditional arguments will be ignored.",
-	"too_little_args": "{error}: Not enough arguments given.",
-	"not_enough_args": "{error}: Arguments given but not enough.",
+	"too_many_args": "{warning}: Too many arguments were given\nAdditional arguments will be ignored",
+	"too_little_args": "{error}: Not enough arguments given",
+	"not_enough_args": "{error}: Arguments given but not enough",
 	
 	"cfg_not_open": "Config file could not be opened",
-	"cfg_not_found": "No config file could be found or read.",
-	"cfg_create_appeal": "At least one config is needed.",
+	"cfg_not_found": "No config file could be found or read",
+	"cfg_create_appeal": "At least one config is needed",
 	"cfg_at_local": "Config found in local space",
 	"cfg_at_user": "Config found in user space",
 	"cfg_at_global": "Config found in global space",
@@ -58,14 +58,14 @@
 	"record_description_set": "Record description set",
 	"record_deleted": "Record deleted",
 	
-	"transfer_different_projects": "{error}: This command transfers the records of a project to another.\nA transfer needs two different projects.",
+	"transfer_different_projects": "{error}: This command transfers the records of a project to another\nA transfer needs two different projects",
 	"transfer": "Records moved to other project",
 	
-	"swap_different_projects": "{error}: This command swaps the records of a project to another.\nA transfer needs two different projects.",
+	"swap_different_projects": "{error}: This command swaps the records of a project to another\nA transfer needs two different projects",
 	"swap": "Records of both projects swapped",
 	
 	"sum_worktime": "Summarized worktime",
-	"unexpected_parameters": "Unexpected combination of parameters.",
+	"unexpected_parameters": "Unexpected combination of parameters",
 	"database_path": "Database path"
 }
 

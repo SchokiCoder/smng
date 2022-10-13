@@ -22,7 +22,7 @@ mod lang;
 mod db;
 mod cfg;
 use lang::*;
-use data::records::RecordState;
+use data::RecordState;
 
 fn main() {
 	// get basic data (language, db, args, cmd data)
@@ -59,7 +59,7 @@ fn main() {
 	
 	// if last record is done, stop
 	if rec_state.state == 1 {
-		println!("{}: {} ({}).", lcl.error(), lcl.record_last_done(), rec_state.id);
+		println!("{}: {} ({})", lcl.error(), lcl.record_last_done(), rec_state.id);
 		return;
 	}
 
@@ -74,5 +74,5 @@ fn main() {
 	stmt.bind(1, description).unwrap();
 	stmt.next().unwrap();
 
-	println!("{}: ({}).", lcl.record_stopped(), description);
+	println!("{}: ({})", lcl.record_stopped(), description);
 }

@@ -33,20 +33,11 @@ impl DatabaseResult {
 	}
 }
 
-pub fn database_open() -> Result<DatabaseResult, std::io::ErrorKind> {
-	// read db path config
-	let path_result = crate::cfg::read_cfg_db_path();
-	
-	if path_result.is_ok() == false {
-		return Err(path_result.err().unwrap());
-	}
-	
-	let path = path_result.unwrap();
-
+pub fn database_open(path: &str) -> Result<DatabaseResult, std::io::ErrorKind> {
 	// if db doesn't exist, flag
 	let db_empty: bool;
 	
-	if std::fs::metadata(path.as_str()).is_ok() == false {
+	if std::fs::metadata(path).is_ok() == false {
 		db_empty = true;
 	}
 	else {
@@ -55,7 +46,7 @@ pub fn database_open() -> Result<DatabaseResult, std::io::ErrorKind> {
 
 	// open db
 	let db = {
-		let temp = sqlite::open(path.as_str());
+		let temp = sqlite::open(path);
 
 		// if connection ok, set db
 		if temp.is_ok() {

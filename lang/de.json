@@ -15,18 +15,18 @@
 	"report": "Bericht",
 	"administration": "Administration",
 	
-	"app_usage": "Nutzung:\n{pkg_name} Kommando [Argumente]\nVersuche '{pkg_name} {cmd_help_name}' für mehr Informationen.",
-	"app_about": "{pkg_name} {pkg_version} ist lizensiert unter der {pkg_license}.\nSie sollten eine Kopie der Lizenz mit diesem Programm erhalten haben.\nFalls nicht, besuchen sie <{gnu_website}>\n\nDer Quellcode dieses Programmes ist verfügbar unter:\n{pkg_repository}",
+	"app_usage": "Nutzung:\n{pkg_name} Kommando [Argumente]\nVersuche '{pkg_name} {cmd_help_name}' für mehr Informationen",
+	"app_about": "{pkg_name} {pkg_version} ist lizensiert unter der {pkg_license}\nSie sollten eine Kopie der Lizenz mit diesem Programm erhalten haben\nFalls nicht, besuchen sie <{gnu_website}>\n\nDer Quellcode dieses Programmes ist verfügbar unter:\n{pkg_repository}",
 			
-	"cmd_unknown": "Kommando nicht bekannt.",
+	"cmd_unknown": "Kommando nicht bekannt",
 			
-	"too_many_args": "{warning}: Zu viele Argumente erhalten.\nZusätzliche Argumente werden ignoriert.",
-	"too_little_args": "{error}: Nicht genug Argumente erhalten.",
-	"not_enough_args": "{error}: Argumente erhalten aber nicht genug.",
+	"too_many_args": "{warning}: Zu viele Argumente erhalten\nZusätzliche Argumente werden ignoriert",
+	"too_little_args": "{error}: Nicht genug Argumente erhalten",
+	"not_enough_args": "{error}: Argumente erhalten aber nicht genug",
 	
 	"cfg_not_open": "Config Datei konnte nicht geöffnet werden",
-	"cfg_not_found": "Keine Config Datei konnte gefunden oder gelesen werden.",
-	"cfg_create_appeal": "Es wird mindestens eine Config benötigt.",
+	"cfg_not_found": "Keine Config Datei konnte gefunden oder gelesen werden",
+	"cfg_create_appeal": "Es wird mindestens eine Config benötigt",
 	"cfg_at_local": "Config gefunden im lokalem Bereich",
 	"cfg_at_user": "Config gefunden im Nutzer-Bereich",
 	"cfg_at_global": "Config gefunden im globalen Bereich",
@@ -58,14 +58,14 @@
 	"record_description_set": "Arbeitszeit-Beschreibung gesetzt",
 	"record_deleted": "Arbeitszeit gelöscht",
 	
-	"transfer_different_projects": "{error}: Dieser Befehl verschiebt Arbeitszeiten von einem Projekt zu einem anderen.\nEin Transfer benötigt zwei verschiedene Projekte.",
+	"transfer_different_projects": "{error}: Dieser Befehl verschiebt Arbeitszeiten von einem Projekt zu einem anderen\nEin Transfer benötigt zwei verschiedene Projekte",
 	"transfer": "Arbeitszeiten wurden zu anderem Project verschoben",
 	
-	"swap_different_projects": "{error}: Dieser Befehl tauscht Arbeitszeiten von einem Projekt mit einem anderen.\nEin Tausch benötigt zwei verschiedene Projekte.",
+	"swap_different_projects": "{error}: Dieser Befehl tauscht Arbeitszeiten von einem Projekt mit einem anderen\nEin Tausch benötigt zwei verschiedene Projekte",
 	"swap": "Arbeitszeiten von beiden Projekten getauscht",
 	
 	"sum_worktime": "Arbeitszeit insgesamt",
-	"unexpected_parameters": "Unerwartete Kombination von Parametern.",
+	"unexpected_parameters": "Unerwartete Kombination von Parametern",
 	"database_path": "Datenbank-Pfad"
 }
 

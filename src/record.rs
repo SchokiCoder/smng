@@ -22,36 +22,45 @@ mod lang;
 mod db;
 mod cfg;
 use lang::*;
-use data::records::RecordState;
+use data::RecordState;
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(author, version, about = None, long_about = None)]
+struct Args {
+   #[arg(short, long)]
+   project_id: i64,
+}
 
 fn main() {
-	// get basic data (language, db, args, cmd data)
+	// get basic data (language, db, args)
 	let base = cmd::get_base();
-	let (lcl, db, args): (Locale, sqlite::Connection, Vec<String>);
+	let (lcl, db, dummy): (Locale, sqlite::Connection, Vec<String>);
 		
 	if base.is_ok() == false {
 		return;
 	}
 	
-	(lcl, db, args) = base.unwrap();
+	(lcl, db, dummy) = base.unwrap();
 	
-	let cmd_data = cmd::Command::new(
-		"record work time on given project",
-		"record",
-		Some("project_id"),
-		1, 1, false);
 	
-	// check arg count
-	if cmd_data.arg_count_pass(&lcl, args.len()) == false {
-		return;
-	}
 	
-	// parse
-	let project_id = args[0].parse::<i64>().unwrap();
 	
+	
+	// manually wrangle the macrod command struct
+//	command = command.about("record work time on given project");
+	
+	
+	
+	
+	
+	
+	
+	let args = Args::parse();
+		
 	// if used project is archived, stop
-	if data::projects::project_archived(&db, project_id) {
-		println!("{} ({}).", lcl.project_archived_nouse(Error(&lcl.error())), project_id);
+	if data::project_archived(&db, args.project_id) {
+		println!("{} ({})", lcl.project_archived_nouse(Error(&lcl.error())), args.project_id);
 		return;
 	}
 	
@@ -60,7 +69,7 @@ fn main() {
 
 	if rec_state.id != 0 {
 		if rec_state.state == 0 {
-			println!("{} {} ({}).", lcl.error(), lcl.record_last_not_done(), rec_state.id);
+			println!("{}: {} ({})", lcl.error(), lcl.record_last_not_done(), rec_state.id);
 			return;
 		}
 	}
@@ -71,9 +80,9 @@ fn main() {
 	 		 VALUES(?, strftime('%s', 'now', 'localtime'));")
 	 	.unwrap();
 
-	stmt.bind(1, project_id).unwrap();
+	stmt.bind(1, args.project_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}).", lcl.record_started(), project_id);
+	println!("{} ({})", lcl.record_started(), args.project_id);
 }
 

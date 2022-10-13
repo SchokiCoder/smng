@@ -22,8 +22,7 @@ mod lang;
 mod db;
 mod cfg;
 use lang::*;
-use data::records::record_archived;
-use data::projects::project_archived;
+use data::{record_archived, project_archived};
 
 fn main() {
 	// get basic data (language, db, args, cmd data)
@@ -53,13 +52,13 @@ fn main() {
 	
 	// if used project is archived, stop
 	if project_archived(&db, project_id) {
-		println!("{} ({}).", lcl.project_archived_nouse(Error(&lcl.error())), project_id);
+		println!("{} ({})", lcl.project_archived_nouse(Error(&lcl.error())), project_id);
 		return;
 	}
 	
 	// if record is assigned to archived project, stop
 	if record_archived(&db, record_id) {
-		println!("{} ({}).", lcl.record_archived_noedit(Error(&lcl.error())), record_id);
+		println!("{} ({})", lcl.record_archived_noedit(Error(&lcl.error())), record_id);
 		return;
 	}
 
@@ -75,6 +74,6 @@ fn main() {
 	stmt.bind(2, record_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({}) = ({}).", lcl.record_project_set(), record_id, project_id);
+	println!("{} ({}) = ({})", lcl.record_project_set(), record_id, project_id);
 }
 
