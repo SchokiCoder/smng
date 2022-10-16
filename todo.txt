@@ -9,12 +9,12 @@
 }
 
 {
-	-localization			v_10-49_08-10-2022
-		-env $LANG				v_10-19_01-10-2022
-		-outsource strings		v_14-48_03-10-2022
+	-localization				v_10-49_08-10-2022
+		-env $LANG					v_10-19_01-10-2022
+		-outsource strings			v_14-48_03-10-2022
 		 (english)
-		-add german				v_15-15
-		-move to i18n_codegen	v_10-49_08-10-2022
+		-add german					v_15-15
+		-move to i18n_codegen		v_10-49_08-10-2022
 	
 	-the great divide			.
 		-split smng into a bin for	x
@@ -27,91 +27,73 @@
 
 		-string and build fixes			v_22-20_13-10-2022
 		
-		-implementing manpage gen	.
+		-implement clap in record		v_11-31_16-10-2022
+		-fix i18n by using the users	v_11-37
+		 LANG var
+		-fix project structure			.
+		 cargo workspace ?
+		
+		-implementing manpage gen		.
 		 could require clap,
 		 reimplement cmds with
-		 manpage gen
-			-record						.
-			
-				-Currently trying to get	.
-				 help string "record work \
-				 time on given project"
-				 as the command.about
-				 after localization.
+		 manpage gen and completions
+			-record							.
 				 
-				 Localization runs
-				 unnecessarily and
-				 ineffectively every
-				 time at runtime.
-				 The get_locale
-				 execution never
-				 matters. The result is
-				 always the language,
-				 the builder currently
-				 uses.
-				 
-			-stop						.
-			-status						.
+			-stop							.
+			-status							.
 
-			-erp						.
-			-erb						.
-			-ere						.
-			-erd						.
-			-ar							.
-			-del rec					.
-			-transfer rec				.
-			-swap rec					.
+			-erp							.
+			-erb							.
+			-ere							.
+			-erd							.
+			-ar								.
+			-del rec						.
+			-transfer rec					.
+			-swap rec						.
 			
-			-ap							.
-			-sp							.
-			-ep							.
-			-archive p					.
-			-del p						.
+			-ap								.
+			-sp								.
+			-ep								.
+			-archive p						.
+			-del p							.
 			
-			-sw							.
-			-sm							.
-			-spr						.
+			-sw								.
+			-sm								.
+			-spr							.
 			
-			-merge db					.
-			-show cfg path				.
-			-show db path				.
+			-merge db						.
+			-show cfg path					.
+			-show db path					.
 		
-		-help and about as options	?
+		-help and about as options		?
 		 for all binaries
 		
-		-quiet options				.
-		-add return integers		.
+		-quiet options					.
+		-add return integers			.
 		 
-		-make: install symlinks to	?
+		-make: install symlinks to		?
 		 cmds in a way to have
 		 shortcuts
 		 eg: "smng-r"
-		 
-		-change bash completions	.
-		-manpage is handled later	i
 	
-	-update copyright year	.
+	-update copyright year			.
 	 2021 - 2022
 	
-	-purge careless unwraps	.
-	 on type conversions
-	
-	-localization part 2	.
-		-cmd help text			.
-		-gen manpage from lang	.
+	-localization part 2			.
+		-cmd help text					.
+		-gen manpage from lang			.
 		 files
 		
-	-cfg					.
-		-toml					.
-		-add option for			.
+	-cfg							.
+		-toml							.
+		-add option for					.
 		 min and max worktime
 		 per day, week
 	
-	-mainloop for checking	.
+	-mainloop for checking			.
 	 min/max worktime
 	
-	-update man				.
-	-v						. -> 3.0.0
+	-v								. -> 3.0.0
 }
 
 --- done ---

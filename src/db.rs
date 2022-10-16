@@ -16,24 +16,13 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#![allow(dead_code)]
+
 use crate::lang::*;
 
-pub struct DatabaseResult {
-	new: bool,
-	db: sqlite::Connection,
-}
-
-impl DatabaseResult {
-	pub fn unwrap(self, lcl: &Locale) -> sqlite::Connection {
-		if self.new {
-			println!("{}", lcl.db_create(Warning(&lcl.warning())));
-		}
-		
-		return self.db;
-	}
-}
-
-pub fn database_open(path: &str) -> Result<DatabaseResult, std::io::ErrorKind> {
+pub fn database_open(path: &str) -> Result<sqlite::Connection, std::io::ErrorKind> {
+	let lcl = Locale::new();
+	
 	// if db doesn't exist, flag
 	let db_empty: bool;
 	
@@ -60,14 +49,11 @@ pub fn database_open(path: &str) -> Result<DatabaseResult, std::io::ErrorKind> {
 	};
 
 	// activate foreign keys
-	db.execute("PRAGMA foreign_keys = ON;")
-		.unwrap();
+	db.execute("PRAGMA foreign_keys = ON;").unwrap();
 
-	// if flagged, create database
-	let db_new: bool;
-	
+	// if flagged, create database	
 	if db_empty {
-		db_new = true;
+		println!("{}: {}", lcl.warning, lcl.db_create);
 		
 		db.execute(
 			"CREATE TABLE tbl_projects( \
@@ -95,12 +81,6 @@ pub fn database_open(path: &str) -> Result<DatabaseResult, std::io::ErrorKind> {
 		db.execute(
 			"CREATE INDEX idx_end ON tbl_work_records(end);").unwrap();
 	}
-	else {
-		db_new = false;
-	}
 
-	return Ok(DatabaseResult {
-		new: db_new,
-		db: db,
-	});
+	return Ok(db);
 }

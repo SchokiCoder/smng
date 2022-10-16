@@ -18,14 +18,14 @@
 
 use crate::lang::*;
 
-pub fn get_base() -> Result<(Locale, sqlite::Connection, Vec<String>), ()> {
-	let lcl = crate::lang::get_locale();
+pub fn get_base() -> Result<sqlite::Connection, ()> {
+	let lcl = Locale::new();
 	
 	// read db path config
 	let path_result = crate::cfg::read_cfg_db_path();
 	
 	if path_result.is_ok() == false {
-		println!("{}: {}", lcl.error(), lcl.cfg_not_open());
+		println!("{}: {}", lcl.error, lcl.cfg_not_open);
 		return Err(());
 	}
 	
@@ -35,16 +35,12 @@ pub fn get_base() -> Result<(Locale, sqlite::Connection, Vec<String>), ()> {
 	let db = crate::db::database_open(db_path.as_str());
 	
 	if db.is_ok() == false {
-		println!("{}: {}\n({})", lcl.error(), lcl.db_conn_fail(), db_path);
+		println!("{}: {}\n({})", lcl.error, lcl.db_conn_fail, db_path);
 		return Err(());
 	}
 	
-	let db = db.unwrap().unwrap(&lcl);
+	let db = db.unwrap();
 	
-	// get args
-	let all_args: Vec<String> = std::env::args().collect();
-	let args = all_args[1..].to_vec();
-	
-	return Ok((lcl, db, args));
+	return Ok(db);
 }
 

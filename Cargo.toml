@@ -7,9 +7,7 @@ edition = "2018"
 license = "GPLv3"
 publish = false
 
-[[bin]]
-name = "smng-record"
-path = "src/record.rs"
+# record is in bin
 
 #[[bin]]
 #name = "smng-stop"
@@ -44,8 +42,7 @@ sqlite = "0.26.*"
 chrono = "0.4.*"
 term_size = "0.3.*"
 
-i18n_codegen = "0.1.*"
-clap = { version = "4.0.*", features = ["derive"] }
+clap = { version = "4.0.*", features = ["derive", "cargo"] }
 
 [build-dependencies]
-#clap-mangen = "0.2.*"
+clap_mangen = "0.2.*"

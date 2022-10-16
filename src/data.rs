@@ -16,6 +16,8 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#![allow(dead_code)]
+
 pub fn project_archived(db: &sqlite::Connection, project_id: i64) -> bool {
 	let mut stmt = db
 		.prepare(
@@ -30,38 +32,47 @@ pub fn project_archived(db: &sqlite::Connection, project_id: i64) -> bool {
 	return stmt.read::<i64>(0).unwrap() != 0;
 }
 
+const SQL_GET_RECORD_STATE: &str = "SELECT work_record_id, \
+	(CASE WHEN end IS NULL THEN 0 ELSE 1 END) as record_complete, 
+	(SELECT project_archived \
+	 FROM tbl_projects
+	 WHERE tbl_projects.project_id = tbl_work_records.project_id)\n \
+	FROM tbl_work_records";
+
 pub struct RecordState {
 	pub id: i64,
-	pub state: i64,
+	pub done: bool,
+	pub archived: bool,
 }
 
 impl RecordState {
+	pub fn by_id(db: &sqlite::Connection, record_id: i64) -> RecordState {
+		let mut stmt = db
+			.prepare(format!("{}\nWHERE work_record_id = ?;", SQL_GET_RECORD_STATE))
+			.unwrap();
+
+		stmt.bind(1, record_id).unwrap();
+		stmt.next().unwrap();
+
+		return RecordState {
+			id: stmt.read::<i64>(0).unwrap(),
+			done: if stmt.read::<i64>(1).unwrap() == 0 {false} else {true},
+			archived: if stmt.read::<i64>(2).unwrap() == 0 {false} else {true},
+		};
+	}
+	
 	pub fn last(db: &sqlite::Connection) -> RecordState {
-		let mut stmt = db.prepare(
-				"SELECT work_record_id, \
-				 (CASE WHEN end IS NULL THEN 0 ELSE 1 END) as record_complete\n \
-				 FROM tbl_work_records\n \
-				 ORDER BY work_record_id DESC LIMIT 1;").unwrap();
+		let mut stmt = db
+			.prepare(format!("{}\nORDER BY work_record_id DESC LIMIT 1;", SQL_GET_RECORD_STATE))
+			.unwrap();
 
 		stmt.next().unwrap();
 
 		return RecordState {
 			id: stmt.read::<i64>(0).unwrap(),
-			state: stmt.read::<i64>(1).unwrap(),
+			done: if stmt.read::<i64>(1).unwrap() == 0 {false} else {true},
+			archived: if stmt.read::<i64>(2).unwrap() == 0 {false} else {true},
 		};
 	}
 }
 
-pub fn record_archived(db: &sqlite::Connection, record_id: i64) -> bool {
-	let mut stmt = db
-		.prepare(
-			"SELECT project_id\n\
-			 FROM tbl_work_records\n\
-			 WHERE work_record_id = ?;")
-		.unwrap();
-
-	stmt.bind(1, record_id).unwrap();
-	stmt.next().unwrap();
-	
-	return project_archived(db, stmt.read::<i64>(0).unwrap());
-}

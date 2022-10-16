@@ -23,7 +23,7 @@ mod db;
 mod cfg;
 use lang::*;
 use data::RecordState;
-use clap::Parser;
+use clap::{Parser, command};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = None, long_about = None)]
@@ -33,34 +33,25 @@ struct Args {
 }
 
 fn main() {
-	// get basic data (language, db, args)
+	// get basic data and set command about
+	let lcl = Locale::new();
 	let base = cmd::get_base();
-	let (lcl, db, dummy): (Locale, sqlite::Connection, Vec<String>);
-		
+	
 	if base.is_ok() == false {
 		return;
 	}
 	
-	(lcl, db, dummy) = base.unwrap();
+	let db = base.unwrap();
 	
-	
-	
-	
-	
-	// manually wrangle the macrod command struct
-//	command = command.about("record work time on given project");
-	
-	
-	
-	
-	
-	
+	let _matches = command!()
+		.about(lcl.about_record)
+		.get_matches();
 	
 	let args = Args::parse();
 		
 	// if used project is archived, stop
 	if data::project_archived(&db, args.project_id) {
-		println!("{} ({})", lcl.project_archived_nouse(Error(&lcl.error())), args.project_id);
+		println!("{}: {} ({})", lcl.error, lcl.project_archived_nouse, args.project_id);
 		return;
 	}
 	
@@ -68,8 +59,8 @@ fn main() {
 	let rec_state = RecordState::last(&db);
 
 	if rec_state.id != 0 {
-		if rec_state.state == 0 {
-			println!("{}: {} ({})", lcl.error(), lcl.record_last_not_done(), rec_state.id);
+		if rec_state.done == false {
+			println!("{}: {} ({})", lcl.error, lcl.record_last_not_done, rec_state.id);
 			return;
 		}
 	}
@@ -83,6 +74,6 @@ fn main() {
 	stmt.bind(1, args.project_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({})", lcl.record_started(), args.project_id);
+	println!("{} ({})", lcl.record_started, args.project_id);
 }
 
