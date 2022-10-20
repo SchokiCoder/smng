@@ -30,8 +30,9 @@
 		-implement clap in record		v_11-31_16-10-2022
 		-fix i18n by using the users	v_11-37
 		 LANG var
-		-fix project structure			.
-		 cargo workspace ?
+		-fix project structure			v_17-59_20-10-2022
+		 cargo workspace
+		-go back to i18n_codegen		.
 		
 		-implementing manpage gen		.
 		 could require clap,

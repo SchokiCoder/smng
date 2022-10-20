@@ -2,10 +2,10 @@ APP_NAME = smng
 INSTALL_BIN_DIR = /usr/bin
 
 debug:
-	cargo rustc
+	cargo build
 
 release:
-	cargo rustc --release
+	cargo build --release
 
 mkconfig:
 	echo "/home/"${USER}"/.smng/worktimes.db" >> "db_path"

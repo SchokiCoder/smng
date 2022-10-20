@@ -21,7 +21,7 @@
 use crate::lang::*;
 
 pub fn database_open(path: &str) -> Result<sqlite::Connection, std::io::ErrorKind> {
-	let lcl = Locale::new();
+	let lcl = cur_locale();
 	
 	// if db doesn't exist, flag
 	let db_empty: bool;
@@ -53,7 +53,7 @@ pub fn database_open(path: &str) -> Result<sqlite::Connection, std::io::ErrorKin
 
 	// if flagged, create database	
 	if db_empty {
-		println!("{}: {}", lcl.warning, lcl.db_create);
+		println!("{}: {}", lcl.warning(), lcl.db_create());
 		
 		db.execute(
 			"CREATE TABLE tbl_projects( \

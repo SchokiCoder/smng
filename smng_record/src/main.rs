@@ -16,12 +16,7 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-mod cmd;
-mod data;
-mod lang;
-mod db;
-mod cfg;
-use lang::*;
+use smng_lib::{cmd, data};
 use data::RecordState;
 use clap::{Parser, command};
 
@@ -34,24 +29,23 @@ struct Args {
 
 fn main() {
 	// get basic data and set command about
-	let lcl = Locale::new();
 	let base = cmd::get_base();
 	
 	if base.is_ok() == false {
 		return;
 	}
 	
-	let db = base.unwrap();
+	let (db, lcl) = base.unwrap();
 	
 	let _matches = command!()
-		.about(lcl.about_record)
+		.about(lcl.about_record())
 		.get_matches();
 	
 	let args = Args::parse();
 		
 	// if used project is archived, stop
 	if data::project_archived(&db, args.project_id) {
-		println!("{}: {} ({})", lcl.error, lcl.project_archived_nouse, args.project_id);
+		println!("{}: {} ({})", lcl.error(), lcl.project_archived_nouse(), args.project_id);
 		return;
 	}
 	
@@ -60,7 +54,7 @@ fn main() {
 
 	if rec_state.id != 0 {
 		if rec_state.done == false {
-			println!("{}: {} ({})", lcl.error, lcl.record_last_not_done, rec_state.id);
+			println!("{}: {} ({})", lcl.error(), lcl.record_last_not_done(), rec_state.id);
 			return;
 		}
 	}
@@ -74,6 +68,6 @@ fn main() {
 	stmt.bind(1, args.project_id).unwrap();
 	stmt.next().unwrap();
 
-	println!("{} ({})", lcl.record_started, args.project_id);
+	println!("{} ({})", lcl.record_started(), args.project_id);
 }
 

@@ -15,14 +15,7 @@
 	"report": "Report",
 	"administration": "Administration",
 	
-	"app_usage": "Usage:\n{pkg_name} command [arguments]\nTry '{pkg_name} {cmd_help_name}' for more information",
 	"app_about": "{pkg_name} {pkg_version} is licensed under the {pkg_license}\nYou should have received a copy of the license along with this program\nIf not see <{gnu_website}>\n\nThe source code of this program is available at:\n{pkg_repository}",
-			
-	"cmd_unknown": "Command not recognised",
-			
-	"too_many_args": "{warning}: Too many arguments were given\nAdditional arguments will be ignored",
-	"too_little_args": "{error}: Not enough arguments given",
-	"not_enough_args": "{error}: Arguments given but not enough",
 	
 	"cfg_not_open": "Config file could not be opened",
 	"cfg_not_found": "No config file could be found or read",
@@ -32,12 +25,12 @@
 	"cfg_at_global": "Config found in global space",
 	
 	"db_conn_fail": "Connection to database failed",
-	"db_create": "{warning}: Database does not exist and will be newly created",
+	"db_create": "Database does not exist and will be newly created",
 	"db_merged": "All projects and work-records successfully moved",
 	
 	"project_added": "Project added",
 	"project_archived_noedit": "{error}: Project is archived and can not be edited",
-	"project_archived_nouse": "{error}: Project is archived and can not be used",
+	"project_archived_nouse": "Project is archived and can not be used",
 	"project_name_set": "Project name set",
 	"project_archived": "Project has been archived",
 	"project_unarchived": "Project has been unarchived",
@@ -66,6 +59,8 @@
 	
 	"sum_worktime": "Summarized worktime",
 	"unexpected_parameters": "Unexpected combination of parameters",
-	"database_path": "Database path"
+	"database_path": "Database path",
+	
+	"about_record": "Start recording work time."
 }
 

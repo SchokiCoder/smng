@@ -15,14 +15,7 @@
 	"report": "Bericht",
 	"administration": "Administration",
 	
-	"app_usage": "Nutzung:\n{pkg_name} Kommando [Argumente]\nVersuche '{pkg_name} {cmd_help_name}' für mehr Informationen",
 	"app_about": "{pkg_name} {pkg_version} ist lizensiert unter der {pkg_license}\nSie sollten eine Kopie der Lizenz mit diesem Programm erhalten haben\nFalls nicht, besuchen sie <{gnu_website}>\n\nDer Quellcode dieses Programmes ist verfügbar unter:\n{pkg_repository}",
-			
-	"cmd_unknown": "Kommando nicht bekannt",
-			
-	"too_many_args": "{warning}: Zu viele Argumente erhalten\nZusätzliche Argumente werden ignoriert",
-	"too_little_args": "{error}: Nicht genug Argumente erhalten",
-	"not_enough_args": "{error}: Argumente erhalten aber nicht genug",
 	
 	"cfg_not_open": "Config Datei konnte nicht geöffnet werden",
 	"cfg_not_found": "Keine Config Datei konnte gefunden oder gelesen werden",
@@ -32,12 +25,12 @@
 	"cfg_at_global": "Config gefunden im globalen Bereich",
 	
 	"db_conn_fail": "Verbindung zur Datenbank gescheitert",
-	"db_create": "{warning}: Datenbank existiert nicht und wird neu erstellt",
+	"db_create": "Datenbank existiert nicht und wird neu erstellt",
 	"db_merged": "Alle Projekte und Arbeitszeiten erfolgreich verschoben",
 	
 	"project_added": "Projekt hinzugefügt",
 	"project_archived_noedit": "{error}: Projekt ist archiviert und kann nicht bearbeitet werden",
-	"project_archived_nouse": "{error}: Projekt ist archiviert und kann nicht genutzt werden",
+	"project_archived_nouse": "Projekt ist archiviert und kann nicht genutzt werden",
 	"project_name_set": "Projekt-Name gesetzt",
 	"project_archived": "Projekt wurde archiviert",
 	"project_unarchived": "Projekt wurde entarchiviert",
@@ -66,6 +59,8 @@
 	
 	"sum_worktime": "Arbeitszeit insgesamt",
 	"unexpected_parameters": "Unerwartete Kombination von Parametern",
-	"database_path": "Datenbank-Pfad"
+	"database_path": "Datenbank-Pfad",
+	
+	"about_record": "Arbeitszeit-Aufnahme beginnen."
 }
 

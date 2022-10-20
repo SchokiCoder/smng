@@ -1,0 +1,12 @@
+[package]
+name = "smng-record"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+smng-lib = { path = "../smng_lib" }
+clap.workspace = true

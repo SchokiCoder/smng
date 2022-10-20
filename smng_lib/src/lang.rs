@@ -16,31 +16,40 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-use crate::lang::*;
+const GNU_WEBSITE: &str = "https://www.gnu.org/licenses/";
 
-pub fn get_base() -> Result<sqlite::Connection, ()> {
-	let lcl = Locale::new();
+i18n_codegen::i18n!("../lang");
+
+pub fn cur_locale() -> Locale {
+	// get user language
+	let lcl: Locale;
+	let lang = std::env::var("LANG");
 	
-	// read db path config
-	let path_result = crate::cfg::read_cfg_db_path();
-	
-	if path_result.is_ok() == false {
-		println!("{}: {}", lcl.error, lcl.cfg_not_open);
-		return Err(());
+	// if lang env var could be read		
+	if lang.is_ok() == false {
+		return Locale::En;
 	}
 	
-	let db_path = path_result.unwrap();
+	let lang = lang.unwrap();
+	let lang = lang.split('.').next();
 	
-	// open db
-	let db = crate::db::database_open(db_path.as_str());
-	
-	if db.is_ok() == false {
-		println!("{}: {}\n({})", lcl.error, lcl.db_conn_fail, db_path);
-		return Err(());
+	if lang.is_some() == false {
+		return Locale::En;
 	}
 	
-	let db = db.unwrap();
+	let lang = lang.unwrap();
+		
+	// get strings	
+	match lang {
+		"de_DE" => {
+			lcl = Locale::De;
+		}
+		
+		_ => {
+			lcl = Locale::En;
+		}
+	}
 	
-	return Ok(db);
+	return lcl;
 }
 
