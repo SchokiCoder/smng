@@ -18,7 +18,7 @@
 
 use crate::lang::*;
 
-pub fn get_base() -> Result<(sqlite::Connection, Locale), ()> {
+pub fn init() -> Result<(sqlite::Connection, Locale), ()> {
 	let lcl = cur_locale();
 	
 	// read db path config

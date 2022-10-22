@@ -16,33 +16,54 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-use smng_lib::{cmd, data};
+use smng_lib::{init, data};
 use data::RecordState;
-use clap::{Parser, command};
+use clap::{Parser, Command};
 
-#[derive(Parser, Debug)]
+/*#[derive(Parser, Debug)]
 #[command(author, version, about = None, long_about = None)]
 struct Args {
    #[arg(short, long)]
    project_id: i64,
-}
+}*/
 
 fn main() {
 	// get basic data and set command about
-	let base = cmd::get_base();
+	let base = init::init();
 	
 	if base.is_ok() == false {
 		return;
 	}
 	
 	let (db, lcl) = base.unwrap();
+/*	
+	let cmd = command!()
+		.about(lcl.about_record());
+	let matches = cmd.get_matches();
+*/
 	
-	let _matches = command!()
-		.about(lcl.about_record())
-		.get_matches();
-	
-	let args = Args::parse();
+	move this into a lib, so that this main.rs and build.rs can access this {
+		let cmd = Command::new(env!("CARGO_PKG_NAME"))
+			.version(env!("CARGO_PKG_VERSION"))
+			.author(env!("CARGO_PKG_AUTHORS"))
+			.about(lcl.about_record())
+			.arg_required_else_help(true)
+			.arg(
+				Arg::new("project_id")
+					.short('p')
+					.value_parser(clap::value_parser!(i64)
+					.required(true)
+			)
+			.get_matches();
 		
+		let args = Args::parse();
+	}
+
+
+clap_mangen::Man::new(cmd).render(&mut std::io::stdout());
+
+
+
 	// if used project is archived, stop
 	if data::project_archived(&db, args.project_id) {
 		println!("{}: {} ({})", lcl.error(), lcl.project_archived_nouse(), args.project_id);

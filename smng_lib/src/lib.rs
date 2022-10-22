@@ -17,7 +17,7 @@
 */
 
 pub mod cfg;
-pub mod cmd;
+pub mod init;
 pub mod data;
 pub mod db;
 pub mod lang;

@@ -10,3 +10,5 @@ publish.workspace = true
 [dependencies]
 smng-lib = { path = "../smng_lib" }
 clap.workspace = true
+clap_mangen.workspace = true
+
