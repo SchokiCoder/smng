@@ -16,9 +16,24 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-pub mod cfg;
-pub mod cmdinfo;
-pub mod init;
-pub mod data;
-pub mod db;
-pub mod lang;
+use clap::{Command, Arg};
+use crate::lang;
+
+pub fn record(
+	lcl: &lang::Locale,
+	name: &'static str, version: &'static str, authors: &'static str)
+	-> clap::Command
+{
+	return Command
+		::new(name)
+		.version(version)
+		.author(authors)
+		.about(lcl.about_record())
+		.arg_required_else_help(true)
+		.arg(
+			Arg::new("project_id")
+				.short('p')
+				.value_parser(clap::value_parser!(i64))
+				.required(true)
+		);
+}

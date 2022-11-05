@@ -1,5 +1,5 @@
 [package]
-name = "smng-lib"
+name = "xtask"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -8,7 +8,8 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
-sqlite.workspace = true
-i18n_codegen.workspace = true
+smng-lib = { path = "../smng_lib" }
 clap.workspace = true
+clap_mangen.workspace = true
+clap_complete.workspace = true
 

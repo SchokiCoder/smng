@@ -39,6 +39,9 @@
 		 reimplement cmds with
 		 manpage gen and completions
 			-record							.
+				-mangen							v_12-17_05-11-2022
+				-compgen						.
+				-cmdfix							.
 				 
 			-stop							.
 			-status							.
@@ -70,6 +73,7 @@
 		 for all binaries
 		
 		-quiet options					.
+		-csv output option				.
 		-add return integers			.
 		 
 		-make: install symlinks to		?
@@ -91,8 +95,15 @@
 		 min and max worktime
 		 per day, week
 	
-	-mainloop for checking			.
+	-mainloop bin for checking		.
 	 min/max worktime
+	 "smng_surveil"
+	
+	-make sure that make			.
+	 	-installation works				.
+		-generates all the manpages		.
+		 and completions (xtask)
+		-and deploys them				.
 	
 	-v								. -> 3.0.0
 }

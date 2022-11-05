@@ -16,9 +16,9 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-use smng_lib::{init, data};
+use smng_lib::{init, data, cmdinfo};
 use data::RecordState;
-use clap::{Parser, Command};
+use clap::{Parser};
 
 /*#[derive(Parser, Debug)]
 #[command(author, version, about = None, long_about = None)]
@@ -28,7 +28,7 @@ struct Args {
 }*/
 
 fn main() {
-	// get basic data and set command about
+	// get basic data
 	let base = init::init();
 	
 	if base.is_ok() == false {
@@ -36,33 +36,15 @@ fn main() {
 	}
 	
 	let (db, lcl) = base.unwrap();
-/*	
-	let cmd = command!()
-		.about(lcl.about_record());
-	let matches = cmd.get_matches();
-*/
 	
-	move this into a lib, so that this main.rs and build.rs can access this {
-		let cmd = Command::new(env!("CARGO_PKG_NAME"))
-			.version(env!("CARGO_PKG_VERSION"))
-			.author(env!("CARGO_PKG_AUTHORS"))
-			.about(lcl.about_record())
-			.arg_required_else_help(true)
-			.arg(
-				Arg::new("project_id")
-					.short('p')
-					.value_parser(clap::value_parser!(i64)
-					.required(true)
-			)
-			.get_matches();
-		
-		let args = Args::parse();
-	}
-
-
-clap_mangen::Man::new(cmd).render(&mut std::io::stdout());
-
-
+	let cmd = cmdinfo::record(
+		&lcl,
+		env!("CARGO_PKG_NAME"),
+		env!("CARGO_PKG_VERSION"),
+		env!("CARGO_PKG_AUTHORS"))
+		.get_matches();
+	//let args = Args::parse();
+	let args = cmd.parse();
 
 	// if used project is archived, stop
 	if data::project_archived(&db, args.project_id) {

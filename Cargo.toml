@@ -2,13 +2,14 @@
 members = [
 	"smng_lib",
 	"smng_record",
+	"xtask",
 ]
 
 [workspace.package]
 version = "2.3.1"
 authors = ["SchokiCoder <afschoknecht@gmail.com>"]
 repository = "https://github.com/SchokiCoder/smng"
-edition = "2018"
+edition = "2021"
 license = "GPLv3"
 publish = false
 
@@ -16,7 +17,8 @@ publish = false
 sqlite = "0.26.*"
 chrono = "0.4.*"
 term_size = "0.3.*"
-clap = { version = "4.0.*", features = ["derive", "cargo"] }
 i18n_codegen = "0.1.*"
+clap = { version = "4.0.*", features = ["derive", "cargo"] }
 clap_mangen = "0.2.*"
+clap_complete = "4.0.*"
 
