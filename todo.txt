@@ -1,0 +1,194 @@
+{
+	-undo cmd				.
+		-command history		.
+		-data history			.
+	
+	-update manpage			.
+	
+	-v						.
+}
+
+{
+	-cfg					.
+		-toml					.
+		-add option for			.
+		 min and max worktime
+		 per day, week
+	
+	-mainloop for checking	.
+	 min/max worktime
+	
+	-update man				.
+	-v						.
+}
+
+--- done ---
+
+{
+	-main.rs arg count check function	v_20-46_28-09-2022
+	 advance
+	-fix completion						v_20-47
+	-Makefile							v_21-00
+	 (use correct username for cfg)
+
+	-update readme						v_21-01
+	-update man							v_21-02
+	-v									v_21-02 -> 2.3.1
+}
+
+{
+	-line in show record report			v_11-10_24-09-2022
+	 for entire width of term
+	
+	-archive-project cmd				v_11-46
+		-help								v_11-17
+		-database							v_11-30
+		-cmd								v_11-46
+
+	-archived projects are				v_11-57
+	 listed below other
+	 projects in
+	 show-projects
+
+	-archived projects can not be		v_13-14
+	 edited
+
+	-archived projects cant be used for	v_13-24
+		-record								v_13-22
+		-add-record							v_13-24
+	
+	-records under archived projects	v_13-51
+		-can not be edited					v_13-42
+		-can not be deleted					v_13-43
+		-can not be transferred				v_13-46
+		-can not be swapped					v_13-51
+	
+	-undo								x_14-50 (for next update)
+	
+	-update manpage						v_14-55
+	-tabcompletions						v_14-56
+	
+	-v									v_14-57 -> 2.3.0
+}
+
+{
+	-show-month seems to only	v_10-18_24-09-2022
+	 work with current month
+	 (wether implicit
+	  (no args)
+	  or explicit (arg))
+	-v							v_10-19 -> 2.2.1
+}
+
+{
+	-README dependencies link to repo
+}
+
+{
+	-formatting					v_12-46
+	
+	-provide tabcomplete		v_14-08
+	 for bash only ¯\_(ツ)_/¯
+	-fix manpage formatting		v_14-24
+	 (info cmds)
+
+	-remove need for manual		v_23-10_30-07-2022
+	 configuration in makefile
+	-list files in manpage		v_23-13
+	 (cfg, manpage, tabcomplete)
+	-remove files on uninstall	v_23-25
+
+	-add admin cmds				v_13-19_02-08-2022
+		-"show-cfg-path"			v_13-10_02-08-2022
+		-"show-db-path"				v_13-19
+
+	-report summary:			v_14-05
+	 removed unnecessary
+	 conversion
+	-fixed trying to print		v_14-16
+	 records without end
+	-unnecessary conversion in	v_14-22
+	 show record
+
+	-cmds						v_14-12_04-08-2022
+		-show-project-records		v_14-24
+		-swap-project-record		v_14-12_04-08-2022
+
+	-report						v_14-33
+		-day value needs full date	v_14-25
+		-full line for new day		v_14-29
+		-fix record minute same as	v_14-33
+		 hour
+
+	-update manpage				v_14-56
+	 (including version)
+	-update completions			v_14-57
+	-v							v_14-58 -> 2.2.0
+}
+
+{
+	-better man page	v_09-33_13-07-2022
+}
+
+{
+	-man page	v_12-04_18-06-2022
+}
+
+{
+	-db_connect panic when path		v_11-11_17-06-2022
+	 arg has no slashes
+	-v 								v_11-14 -> 2.1.2
+}
+
+{
+	-db_connect panic when no args	v_10-38_17-06-2022
+	-v 								v_10-41 -> 2.1.1
+}
+
+{
+	-config pos priority			v_11-19_09-06-2022
+	-first record cmd tells you to	v_09-16_10-06-2022
+	 complete record 0
+	-Makefile uninstall: remove		v
+	 etc dir
+	-assign commands to				v_09-25
+	 groups in help print
+	-add administrative command		v_11-50
+	 "merge-db"
+	-v								v_11-52 -> 2.1.0
+}
+
+{
+	-rewrite					v
+	-show week					v_09-26_31-05-2022
+	-record/stop check status	v_09-46
+	 before exec
+	-cmd feedback				v_10-00
+	-summary summarize worktime	v_09-59_01-06-2022
+	-summary split days			v_10-37
+	-description linebreak		v_12-17
+	-show week/month without	v_12-01_02-06-2022
+	 params
+	-when arguments needed but	v_12-20
+	 no arguments given,
+	 print help for that command
+	-cmd "add-record" "ar"		v_12-46
+	-fix range of sw/sm			v_09-47_04-06-2022
+	 (the c-variant actually
+	  had this bug too)
+	-add command				v_10-31
+	 "delete-record"
+	-add 'localtime' to sql		v_10-55
+	  
+	-config						v_11-52
+	 (db_path)
+	-make sure help text		v_09-55_05-06-2022
+	 matches reality
+	-about command				v_10-31
+	 (show version, license)
+	-makefile					v_10-59
+	 (also install std etc)
+	-README.md					v_11-03
+	
+	-v							. -> 2.0.0
+}
