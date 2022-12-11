@@ -1,44 +1,41 @@
+#	SchokiManager
+#	Copyright (C) 2021  Andy Frank Schoknecht
+#
+#	This program is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation, either version 3 of the License, or
+#	(at your option) any later version.
+#
+#	This program is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#
+#	You should have received a copy of the GNU General Public License
+#	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+CC = cc
 APP_NAME = smng
+CFLAGS = -std=c99 -Wall -Wextra -O3
+LIBS = -lschoki_misc -lsqlite3
+INCLUDE = -I /usr/include/schoki_misc
+
 INSTALL_BIN_DIR = /usr/bin
 
-debug:
-	cargo build
+options:
+	@echo smng build options:
+	@echo "CFLAGS	= ${CFLAGS}"
+	@echo "CC		= ${CC}"
+	@echo "LIBS		= ${LIBS}"
 
-release:
-	cargo build --release
+clean:
+	rm -f ${APP_NAME} *.o
 
-mkconfig:
-	echo "/home/"${USER}"/.smng/worktimes.db" >> "db_path"
-
-prepare: release mkconfig
-
-install-config:
-	mkdir -p /etc/smng.d
-	cp "db_path" "/etc/${APP_NAME}.d/db_path"
-
-install-manpage:
-	mkdir -p /usr/local/man/man1
-	cp manpage.1 /usr/local/man/man1/${APP_NAME}.1
-	gzip /usr/local/man/man1/${APP_NAME}.1
-	mandb
-
-install-completion:
-	cp completion.bash /usr/share/bash-completion/completions/${APP_NAME}
-
-install-utils: install-config install-manpage install-completion
-
-install: install-utils
+install:
+	${CC} src/*.c ${CFLAGS} ${INCLUDE} ${LIBS} -o ${APP_NAME}
 	mkdir -p ${INSTALL_BIN_DIR}
-	mv -f ./target/release/${APP_NAME} ${INSTALL_BIN_DIR}
+	mv -f ${APP_NAME} ${INSTALL_BIN_DIR}
 	chmod 755 ${INSTALL_BIN_DIR}/${APP_NAME}
 
 uninstall:
 	rm -f ${INSTALL_BIN_DIR}/${APP_NAME}
-	
-	rm -r -f /etc/smng.d
-	
-	rm -f /usr/share/bash-completion/completions/${APP_NAME}
-	
-	rm -f /usr/local/man/man1/${APP_NAME}.1
-	rm -f /usr/local/man/man1/${APP_NAME}.1.gz
-	mandb
