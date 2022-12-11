@@ -1,6 +1,7 @@
-# SchokiManager
+# SchokiManager 2
 
 Personal working time manager, to monitor the time you worked on each project.
+Relicensed under GPLv2.
 
 ## Dependencies
 
