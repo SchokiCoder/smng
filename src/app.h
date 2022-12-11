@@ -24,7 +24,8 @@ static const char APP_NAME[] = "smng";
 static const char APP_LICENSE[] = "GPLv3";
 static const char APP_LICENSE_NOTICE[] =
     "You should have received a copy of the GNU General Public License\n"
-    "along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
+    "along with this program.  "
+    "If not, see <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>.\n";
 static const char APP_SOURCE[] = "https://github.com/SchokiCoder/smng";
 #define APP_MAJOR 1
 #define APP_MINOR 2
