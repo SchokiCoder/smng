@@ -1,79 +1,107 @@
 {
-	-undo cmd				.
-		-command history		.
-		-data history			.
+	-README.md:						.
+	 "deprecation notice"
+	 "look at the branches for gplv2'd old versions"
+
+	-new repo "smng3"					.
+
+	-back to suckless roots, in Go or C			.
+	 (does Go support a suckless approach ?
+	  (src files as cfg, compiler definitions (for version))
+	 )
+
+	-define goals file					.
+
+	-divide big binary into binary per command		.
+	 which format ?
+	 "smng-ap" vs "smng_ap"
+
+	-i18n / l10n						?
+
+	-manpages						.
+	 one summary for all commands
+	 and one detailed for each command
+	-set version to 3.0.0					.
+}
+
+--- done ---
+
+{
+	-undo cmd			x
+		-command history		x
+		-data history			x
 	
-	-update manpage			.
+	-update manpage			x
 	
-	-v						.
+	-v				x
 }
 
 {
 	-localization				v_10-49_08-10-2022
-		-env $LANG					v_10-19_01-10-2022
+		-env $LANG				v_10-19_01-10-2022
 		-outsource strings			v_14-48_03-10-2022
 		 (english)
-		-add german					v_15-15
-		-move to i18n_codegen		v_10-49_08-10-2022
+		-add german				v_15-15
+		-move to i18n_codegen			v_10-49_08-10-2022
 	
-	-the great divide			.
-		-split smng into a bin for	x
+	-the great divide			x
+		-split smng into a bin for		x
 		 each cmd eg: "smng-record"
 		 except for: help, about
-			-record						v_14-53
-			-stop						v_15-03
-			-status						v_15-08
-			-erp						v_15-29
+			-record					v_14-53
+			-stop					v_15-03
+			-status					v_15-08
+			-erp					v_15-29
 
 		-string and build fixes			v_22-20_13-10-2022
 		
 		-implement clap in record		v_11-31_16-10-2022
-		-fix i18n by using the users	v_11-37
+		-fix i18n by using the users		v_11-37
 		 LANG var
 		-fix project structure			v_17-59_20-10-2022
 		 cargo workspace
 		-go back to i18n_codegen		v_18-24
 		
-		-implementing manpage gen		.
+		-implementing manpage gen		x
 		 could require clap,
 		 reimplement cmds with
 		 manpage gen and completions
-			-record							.
-				-mangen							v_12-17_05-11-2022
-				-compgen						.
-				-cmdfix							.
+			-record					.
+				-mangen					v_12-17_05-11-2022
+				-compgen				x
+				-cmdfix					.
 				 
-			-stop							.
-			-status							.
+			-stop					.
+			-status					.
 
-			-erp							.
-			-erb							.
-			-ere							.
-			-erd							.
-			-ar								.
-			-del rec						.
-			-transfer rec					.
-			-swap rec						.
+			-erp					.
+			-erb					.
+			-ere					.
+			-erd					.
+			-ar					.
+			-del rec				.
+			-transfer rec				.
+			-swap rec				.
 			
-			-ap								.
-			-sp								.
-			-ep								.
-			-archive p						.
-			-del p							.
+			-ap					.
+			-sp					.
+			-ep					.
+			-archive p				.
+			-del p					.
 			
-			-sw								.
-			-sm								.
-			-spr							.
+			-sw					.
+			-sm					.
+			-spr					.
 			
-			-merge db						.
-			-show cfg path					.
-			-show db path					.
+			-merge db				.
+			-show cfg path				.
+			-show db path				.
 		
 		-help and about as options		?
 		 for all binaries
 		
-		-quiet options					.
-		-csv output option				.
+		-quiet options				.
+		-csv output option			.
 		-add return integers			.
 		 
 		-make: install symlinks to		?
@@ -85,13 +113,13 @@
 	 2021 - 2022
 	
 	-localization part 2			.
-		-cmd help text					.
+		-cmd help text				.
 		-gen manpage from lang			.
 		 files
 		
-	-cfg							.
-		-toml							.
-		-add option for					.
+	-cfg					.
+		-toml					.
+		-add option for				.
 		 min and max worktime
 		 per day, week
 	
@@ -100,15 +128,13 @@
 	 "smng_surveil"
 	
 	-make sure that make			.
-	 	-installation works				.
+	 	-installation works			.
 		-generates all the manpages		.
 		 and completions (xtask)
-		-and deploys them				.
+		-and deploys them			.
 	
-	-v								. -> 3.0.0
+	-v					x -> 3.0.0
 }
-
---- done ---
 
 {
 	-main.rs arg count check function	v_20-46_28-09-2022
